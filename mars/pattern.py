@@ -151,9 +151,6 @@ class ChangeOperation(ABC):
         Returns change operation in a human-readable form.
     """
 
-    def __init__(self):
-        super().__init__()
-
     @abstractmethod
     def make_change(self, original):
         """

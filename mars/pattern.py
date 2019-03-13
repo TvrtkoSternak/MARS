@@ -84,7 +84,7 @@ class EditScript:
 
         Returns
         -------
-            Iterator
+        Iterator
             Iterator object that iterates through changes
         """
 
@@ -96,7 +96,7 @@ class EditScript:
 
         Returns
         -------
-            ChangeOperation
+        ChangeOperation
             The next ChangeOperation in changes list
         """
 
@@ -108,17 +108,17 @@ class EditScript:
 
         Parameters
         ----------
-            index : int
+        index : int
             Index of change operation in changes that the user wishes to retrieve
 
         Returns
         -------
-            ChangeOperation
+        ChangeOperation
             ChangeOperation at the specified index
 
         Raises
         ------
-            IndexError
+        IndexError
             If the specified index is out of range
         """
 
@@ -130,7 +130,7 @@ class EditScript:
 
         Parameters
         ----------
-            change : ChangeOperation
+        change : ChangeOperation
             ChangeOperation to be added in changes
         """
 
@@ -158,12 +158,12 @@ class ChangeOperation(ABC):
 
         Parameters
         ----------
-            original : ast
+        original : ast
             AST of original code
 
         Returns
         -------
-            ast
+        ast
             Modified AST
         """
         pass
@@ -171,24 +171,279 @@ class ChangeOperation(ABC):
     @abstractmethod
     def __str__(self):
         """
-        Returns change operation in a human-readable form
+        Returns change operation in a human-readable form.
 
         Returns
         -------
-            string
+        string
             Human-readable interpretation of ChangeOperation
         """
         pass
 
 
 class Insert(ChangeOperation):
+    """
+    A class that implements the insert change operation logic. It contains index of the node in the original AST where
+    insert operation should be applied. It also contains AST that should be inserted at that position.
+
+    ...
+
+    Attributes
+    ----------
+    index : int
+        Index of the node where insert operation should be applied
+    change : ast
+        AST of inserted code
+
+    Methods
+    -------
+    __init__(self, index, change)
+        Initialises Insert object.
+    make_change(self, ast)
+        Applies the insert operation to the received AST.
+    """
 
     def __init__(self, index, change):
+        """
+        Initialises Insert object.
+
+        Parameters
+        ----------
+        index : int
+            Index of the node
+        change : ast
+            AST of inserted code
+        """
+
         self.index = index
         self.change = change
 
     def make_change(self, original):
+        """
+        Applies the insert operation to the received AST.
+
+        Parameters
+        ----------
+        original : ast
+            AST of original code
+
+        Returns
+        -------
+        ast
+            Modified AST
+
+        Raises
+        IndexError
+            If the specified index is out of range
+        """
         pass
 
     def __str__(self):
+        """
+        Returns insert operation in a human-readable form.
+
+        Returns
+        -------
+        string
+            Human-readable interpretation of Insert
+        """
+        pass
+
+
+class Delete(ChangeOperation):
+    """
+    A class that implements the delete change operation logic. It deletes the node from AST at the specified index.
+
+    ...
+
+    Attributes
+    ----------
+    index : int
+        Index of the node that should be deleted
+
+    Methods
+    -------
+    __init__(self, index)
+        Initialises Delete object.
+    make_change(self, ast)
+        Applies the delete operation to the received AST.
+    """
+
+    def __init__(self, index):
+        """
+        Initialises Delete object.
+
+        Parameters
+        ----------
+        index : int
+            Index of the node
+        """
+
+        self.index = index
+
+    def make_change(self, original):
+        """
+        Applies the delete operation to the received AST.
+
+        Parameters
+        ----------
+        original : ast
+            AST of original code
+
+        Returns
+        -------
+        ast
+            Modified AST
+
+        Raises
+        IndexError
+            If the specified index is out of range
+        """
+        pass
+
+    def __str__(self):
+        """
+        Returns delete operation in a human-readable form.
+
+        Returns
+        -------
+        string
+            Human-readable interpretation of Delete
+        """
+        pass
+
+
+class Update(ChangeOperation):
+    """
+    A class that implements the update change operation logic. It wraps a combination of an Insert operation and Delete
+    operation into one.
+
+    ...
+
+    Attributes
+    ----------
+    insert_operation : Insert
+        Insert operation that should be executed as a part of update
+    delete_operation: Delete
+        Delete operation that should be executed as a part of update
+
+    Methods
+    -------
+    __init__(self, index, change)
+        Initialises Update object. It creates the Insert and Delete operation from received arguments.
+    make_change(self, ast)
+        Applies the update operation to the received AST.
+    """
+
+    def __init__(self, index, change):
+        """
+        Initialises Update object. It creates the Insert and Delete operation from received arguments.
+
+        Parameters
+        ----------
+        index : int
+            Index of the node that should be updated
+        change : ast
+            AST of updated code
+        """
+
+        pass
+
+    def make_change(self, original):
+        """
+        Applies the update operation to the received AST.
+
+        Parameters
+        ----------
+        original : ast
+            AST of original code
+
+        Returns
+        -------
+        ast
+            Modified AST
+
+        Raises
+        IndexError
+            If the specified index is out of range
+        """
+        pass
+
+    def __str__(self):
+        """
+        Returns update operation in a human-readable form.
+
+        Returns
+        -------
+        string
+            Human-readable interpretation of Update
+        """
+        pass
+
+
+class Move(ChangeOperation):
+    """
+    A  class  that  implements  the  move  change  operation  logic.  It  combines  the  delete  and  insert operation
+    in a way that it deletes the AST node at first index and then inserts the deleted AST node at the second index.
+
+    ...
+
+    Attributes
+    ----------
+    insert_operation : Insert
+        Insert operation that should be executed as a part of move
+    delete_operation: Delete
+        Delete operation that should be executed as a part of move
+
+    Methods
+    -------
+    __init__(self, insert_index, delete_index)
+        Initialises Move object. It creates Insert and Delete operations which combined implement move logic.
+    make_change(self, ast)
+        Applies the move operation to the received AST.
+    """
+
+    def __init__(self, insert_index, delete_index):
+        """
+        Initialises Move object. It creates Insert and Delete operations which combined implement move logic.
+
+        Parameters
+        ----------
+        insert_index : int
+            The position in the AST to which node needs to be moved
+        delete_index : ast
+            The position of the AST node that needs to be moved
+        """
+
+        pass
+
+    def make_change(self, original):
+        """
+        Applies the move operation to the received AST.
+
+        Parameters
+        ----------
+        original : ast
+            AST of original code
+
+        Returns
+        -------
+        ast
+            Modified AST
+
+        Raises
+        IndexError
+            If the specified index is out of range
+        """
+        pass
+
+    def __str__(self):
+        """
+        Returns move operation in a human-readable form.
+
+        Returns
+        -------
+        string
+            Human-readable interpretation of Move
+        """
         pass

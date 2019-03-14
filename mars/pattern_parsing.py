@@ -14,7 +14,7 @@ class PatternParser(ABC):
     public void parse(self, pattern_matcher)
         Parses the input pattern.
     """
-    
+
     @abstractmethod
     def parse(self, pattern_matcher):
         """

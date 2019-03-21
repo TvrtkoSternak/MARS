@@ -21,6 +21,13 @@ class TestEditScript(TestCase):
             i = i + 1
         self.assertEqual(i, 1)
 
+    def test_ast_insert(self):
+        root = ast.parse(open('test.py').read())
+        ast.dump(root)
+        print(root.body[0])
+
+
+
 
 if __name__ == 'main':
     main()

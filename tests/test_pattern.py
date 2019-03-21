@@ -2,6 +2,8 @@ from unittest import TestCase
 from unittest import main
 import ast
 import mars.pattern
+import astunparse
+from mars.pattern import Update
 
 
 class TestEditScript(TestCase):
@@ -21,10 +23,12 @@ class TestEditScript(TestCase):
             i = i + 1
         self.assertEqual(i, 1)
 
-    def test_ast_insert(self):
+    def test_ast_update(self):
         root = ast.parse(open('test.py').read())
-        ast.dump(root)
-        print(root.body[0])
+        change = ast.parse(open('test_change.py').read())
+        update = Update(2, change)
+        update.make_change(root)
+        print(astunparse.unparse(root.body))
 
 
 

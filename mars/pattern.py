@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import ast
 
 
 class Pattern:
@@ -139,7 +140,7 @@ class EditScript:
         self.changes.append(change)
 
 
-class ChangeOperation(ABC):
+class ChangeOperation(ABC, ast.NodeTransformer):
     """
     A class that represents the operations used to transform the original code to modified code.
 
@@ -238,7 +239,8 @@ class Insert(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        pass
+        original.body[self.index] = self.change
+        return original
 
     def __str__(self):
         """
@@ -348,8 +350,10 @@ class Update(ChangeOperation):
         change : ast
             AST of updated code
         """
+        self.index = index
+        self.change = change
+        self.internal_index = 0
 
-        pass
 
     def make_change(self, original):
         """
@@ -369,7 +373,8 @@ class Update(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        pass
+        self.internal_index = 0
+        self.visit(original)
 
     def __str__(self):
         """
@@ -381,6 +386,13 @@ class Update(ChangeOperation):
             Human-readable interpretation of Update
         """
         pass
+
+    def generic_visit(self, node):
+        self.internal_index+=1
+        if self.internal_index == self.index:
+            return self.change
+        ast.NodeTransformer.generic_visit(self, node)
+        return node
 
 
 class Move(ChangeOperation):

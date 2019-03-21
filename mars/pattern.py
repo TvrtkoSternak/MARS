@@ -87,8 +87,8 @@ class EditScript:
         Iterator
             Iterator object that iterates through changes
         """
-
-        pass
+        self.index = 0
+        return self
 
     def __next__(self):
         """
@@ -99,8 +99,10 @@ class EditScript:
         ChangeOperation
             The next ChangeOperation in changes list
         """
-
-        pass
+        if self.index >= len(self.changes):
+            raise StopIteration
+        self.index += 1
+        return self.changes[self.index - 1]
 
     def get(self, index):
         """
@@ -121,8 +123,9 @@ class EditScript:
         IndexError
             If the specified index is out of range
         """
-
-        pass
+        if index >= len(self.changes):
+            raise IndexError('change index out of range')
+        return self.changes[index]
 
     def add(self, change):
         """
@@ -133,8 +136,7 @@ class EditScript:
         change : ChangeOperation
             ChangeOperation to be added in changes
         """
-
-        pass
+        self.changes.append(change)
 
 
 class ChangeOperation(ABC):

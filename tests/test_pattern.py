@@ -3,8 +3,7 @@ from unittest import main
 import ast
 import mars.pattern
 import astunparse
-from mars.pattern import Insert
-from mars.pattern import Update
+from mars.pattern import Insert, Update, Delete
 
 
 class TestEditScript(TestCase):
@@ -34,7 +33,8 @@ class TestEditScript(TestCase):
             insert = Insert(24, change_ast)
             insert.make_change(original_ast)
             self.assertEqual(astunparse.unparse(original_ast.body),
-                             astunparse.unparse(modified_ast.body))
+                             astunparse.unparse(modified_ast.body),
+                             msg='Insert test failed, modified codes do not match!')
 
     def test_ast_update(self):
         with open('resources/test_update_original.py') as original, \
@@ -46,7 +46,20 @@ class TestEditScript(TestCase):
             update = Update(12, change_ast)
             update.make_change(original_ast)
             self.assertEqual(astunparse.unparse(original_ast.body),
-                             astunparse.unparse(modified_ast.body))
+                             astunparse.unparse(modified_ast.body),
+                             msg='Update test failed, modified codes do not match')
+
+    def test_ast_delete(self):
+        with open('resources/test_delete_original.py') as original, \
+                open('resources/test_delete_modified.py') as modified:
+            original_ast = ast.parse(original.read())
+            modified_ast = ast.parse(modified.read())
+            delete = Delete(12)
+            delete.make_change(original_ast)
+            print(astunparse.unparse(original_ast.body))
+            self.assertEqual(astunparse.unparse(original_ast.body),
+                             astunparse.unparse(modified_ast.body),
+                             msg='Delete test failed, modified codes do not match')
 
 
 if __name__ == 'main':

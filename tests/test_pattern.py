@@ -31,7 +31,7 @@ class TestEditScript(TestCase):
             original_ast = ast.parse(original.read())
             change_ast = ast.parse(change.read())
             modified_ast = ast.parse(modified.read())
-            insert = Insert(6, change_ast)
+            insert = Insert(24, change_ast)
             insert.make_change(original_ast)
             self.assertEqual(astunparse.unparse(original_ast.body),
                              astunparse.unparse(modified_ast.body))

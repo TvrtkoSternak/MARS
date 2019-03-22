@@ -220,6 +220,7 @@ class Insert(ChangeOperation):
 
         self.index = index
         self.change = change
+        self.internal_index = 0
 
     def make_change(self, original):
         """
@@ -239,7 +240,8 @@ class Insert(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        pass
+        self.internal_index = 0
+        self.visit(original)
 
     def __str__(self):
         """
@@ -251,6 +253,14 @@ class Insert(ChangeOperation):
             Human-readable interpretation of Insert
         """
         pass
+
+    def generic_visit(self, node):
+        self.internal_index += 1
+        if self.internal_index == self.index:
+            #node.body.insert(0, self.change)
+            return [node] + [self.change]
+        ast.NodeTransformer.generic_visit(self, node)
+        return node
 
 
 class Delete(ChangeOperation):

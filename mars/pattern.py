@@ -239,8 +239,7 @@ class Insert(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        original.body[self.index] = self.change
-        return original
+        pass
 
     def __str__(self):
         """
@@ -284,6 +283,7 @@ class Delete(ChangeOperation):
         """
 
         self.index = index
+        self.internal_index = 0
 
     def make_change(self, original):
         """
@@ -303,7 +303,8 @@ class Delete(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        pass
+        self.internal_index = 0
+        self.visit(original)
 
     def __str__(self):
         """
@@ -315,6 +316,13 @@ class Delete(ChangeOperation):
             Human-readable interpretation of Delete
         """
         pass
+
+    def generic_visit(self, node):
+        self.internal_index += 1
+        if self.internal_index == self.index:
+            return None
+        ast.NodeTransformer.generic_visit(self, node)
+        return node
 
 
 class Update(ChangeOperation):
@@ -354,7 +362,6 @@ class Update(ChangeOperation):
         self.change = change
         self.internal_index = 0
 
-
     def make_change(self, original):
         """
         Applies the update operation to the received AST.
@@ -388,7 +395,7 @@ class Update(ChangeOperation):
         pass
 
     def generic_visit(self, node):
-        self.internal_index+=1
+        self.internal_index += 1
         if self.internal_index == self.index:
             return self.change
         ast.NodeTransformer.generic_visit(self, node)

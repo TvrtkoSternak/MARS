@@ -257,7 +257,6 @@ class Insert(ChangeOperation):
     def generic_visit(self, node):
         self.internal_index += 1
         if self.internal_index == self.index:
-            #node.body.insert(0, self.change)
             return [node] + [self.change]
         ast.NodeTransformer.generic_visit(self, node)
         return node

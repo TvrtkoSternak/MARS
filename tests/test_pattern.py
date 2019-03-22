@@ -19,18 +19,21 @@ class TestEditScript(TestCase):
         with self.assertRaises(StopIteration):
             next(it)
         i = 0
-        for e in edit_script:
+        for _ in edit_script:
             i = i + 1
         self.assertEqual(i, 1)
 
     def test_ast_update(self):
-        root = ast.parse(open('test.py').read())
-        change = ast.parse(open('test_change.py').read())
-        update = Update(2, change)
-        update.make_change(root)
-        print(astunparse.unparse(root.body))
-
-
+        with open('resources/test_update_original.py') as original, \
+                open('resources/test_update_change.py') as change, \
+                open('resources/test_update_modified.py') as modified:
+            original_ast = ast.parse(original.read())
+            change_ast = ast.parse(change.read())
+            modified_ast = ast.parse(modified.read())
+            update = Update(12, change_ast)
+            update.make_change(original_ast)
+            self.assertEqual(astunparse.unparse(original_ast.body),
+                             astunparse.unparse(modified_ast.body))
 
 
 if __name__ == 'main':

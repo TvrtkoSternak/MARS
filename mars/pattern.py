@@ -444,8 +444,10 @@ class Move(ChangeOperation):
         delete_index : ast
             The position of the AST node that needs to be moved
         """
-
-        pass
+        self.insert_index = insert_index
+        self.delete_index = delete_index
+        self.internal_index = 0
+        self.insert = None
 
     def make_change(self, original):
         """
@@ -465,7 +467,9 @@ class Move(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        pass
+        self.internal_index = 0
+        self.visit(original)
+        self.insert.make_change(original)
 
     def __str__(self):
         """
@@ -477,3 +481,11 @@ class Move(ChangeOperation):
             Human-readable interpretation of Move
         """
         pass
+
+    def generic_visit(self, node):
+        self.internal_index += 1
+        if self.internal_index == self.delete_index:
+            self.insert = Insert(self.insert_index, node)
+            return None
+        ast.NodeTransformer.generic_visit(self, node)
+        return node

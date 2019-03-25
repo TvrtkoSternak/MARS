@@ -154,8 +154,17 @@ class ChangeOperation(ABC, ast.NodeTransformer):
         Returns change operation in a human-readable form.
     """
 
-    @abstractmethod
     def make_change(self, original):
+        appender = EndBodyAppender()
+        appender.visit(original)
+
+        self.specific_change(original)
+
+        remover = EndBodyRemover()
+        remover.visit(original)
+
+    @abstractmethod
+    def specific_change(self, original):
         """
         Applies the change operation to the received AST.
 
@@ -220,9 +229,9 @@ class Insert(ChangeOperation):
 
         self.index = index
         self.change = change
-        self.internal_index = 0
+        self.internal_index = -1
 
-    def make_change(self, original):
+    def specific_change(self, original):
         """
         Applies the insert operation to the received AST.
 
@@ -240,7 +249,7 @@ class Insert(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        self.internal_index = 0
+        self.internal_index = -1
         self.visit(original)
 
     def __str__(self):
@@ -257,7 +266,7 @@ class Insert(ChangeOperation):
     def generic_visit(self, node):
         self.internal_index += 1
         if self.internal_index == self.index:
-            return [node] + [self.change]
+            return [self.change] + [node]
         ast.NodeTransformer.generic_visit(self, node)
         return node
 
@@ -292,9 +301,9 @@ class Delete(ChangeOperation):
         """
 
         self.index = index
-        self.internal_index = 0
+        self.internal_index = -1
 
-    def make_change(self, original):
+    def specific_change(self, original):
         """
         Applies the delete operation to the received AST.
 
@@ -312,7 +321,7 @@ class Delete(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        self.internal_index = 0
+        self.internal_index = -1
         self.visit(original)
 
     def __str__(self):
@@ -371,7 +380,7 @@ class Update(ChangeOperation):
         self.change = change
         self.internal_index = 0
 
-    def make_change(self, original):
+    def specific_change(self, original):
         """
         Applies the update operation to the received AST.
 
@@ -449,7 +458,7 @@ class Move(ChangeOperation):
         self.internal_index = 0
         self.insert = None
 
-    def make_change(self, original):
+    def specific_change(self, original):
         """
         Applies the move operation to the received AST.
 
@@ -469,6 +478,8 @@ class Move(ChangeOperation):
         """
         self.internal_index = 0
         self.visit(original)
+        remover = EndBodyRemover()
+        remover.visit(original)
         self.insert.make_change(original)
 
     def __str__(self):
@@ -483,9 +494,46 @@ class Move(ChangeOperation):
         pass
 
     def generic_visit(self, node):
-        self.internal_index += 1
         if self.internal_index == self.delete_index:
-            self.insert = Insert(self.insert_index, node)
+            counter = Counter()
+            counter.visit(node)
+            self.insert = Insert(self.insert_index-counter.count, node)
+            self.internal_index += 1
+            return None
+        self.internal_index += 1
+        ast.NodeTransformer.generic_visit(self, node)
+        return node
+
+
+class EndBodyAppender(ast.NodeTransformer):
+
+    def generic_visit(self, node):
+        if hasattr(node, 'body'):
+            import_node = EndBodyNode()
+            node.body.insert(len(node.body), import_node)
+        ast.NodeTransformer.generic_visit(self, node)
+        return node
+
+
+class EndBodyRemover(ast.NodeTransformer):
+
+    def generic_visit(self, node):
+        if type(node) is EndBodyNode:
             return None
         ast.NodeTransformer.generic_visit(self, node)
         return node
+
+
+class Counter(ast.NodeVisitor):
+
+    def __init__(self):
+        self.count = 0
+
+    def generic_visit(self, node):
+        self.count += 1
+        ast.NodeVisitor.generic_visit(self, node)
+
+
+class EndBodyNode(ast.AST):
+    def __init__(self):
+        self.__type__ = 'end'

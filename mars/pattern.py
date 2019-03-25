@@ -229,7 +229,7 @@ class Insert(ChangeOperation):
 
         self.index = index
         self.change = change
-        self.internal_index = -1
+        self.internal_index = 0
 
     def specific_change(self, original):
         """
@@ -249,7 +249,7 @@ class Insert(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        self.internal_index = -1
+        self.internal_index = 0
         self.visit(original)
 
     def __str__(self):
@@ -261,12 +261,13 @@ class Insert(ChangeOperation):
         string
             Human-readable interpretation of Insert
         """
-        pass
+        return "Insert operation @index " + str(self.index)
 
     def generic_visit(self, node):
-        self.internal_index += 1
         if self.internal_index == self.index:
+            self.internal_index += 1
             return [self.change] + [node]
+        self.internal_index += 1
         ast.NodeTransformer.generic_visit(self, node)
         return node
 
@@ -301,7 +302,7 @@ class Delete(ChangeOperation):
         """
 
         self.index = index
-        self.internal_index = -1
+        self.internal_index = 0
 
     def specific_change(self, original):
         """
@@ -321,7 +322,7 @@ class Delete(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        self.internal_index = -1
+        self.internal_index = 0
         self.visit(original)
 
     def __str__(self):
@@ -333,12 +334,13 @@ class Delete(ChangeOperation):
         string
             Human-readable interpretation of Delete
         """
-        pass
+        return "Delete operation @index " + str(self.index)
 
     def generic_visit(self, node):
-        self.internal_index += 1
         if self.internal_index == self.index:
+            self.internal_index += 1
             return None
+        self.internal_index += 1
         ast.NodeTransformer.generic_visit(self, node)
         return node
 
@@ -410,12 +412,13 @@ class Update(ChangeOperation):
         string
             Human-readable interpretation of Update
         """
-        pass
+        return "Update operation @index " + str(self.index)
 
     def generic_visit(self, node):
-        self.internal_index += 1
         if self.internal_index == self.index:
+            self.internal_index += 1
             return self.change
+        self.internal_index += 1
         ast.NodeTransformer.generic_visit(self, node)
         return node
 
@@ -491,7 +494,8 @@ class Move(ChangeOperation):
         string
             Human-readable interpretation of Move
         """
-        pass
+        return "Move operation from index " + str(self.delete_index) \
+               + " to index " + str(self.insert_index)
 
     def generic_visit(self, node):
         if self.internal_index == self.delete_index:

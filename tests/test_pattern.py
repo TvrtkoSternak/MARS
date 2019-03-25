@@ -24,48 +24,58 @@ class TestEditScript(TestCase):
         self.assertEqual(i, 1)
 
     def test_ast_insert_simple(self):
-        self.upsert_test('insert/original.py', 'insert/change_simple.py', 'insert/modified_simple.py', 2, True)
+        self.insert_test('insert/original.py', 'insert/change_simple.py', 'insert/modified_simple.py', 2)
 
     def test_ast_insert_middle_of_if_statement(self):
-        self.upsert_test('insert/original.py', 'insert/change_simple.py', 'insert/modified_middle_of_if.py', 12, True)
+        self.insert_test('insert/original.py', 'insert/change_simple.py', 'insert/modified_middle_of_if.py', 12)
 
     def test_ast_insert_end_of_if_statement(self):
-        self.upsert_test('insert/original.py', 'insert/change_simple.py', 'insert/modified_end_of_if.py', 17, True)
+        self.insert_test('insert/original.py', 'insert/change_simple.py', 'insert/modified_end_of_if.py', 17)
 
     def test_ast_update(self):
-        self.upsert_test('test_update_original.py', 'test_update_change.py', 'test_update_modified.py', 12, False)
+        self.update_test('test_update_original.py', 'test_update_change.py', 'test_update_modified.py', 12)
 
     def test_ast_delete(self):
-        self.delmov_test('test_delete_original.py', 'test_delete_modified.py', 12)
+        self.delete_test('test_delete_original.py', 'test_delete_modified.py', 12)
 
-    def upsert_test(self, original_code, change_code, modified_code, index, is_insert):
-        with open('resources/'+original_code) as original, \
-                open('resources/'+change_code) as change, \
-                open('resources/'+modified_code) as modified:
-            original_ast = ast.parse(original.read())
-            change_ast = ast.parse(change.read())
-            modified_ast = ast.parse(modified.read())
-            operation = Insert(index, change_ast) if is_insert else Update(index, change_ast)
-            operation.make_change(original_ast)
-            message = 'Insert test failed, modified codes do not match!' if is_insert \
-                else 'Update test failed, modified codes do not match'
-            self.assertEqual(astunparse.unparse(original_ast.body),
-                             astunparse.unparse(modified_ast.body),
-                             msg=message)
+    def test_ast_delete_simple(self):
+        self.delete_test('delete/original.py', 'delete/modified.py', 12)
 
-    def delmov_test(self, original_code, modified_code, del_index, ins_index=None):
-        with open('resources/'+original_code) as original, \
-                open('resources/'+modified_code) as modified:
+    def test_ast_move(self):
+        self.move_test('move/original.py', 'move/modified.py', 12, 12)
+
+    #region HELPERS
+    def insert_test(self, original_code, change_code, modified_code, index):
+        self.run_test(original_code, modified_code, index, 'insert', change_code)
+
+    def update_test(self, original_code, change_code, modified_code, index):
+        self.run_test(original_code, modified_code, index, 'update', change_code)
+
+    def delete_test(self, original_code, modified_code, index):
+        self.run_test(original_code, modified_code, index, 'delete')
+
+    def move_test(self, original_code, modified_code, delete_index, insert_index):
+        self.run_test(original_code, modified_code, delete_index, 'move', second_index=insert_index)
+
+    def run_test(self, original_code, modified_code, index, operation_name, change_code=None, second_index=0):
+        change_ast = None
+        with open('resources/' + original_code) as original, open('resources/' + modified_code) as modified:
             original_ast = ast.parse(original.read())
             modified_ast = ast.parse(modified.read())
-            operation = Delete(del_index) if ins_index is None else Move(ins_index, del_index)
-            operation.make_change(original_ast)
-            message = 'Delete test failed, modified codes do not match!' if ins_index is None \
-                else 'Move test failed, modified codes do not match'
-            print(astunparse.unparse(original_ast.body))
-            self.assertEqual(astunparse.unparse(original_ast.body),
-                             astunparse.unparse(modified_ast.body),
-                             msg=message)
+        if change_code is not None:
+            with open('resources/'+change_code) as change:
+                change_ast = ast.parse(change.read())
+
+        operation = {
+            'insert': Insert(index, change_ast),
+            'update': Update(index, change_ast),
+            'delete': Delete(index),
+            'move': Move(second_index, index)
+        }[operation_name]
+
+        operation.make_change(original_ast)
+        self.assertEqual(astunparse.unparse(original_ast.body), astunparse.unparse(modified_ast.body))
+    #endregion
 
 
 if __name__ == 'main':

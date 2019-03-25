@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import ast
 
 
 class Pattern:
@@ -87,8 +88,8 @@ class EditScript:
         Iterator
             Iterator object that iterates through changes
         """
-
-        pass
+        self.index = 0
+        return self
 
     def __next__(self):
         """
@@ -99,8 +100,10 @@ class EditScript:
         ChangeOperation
             The next ChangeOperation in changes list
         """
-
-        pass
+        if self.index >= len(self.changes):
+            raise StopIteration
+        self.index += 1
+        return self.changes[self.index - 1]
 
     def get(self, index):
         """
@@ -121,8 +124,9 @@ class EditScript:
         IndexError
             If the specified index is out of range
         """
-
-        pass
+        if index >= len(self.changes):
+            raise IndexError('change index out of range')
+        return self.changes[index]
 
     def add(self, change):
         """
@@ -133,11 +137,10 @@ class EditScript:
         change : ChangeOperation
             ChangeOperation to be added in changes
         """
+        self.changes.append(change)
 
-        pass
 
-
-class ChangeOperation(ABC):
+class ChangeOperation(ABC, ast.NodeTransformer):
     """
     A class that represents the operations used to transform the original code to modified code.
 
@@ -151,8 +154,17 @@ class ChangeOperation(ABC):
         Returns change operation in a human-readable form.
     """
 
-    @abstractmethod
     def make_change(self, original):
+        appender = EndBodyAppender()
+        appender.visit(original)
+
+        self.specific_change(original)
+
+        remover = EndBodyRemover()
+        remover.visit(original)
+
+    @abstractmethod
+    def specific_change(self, original):
         """
         Applies the change operation to the received AST.
 
@@ -217,8 +229,9 @@ class Insert(ChangeOperation):
 
         self.index = index
         self.change = change
+        self.internal_index = 0
 
-    def make_change(self, original):
+    def specific_change(self, original):
         """
         Applies the insert operation to the received AST.
 
@@ -236,7 +249,8 @@ class Insert(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        pass
+        self.internal_index = 0
+        self.visit(original)
 
     def __str__(self):
         """
@@ -247,7 +261,15 @@ class Insert(ChangeOperation):
         string
             Human-readable interpretation of Insert
         """
-        pass
+        return "Insert operation @index " + str(self.index)
+
+    def generic_visit(self, node):
+        if self.internal_index == self.index:
+            self.internal_index += 1
+            return [self.change] + [node]
+        self.internal_index += 1
+        ast.NodeTransformer.generic_visit(self, node)
+        return node
 
 
 class Delete(ChangeOperation):
@@ -280,8 +302,9 @@ class Delete(ChangeOperation):
         """
 
         self.index = index
+        self.internal_index = 0
 
-    def make_change(self, original):
+    def specific_change(self, original):
         """
         Applies the delete operation to the received AST.
 
@@ -299,7 +322,8 @@ class Delete(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        pass
+        self.internal_index = 0
+        self.visit(original)
 
     def __str__(self):
         """
@@ -310,7 +334,15 @@ class Delete(ChangeOperation):
         string
             Human-readable interpretation of Delete
         """
-        pass
+        return "Delete operation @index " + str(self.index)
+
+    def generic_visit(self, node):
+        if self.internal_index == self.index:
+            self.internal_index += 1
+            return None
+        self.internal_index += 1
+        ast.NodeTransformer.generic_visit(self, node)
+        return node
 
 
 class Update(ChangeOperation):
@@ -346,10 +378,11 @@ class Update(ChangeOperation):
         change : ast
             AST of updated code
         """
+        self.index = index
+        self.change = change
+        self.internal_index = 0
 
-        pass
-
-    def make_change(self, original):
+    def specific_change(self, original):
         """
         Applies the update operation to the received AST.
 
@@ -367,7 +400,8 @@ class Update(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        pass
+        self.internal_index = 0
+        self.visit(original)
 
     def __str__(self):
         """
@@ -378,7 +412,15 @@ class Update(ChangeOperation):
         string
             Human-readable interpretation of Update
         """
-        pass
+        return "Update operation @index " + str(self.index)
+
+    def generic_visit(self, node):
+        if self.internal_index == self.index:
+            self.internal_index += 1
+            return self.change
+        self.internal_index += 1
+        ast.NodeTransformer.generic_visit(self, node)
+        return node
 
 
 class Move(ChangeOperation):
@@ -414,10 +456,12 @@ class Move(ChangeOperation):
         delete_index : ast
             The position of the AST node that needs to be moved
         """
+        self.insert_index = insert_index
+        self.delete_index = delete_index
+        self.internal_index = 0
+        self.insert = None
 
-        pass
-
-    def make_change(self, original):
+    def specific_change(self, original):
         """
         Applies the move operation to the received AST.
 
@@ -435,7 +479,11 @@ class Move(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        pass
+        self.internal_index = 0
+        self.visit(original)
+        remover = EndBodyRemover()
+        remover.visit(original)
+        self.insert.make_change(original)
 
     def __str__(self):
         """
@@ -446,4 +494,50 @@ class Move(ChangeOperation):
         string
             Human-readable interpretation of Move
         """
-        pass
+        return "Move operation from index " + str(self.delete_index) \
+               + " to index " + str(self.insert_index)
+
+    def generic_visit(self, node):
+        if self.internal_index == self.delete_index:
+            counter = Counter()
+            counter.visit(node)
+            self.insert = Insert(self.insert_index-counter.count, node)
+            self.internal_index += 1
+            return None
+        self.internal_index += 1
+        ast.NodeTransformer.generic_visit(self, node)
+        return node
+
+
+class EndBodyAppender(ast.NodeTransformer):
+
+    def generic_visit(self, node):
+        if hasattr(node, 'body'):
+            import_node = EndBodyNode()
+            node.body.insert(len(node.body), import_node)
+        ast.NodeTransformer.generic_visit(self, node)
+        return node
+
+
+class EndBodyRemover(ast.NodeTransformer):
+
+    def generic_visit(self, node):
+        if type(node) is EndBodyNode:
+            return None
+        ast.NodeTransformer.generic_visit(self, node)
+        return node
+
+
+class Counter(ast.NodeVisitor):
+
+    def __init__(self):
+        self.count = 0
+
+    def generic_visit(self, node):
+        self.count += 1
+        ast.NodeVisitor.generic_visit(self, node)
+
+
+class EndBodyNode(ast.AST):
+    def __init__(self):
+        self.__type__ = 'end'

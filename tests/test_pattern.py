@@ -24,25 +24,28 @@ class TestEditScript(TestCase):
         self.assertEqual(i, 1)
 
     def test_ast_insert_simple(self):
-        self.insert_test('insert/original.py', 'insert/change_simple.py', 'insert/modified_simple.py', 2)
+        self.insert_test('insert/original.py', 'insert/change_simple.py', 'insert/modified_simple.py', 5)
+
+    def test_ast_insert_start_of_if_statement(self):
+        self.insert_test('insert/original.py', 'insert/change_simple.py', 'insert/modified_start_of_if.py', 11)
 
     def test_ast_insert_middle_of_if_statement(self):
-        self.insert_test('insert/original.py', 'insert/change_simple.py', 'insert/modified_middle_of_if.py', 12)
+        self.insert_test('insert/original.py', 'insert/change_simple.py', 'insert/modified_middle_of_if.py', 16)
 
     def test_ast_insert_end_of_if_statement(self):
-        self.insert_test('insert/original.py', 'insert/change_simple.py', 'insert/modified_end_of_if.py', 17)
+        self.insert_test('insert/original.py', 'insert/change_simple.py', 'insert/modified_end_of_if.py', 33)
 
     def test_ast_update(self):
         self.update_test('test_update_original.py', 'test_update_change.py', 'test_update_modified.py', 12)
 
     def test_ast_delete(self):
-        self.delete_test('test_delete_original.py', 'test_delete_modified.py', 12)
+        self.delete_test('test_delete_original.py', 'test_delete_modified.py', 11)
 
     def test_ast_delete_simple(self):
-        self.delete_test('delete/original.py', 'delete/modified.py', 12)
+        self.delete_test('delete/original.py', 'delete/modified.py', 11)
 
     def test_ast_move(self):
-        self.move_test('move/original.py', 'move/modified.py', 12, 12)
+        self.move_test('move/original.py', 'move/modified.py', 11, 33)
 
     #region HELPERS
     def insert_test(self, original_code, change_code, modified_code, index):
@@ -74,6 +77,7 @@ class TestEditScript(TestCase):
         }[operation_name]
 
         operation.make_change(original_ast)
+
         self.assertEqual(astunparse.unparse(original_ast.body), astunparse.unparse(modified_ast.body))
     #endregion
 

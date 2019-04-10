@@ -19,13 +19,16 @@ class AstUtils:
 
     @staticmethod
     def recursive(node, nodes, level, parent, index):
+        print('node: ', node)
         if not AstUtils.is_leaf(node):
-            detailed_node = DetailedNode(False, node, level, parent, index)
-            nodes += [detailed_node]
             if node.__class__ is not _ast.Compare:
+                detailed_node = DetailedNode(False, node, level, parent, index)
+                nodes += [detailed_node]
                 for child in ast.iter_child_nodes(node):
-                    detailed_node.children += [AstUtils.recursive(child, nodes, level+1, detailed_node, index)]
-            return detailed_node
+                    child_node = AstUtils.recursive(child, nodes, level+1, detailed_node, index)
+                    if child_node is not None:
+                        detailed_node.children += [child_node]
+                return detailed_node
         else:
             index += 1
             detailed_node = DetailedNode(True, node, level, parent, index)
@@ -69,6 +72,7 @@ class DetailedNode:
 
     def number_of_children(self):
         count = 0
+        print(self.node)
         for child in self.children:
             count += child.count_recursive()
         return count

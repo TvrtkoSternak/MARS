@@ -108,7 +108,7 @@ class EditScriptGenerator:
             Object that is responsible for connecting the same nodes in
             original and modified code ASTs
         """
-        pass
+        self.tree_differencer = tree_differencer
 
     def generate(self, first_ast, second_ast):
         """
@@ -129,6 +129,10 @@ class EditScriptGenerator:
             Generated EditScript object that describes the modifications
             necessary to transform the original AST to modified AST
         """
+        detailed_first_ast = AstUtils.walk_all_nodes(first_ast)
+        detailed_second_ast = AstUtils.walk_all_nodes(second_ast)
+        similarity_list = self.tree_differencer.connect_nodes(detailed_first_ast, detailed_second_ast)
+
         pass
 
 
@@ -180,13 +184,12 @@ class TreeDifferencer:
             The keys of the dictionary are original AST node indexes and values are
             modified AST node indexes.
         """
-        tree_one = AstUtils.walk_all_nodes(first_ast)
-        tree_two = AstUtils.walk_all_nodes(second_ast)
+
         leaves_matches_tmp = []
-        for x in tree_one:
+        for x in first_ast:
             if x.leaf:
                 # print('x ', x.node)
-                for y in tree_two:
+                for y in second_ast:
                     if y.leaf:
                         # print('y ', y.node)
                         if self.leaves_match(x, y):
@@ -200,9 +203,9 @@ class TreeDifferencer:
         leaves_matches_final = [tup for tup in leaves_matches_tmp if self.best_matches(tup, matched)]
         for leaf_pair in leaves_matches_final:
             print(leaf_pair[0].get_value(), leaf_pair[1].get_value(), leaf_pair[2])
-        for x in tree_one:
+        for x in first_ast:
             if not x.leaf:
-                for y in tree_two:
+                for y in second_ast:
                     if not y.leaf:
                         pass
 

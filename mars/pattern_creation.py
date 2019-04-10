@@ -279,5 +279,5 @@ class TreeDifferencer:
 
     @staticmethod
     def max_number_of_leaves(first_node, second_node):
-        return max(DetailedNode.number_of_leaves(first_node), DetailedNode.number_of_leaves(second_node))
+        return max(first_node.number_of_children(), second_node.number_of_children())
 

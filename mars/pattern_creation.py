@@ -2,6 +2,7 @@ import ast
 from similarity.sorensen_dice import SorensenDice
 
 from mars.astutils import AstUtils, DetailedNode
+from mars.pattern import EditScript, Move, Delete, Insert, Update
 
 
 class PatternCreator:
@@ -109,6 +110,7 @@ class EditScriptGenerator:
             original and modified code ASTs
         """
         self.tree_differencer = tree_differencer
+        self.similarity_list = None
 
     def generate(self, first_ast, second_ast):
         """
@@ -131,9 +133,33 @@ class EditScriptGenerator:
         """
         detailed_first_ast = AstUtils.walk_all_nodes(first_ast)
         detailed_second_ast = AstUtils.walk_all_nodes(second_ast)
-        similarity_list = self.tree_differencer.connect_nodes(detailed_first_ast, detailed_second_ast)
+        self.similarity_list = self.tree_differencer.connect_nodes(detailed_first_ast, detailed_second_ast)
 
-        pass
+        editScript = EditScript()
+
+        # Original ast, here we handle the delete, update and move
+        for node in detailed_first_ast:
+
+            pass
+
+        # Modified ast, here we handle the insert
+        i = 0
+        while i < detailed_second_ast.__sizeof__():
+            node = detailed_second_ast[i]
+            found_match = self.find_node_pair(node, self.similarity_list)
+
+            if not found_match:
+                editScript.add(Insert(node.node, node.index))
+                if not node.leaf:
+                    i += node.number_of_children()
+
+            i += 1
+        
+
+
+    def find_node_pair(self, node, similarity_list):
+        found_match = [item for item in similarity_list if node in item]
+        return found_match
 
 
 class TreeDifferencer:

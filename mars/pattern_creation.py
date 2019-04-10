@@ -1,3 +1,9 @@
+import ast
+from similarity.sorensen_dice import SorensenDice
+
+from mars.astutils import AstUtils, DetailedNode
+
+
 class PatternCreator:
     """
     A class that  is responsible for creating basic patterns from
@@ -112,9 +118,9 @@ class EditScriptGenerator:
 
         Parameters
         ----------
-        original : ast
+        first_ast : ast
             AST of original code
-        modified : ast
+        second_ast : ast
             AST of modified code
 
         Returns
@@ -145,11 +151,14 @@ class TreeDifferencer:
         are corresponding in original and modified ASTs.
 
     """
-    def __init__(self):
+
+    def __init__(self, k=2, f=0.6, t=0.6):
         """
         Initialises TreeDifferencer object.
         """
-        pass
+        self.f = f
+        self.t = t
+        self.sorensen_dice = SorensenDice(k)
 
     def connect_nodes(self, first_ast, second_ast):
         """
@@ -158,9 +167,9 @@ class TreeDifferencer:
 
         Parameters
         ----------
-        original : ast
+        first_ast : ast
             AST of original code
-        modified : ast
+        second_ast : ast
             AST of modified code
 
         Returns
@@ -171,6 +180,63 @@ class TreeDifferencer:
             The keys of the dictionary are original AST node indexes and values are
             modified AST node indexes.
         """
-        pass
+        tree_one = AstUtils.walk_all_nodes(first_ast)
+        tree_two = AstUtils.walk_all_nodes(second_ast)
+        leaves_matches_tmp = []
+        for x in tree_one:
+            if x.leaf:
+                # print('x ', x.node)
+                for y in tree_two:
+                    if y.leaf:
+                        # print('y ', y.node)
+                        if self.leaves_match(x, y):
+                            # leaves_matches[(x, y)] = self.node_similarity(x, y)
+                            leaves_matches_tmp.append((x, y, self.node_similarity(x, y)))
+                            # print(x.get_value(), ' - ', y.get_value(), ' : ', self.node_similarity(x, y))
+        # for leaf_pair in leaves_matches_tmp:
+        #     print(leaf_pair[0].get_value(), leaf_pair[1].get_value(), leaf_pair[2])
+        leaves_matches_tmp.sort(key=lambda tup: tup[2], reverse=True)
+        matched = []
+        leaves_matches_final = [tup for tup in leaves_matches_tmp if self.best_matches(tup, matched)]
+        for leaf_pair in leaves_matches_final:
+            print(leaf_pair[0].get_value(), leaf_pair[1].get_value(), leaf_pair[2])
+        for x in tree_one:
+            if not x.leaf:
+                for y in tree_two:
+                    if not y.leaf:
+                        pass
 
+    def best_matches(self, tup, matched):
+        flag = (tup[0] not in matched) & (tup[1] not in matched)
+        matched.append(tup[0])
+        matched.append(tup[1])
+        return flag
+
+    def leaves_match(self, first_node, second_node):
+        if first_node.node.__class__ is not second_node.node.__class__:
+            return False
+        elif self.node_similarity(first_node, second_node) < self.f:
+            return False
+        return True
+
+    def inner_nodes_match(self, first_node, second_node):
+        if first_node.node.__class__ is not second_node.node.__class__:
+            return False
+        elif (TreeDifferencer.common_nodes(first_node, second_node)/TreeDifferencer.max_number_of_leaves(first_node, second_node)) < self.t:
+            return False
+        elif self.node_similarity(first_node, second_node) < self.f:
+            return False
+        return True
+
+    def node_similarity(self, first_node, second_node):
+        return self.sorensen_dice.similarity(first_node.get_value(), second_node.get_value())
+
+    @staticmethod
+    def common_nodes(first_node, second_node):
+        #to do
+        return 1
+
+    @staticmethod
+    def max_number_of_leaves(first_node, second_node):
+        return max(DetailedNode.number_of_leaves(first_node), DetailedNode.number_of_leaves(second_node))
 

@@ -203,11 +203,16 @@ class TreeDifferencer:
         leaves_matches_final = [tup for tup in leaves_matches_tmp if self.best_matches(tup, matched)]
         for leaf_pair in leaves_matches_final:
             print(leaf_pair[0].get_value(), leaf_pair[1].get_value(), leaf_pair[2])
+
+        inner_nodes_matches = []
         for x in first_ast:
             if not x.leaf:
                 for y in second_ast:
                     if not y.leaf:
-                        pass
+                        if self.inner_nodes_match(x, y):
+                            inner_nodes_matches.append((x, y, self.node_similarity(x, y)))
+                        elif self.weighted_match(x, y):
+                            inner_nodes_matches.append((x, y, self.node_similarity(x, y)))
 
     def best_matches(self, tup, matched):
         flag = (tup[0] not in matched) & (tup[1] not in matched)
@@ -225,11 +230,18 @@ class TreeDifferencer:
     def inner_nodes_match(self, first_node, second_node):
         if first_node.node.__class__ is not second_node.node.__class__:
             return False
-        elif (TreeDifferencer.common_nodes(first_node, second_node)/TreeDifferencer.max_number_of_leaves(first_node, second_node)) < self.t:
+        elif (self.subtree_similarity(first_node, second_node)) < self.t:
             return False
         elif self.node_similarity(first_node, second_node) < self.f:
             return False
         return True
+
+    def subtree_similarity(self, first_node, second_node):
+        return TreeDifferencer.common_nodes(first_node, second_node)/TreeDifferencer.max_number_of_leaves(first_node, second_node)
+
+    def weighted_match(self, first_node, second_node):
+        return (self.node_similarity(first_node, second_node) < self.f)\
+               & (self.subtree_similarity(first_node, second_node) >= 0.8)
 
     def node_similarity(self, first_node, second_node):
         return self.sorensen_dice.similarity(first_node.get_value(), second_node.get_value())

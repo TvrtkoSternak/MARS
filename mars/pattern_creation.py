@@ -99,7 +99,7 @@ class EditScriptGenerator:
         the original AST to modified AST.
 
     """
-    def __init__(self, tree_differencer):
+    def __init__(self, tree_differencer, sim_treshold):
         """
         Initialises EditScriptGenerator object
 
@@ -111,6 +111,7 @@ class EditScriptGenerator:
         """
         self.tree_differencer = tree_differencer
         self.similarity_list = None
+        self.sim_treshold = sim_treshold
 
     def generate(self, first_ast, second_ast):
         """
@@ -135,12 +136,26 @@ class EditScriptGenerator:
         detailed_second_ast = AstUtils.walk_all_nodes(second_ast)
         self.similarity_list = self.tree_differencer.connect_nodes(detailed_first_ast, detailed_second_ast)
 
-        editScript = EditScript()
+        edit_script = EditScript()
 
         # Original ast, here we handle the delete, update and move
-        for node in detailed_first_ast:
+        i = 0
+        while i < detailed_first_ast.__sizeof__():
+            node = detailed_first_ast[i]
+            found_match = self.find_node_pair(node, self.similarity_list)
 
-            pass
+            if not found_match or found_match[0][2] < self.sim_treshold:
+                # No match, delete node
+                edit_script.add(Delete(node.index))
+                if not node.leaf:
+                    # Increment by number of children so that we don't delete them again
+                    i += node.number_of_children()
+            elif 1 > found_match[0][2] > self.sim_treshold:
+                if node.leaf:
+                    # Node is a leaf, update it
+                    edit_script.add(Update(node.index, found_match[0][1].node))
+
+            i += 1
 
         # Modified ast, here we handle the insert
         i = 0
@@ -149,12 +164,14 @@ class EditScriptGenerator:
             found_match = self.find_node_pair(node, self.similarity_list)
 
             if not found_match:
-                editScript.add(Insert(node.node, node.index))
+                # No match, insert node
+                edit_script.add(Insert(node.index, node.node))
                 if not node.leaf:
+                    # Increment by number of children so that we don't insert them again
                     i += node.number_of_children()
 
             i += 1
-        
+
 
 
     def find_node_pair(self, node, similarity_list):

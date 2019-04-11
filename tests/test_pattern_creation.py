@@ -26,7 +26,7 @@ class TestEditScript(TestCase):
 
     def test_print_generated_edit_script(self):
         tree_diff = TreeDifferencer(2)
-        generator = EditScriptGenerator(tree_diff, 0.8)
+        generator = EditScriptGenerator(tree_diff, 0.5)
         with open('resources/example1.py') as original:
             ex_one = ast.parse(original.read())
         with open('resources/example2.py') as original:

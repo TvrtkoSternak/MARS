@@ -135,11 +135,12 @@ class EditScriptGenerator:
         detailed_first_ast = AstUtils.walk_all_nodes(first_ast)
         detailed_second_ast = AstUtils.walk_all_nodes(second_ast)
         self.similarity_list = self.tree_differencer.connect_nodes(detailed_first_ast, detailed_second_ast)
-
+        detailed_first_ast = AstUtils.walk_all_nodes(first_ast, postorder=False)
+        detailed_second_ast = AstUtils.walk_all_nodes(second_ast, postorder=False)
         edit_script = EditScript([])
 
         # Original ast, here we handle the delete, update and move
-        i = 0
+        i = 1
         for x in detailed_first_ast:
             print(x.node)
         while i < detailed_first_ast.__len__():
@@ -160,7 +161,7 @@ class EditScriptGenerator:
             i += 1
 
         # Modified ast, here we handle the insert
-        i = 0
+        i = 1
         while i < detailed_second_ast.__len__():
             node = detailed_second_ast[i]
             found_match = self.find_node_pair(node, self.similarity_list)

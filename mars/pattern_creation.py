@@ -156,7 +156,7 @@ class EditScriptGenerator:
                 edit_script.add(Delete(node.index))
                 if not node.leaf:
                     # Increment by number of children so that we don't delete them again
-                    i += node.number_of_children()+1
+                    i += node.number_of_children(count_inner_nodes=True)+1
             elif 1 > found_match[0][2] > self.sim_treshold:
                 if node.leaf:
                     # Node is a leaf, update it
@@ -175,7 +175,7 @@ class EditScriptGenerator:
                 edit_script.add(Insert(node.index, node.node))
                 if not node.leaf:
                     # Increment by number of children so that we don't insert them again
-                    i += node.number_of_children()
+                    i += node.number_of_children(count_inner_nodes=True)
 
             i += 1
 
@@ -289,6 +289,8 @@ class TreeDifferencer:
         if first_node.node.__class__ is not second_node.node.__class__:
             return False, 0
         sim = self.subtree_similarity(first_node, second_node, node_pairs)
+        if first_node.number_of_children() < 4:
+            return (sim >= 0.4), sim
         return (sim >= self.t), sim
         # elif self.node_similarity(first_node, second_node) < self.f:
         #     return False

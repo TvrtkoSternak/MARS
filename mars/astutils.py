@@ -88,20 +88,20 @@ class DetailedNode:
     def __str__(self):
         return self.node.__str__() + '; isLeaf: ' + self.leaf.__str__() + '; level: ' + self.level.__str__()
 
-    def number_of_children(self):
+    def number_of_children(self, count_inner_nodes=False):
         count = 0
         for child in self.children:
-            count += child.count_recursive()
+            count += child.count_recursive(count_inner_nodes)
         return count
 
-    def count_recursive(self):
+    def count_recursive(self, count_inner_nodes):
         if self.leaf:
-            return 1
+            return 1 if self.node.__class__ is not _ast.Name else 2
         else:
             count = 0
             for child in self.children:
-                count += DetailedNode.count_recursive(child)
-            return count
+                count += child.count_recursive(count_inner_nodes)
+            return count if count_inner_nodes else count + 1
 
     def number_of_direct_children(self):
         return self.children.__len__()

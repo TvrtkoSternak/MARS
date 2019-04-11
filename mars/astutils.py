@@ -6,10 +6,11 @@ class AstUtils:
 
     @staticmethod
     def is_leaf(node):
-        # for x in ast.iter_child_nodes(node):
-        #     return False
-        # return True
-        return not hasattr(node, "body")
+        for _ in ast.iter_child_nodes(node):
+            return False
+        return True
+
+        #return not hasattr(node, "body")
 
     @staticmethod
     def walk_all_nodes(node):

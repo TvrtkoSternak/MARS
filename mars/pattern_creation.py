@@ -139,6 +139,9 @@ class EditScriptGenerator:
         AstUtils.change_to_postorder(detailed_first_ast[0], postorder_first_ast)
         AstUtils.change_to_postorder(detailed_second_ast[0], postorder_second_ast)
 
+        for node in detailed_first_ast:
+            print(node.node, "::::", node.index, "::::", node.leaf)
+
         self.similarity_list = self.tree_differencer.connect_nodes(postorder_first_ast, postorder_second_ast)
 
         edit_script = EditScript([])

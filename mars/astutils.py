@@ -68,6 +68,12 @@ class DetailedNode:
         elif self.node.__class__ is _ast.Compare:
             if self.node.ops[0].__class__ is _ast.Gt:
                 return self.node.left.id.__str__() + '>' + self.node.comparators[0].n.__str__()
+        elif self.node.__class__ is _ast.Num:
+            return "@" + self.node.n.__str__()
+        elif self.node.__class__ is _ast.Name:
+            return "@" + self.node.id
+        elif self.node.__class__ is _ast.Gt:
+            return '>'
         for child in ast.iter_child_nodes(self.node):
             if hasattr(child, 'id'):
                 value += child.id

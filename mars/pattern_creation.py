@@ -136,11 +136,13 @@ class EditScriptGenerator:
         detailed_second_ast = AstUtils.walk_all_nodes(second_ast)
         self.similarity_list = self.tree_differencer.connect_nodes(detailed_first_ast, detailed_second_ast)
 
-        edit_script = EditScript()
+        edit_script = EditScript([])
 
         # Original ast, here we handle the delete, update and move
         i = 0
-        while i < detailed_first_ast.__sizeof__():
+        for x in detailed_first_ast:
+            print(x.node)
+        while i < detailed_first_ast.__len__():
             node = detailed_first_ast[i]
             found_match = self.find_node_pair(node, self.similarity_list)
 
@@ -159,7 +161,7 @@ class EditScriptGenerator:
 
         # Modified ast, here we handle the insert
         i = 0
-        while i < detailed_second_ast.__sizeof__():
+        while i < detailed_second_ast.__len__():
             node = detailed_second_ast[i]
             found_match = self.find_node_pair(node, self.similarity_list)
 
@@ -173,8 +175,6 @@ class EditScriptGenerator:
             i += 1
 
         return edit_script
-
-
 
     def find_node_pair(self, node, similarity_list):
         found_match = [item for item in similarity_list if node in item]
@@ -230,7 +230,7 @@ class TreeDifferencer:
             modified AST node indexes.
         """
 
-        leaves_matches_tmp = []
+        node_pairs = []
         for x in first_ast:
             if x.leaf:
                 # print('x ', x.node)
@@ -239,25 +239,28 @@ class TreeDifferencer:
                         # print('y ', y.node)
                         if self.leaves_match(x, y):
                             # leaves_matches[(x, y)] = self.node_similarity(x, y)
-                            leaves_matches_tmp.append((x, y, self.node_similarity(x, y)))
+                            node_pairs.append((x, y, self.node_similarity(x, y)))
                             # print(x.get_value(), ' - ', y.get_value(), ' : ', self.node_similarity(x, y))
         # for leaf_pair in leaves_matches_tmp:
         #     print(leaf_pair[0].get_value(), leaf_pair[1].get_value(), leaf_pair[2])
-        leaves_matches_tmp.sort(key=lambda tup: tup[2], reverse=True)
-        matched = []
-        leaves_matches_final = [tup for tup in leaves_matches_tmp if self.best_matches(tup, matched)]
-        for leaf_pair in leaves_matches_final:
-            print(leaf_pair[0].get_value(), leaf_pair[1].get_value(), leaf_pair[2])
 
-        inner_nodes_matches = []
         for x in first_ast:
             if not x.leaf:
                 for y in second_ast:
                     if not y.leaf:
-                        if self.inner_nodes_match(x, y):
-                            inner_nodes_matches.append((x, y, self.node_similarity(x, y)))
-                        elif self.weighted_match(x, y):
-                            inner_nodes_matches.append((x, y, self.node_similarity(x, y)))
+                        match, similarity = self.inner_nodes_match(x, y, node_pairs)
+                        if match:
+                            node_pairs.append((x, y, similarity))
+                        # elif self.weighted_match(x, y):
+                        #     inner_nodes_matches.append((x, y, self.node_similarity(x, y)))
+
+        node_pairs.sort(key=lambda tup: tup[2], reverse=True)
+        matched = []
+        node_pairs = [tup for tup in node_pairs if self.best_matches(tup, matched)]
+        for node_pair in node_pairs:
+            print(node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2])
+
+        return node_pairs
 
     def best_matches(self, tup, matched):
         flag = (tup[0] not in matched) & (tup[1] not in matched)
@@ -272,17 +275,16 @@ class TreeDifferencer:
             return False
         return True
 
-    def inner_nodes_match(self, first_node, second_node):
+    def inner_nodes_match(self, first_node, second_node, node_pairs):
         if first_node.node.__class__ is not second_node.node.__class__:
-            return False
-        elif (self.subtree_similarity(first_node, second_node)) < self.t:
-            return False
-        elif self.node_similarity(first_node, second_node) < self.f:
-            return False
-        return True
+            return False, 0
+        sim = self.subtree_similarity(first_node, second_node, node_pairs)
+        return (sim >= self.t), sim
+        # elif self.node_similarity(first_node, second_node) < self.f:
+        #     return False
 
-    def subtree_similarity(self, first_node, second_node):
-        return TreeDifferencer.common_nodes(first_node, second_node)/TreeDifferencer.max_number_of_leaves(first_node, second_node)
+    def subtree_similarity(self, first_node, second_node, node_pairs):
+        return TreeDifferencer.common_nodes(first_node, second_node, node_pairs)/TreeDifferencer.max_number_of_leaves(first_node, second_node)
 
     def weighted_match(self, first_node, second_node):
         return (self.node_similarity(first_node, second_node) < self.f)\
@@ -292,11 +294,20 @@ class TreeDifferencer:
         return self.sorensen_dice.similarity(first_node.get_value(), second_node.get_value())
 
     @staticmethod
-    def common_nodes(first_node, second_node):
-        #to do
-        return 1
+    def common_nodes(first_node, second_node, node_pairs):
+        found_pairs = []
+        for first_child in first_node.children:
+            for second_child in second_node.children:
+                found_pairs += [item for item in node_pairs if (first_child, second_child) in item]
+
+        averaged_similarities = 0
+        for first_child in first_node.children:
+            first_node_pairs = [similarity for first, _, similarity in node_pairs if first_child == first]
+            averaged_similarities += sum(first_node_pairs) / first_node_pairs.__len__()
+
+        return averaged_similarities
 
     @staticmethod
     def max_number_of_leaves(first_node, second_node):
-        return max(first_node.number_of_children(), second_node.number_of_children())
+        return max(first_node.number_of_direct_children(), second_node.number_of_direct_children())
 

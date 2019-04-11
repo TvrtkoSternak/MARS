@@ -140,7 +140,7 @@ class EditScriptGenerator:
         AstUtils.change_to_postorder(detailed_second_ast[0], postorder_second_ast)
 
         for node in detailed_first_ast:
-            print(node.node, "::::", node.index, "::::", node.leaf)
+            print(node.node, "::::", node.index, "::::", node.leaf, "::::", node.parent)
 
         self.similarity_list = self.tree_differencer.connect_nodes(postorder_first_ast, postorder_second_ast)
 
@@ -156,7 +156,7 @@ class EditScriptGenerator:
                 edit_script.add(Delete(node.index))
                 if not node.leaf:
                     # Increment by number of children so that we don't delete them again
-                    i += node.number_of_children()
+                    i += node.number_of_children()+1
             elif 1 > found_match[0][2] > self.sim_treshold:
                 if node.leaf:
                     # Node is a leaf, update it
@@ -261,7 +261,11 @@ class TreeDifferencer:
 
         node_pairs.sort(key=lambda tup: tup[2], reverse=True)
         matched = []
+        for node_pair in node_pairs:
+            print(node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2])
         node_pairs = [tup for tup in node_pairs if self.best_matches(tup, matched)]
+
+        print('----------------------------------------------------------------')
         for node_pair in node_pairs:
             print(node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2])
 
@@ -269,8 +273,9 @@ class TreeDifferencer:
 
     def best_matches(self, tup, matched):
         flag = (tup[0] not in matched) & (tup[1] not in matched)
-        matched.append(tup[0])
-        matched.append(tup[1])
+        if flag:
+            matched.append(tup[0])
+            matched.append(tup[1])
         return flag
 
     def leaves_match(self, first_node, second_node):
@@ -303,14 +308,12 @@ class TreeDifferencer:
         found_pairs = []
         for first_child in first_node.children:
             for second_child in second_node.children:
-                found_pairs += [item for item in node_pairs if (first_child, second_child) in item]
+                found_pairs += [(first, second, sim) for first, second, sim in node_pairs if first_child == first and second_child == second]
 
         averaged_similarities = 0
         for first_child in first_node.children:
-            first_node_pairs = [similarity for first, _, similarity in node_pairs if first_child == first]
-            if first_node_pairs.__len__() == 0:
-                averaged_similarities = 0
-            else:
+            first_node_pairs = [similarity for first, _, similarity in found_pairs if first_child == first]
+            if not first_node_pairs.__len__() == 0:
                 averaged_similarities += sum(first_node_pairs) / first_node_pairs.__len__()
 
         return averaged_similarities
@@ -318,4 +321,3 @@ class TreeDifferencer:
     @staticmethod
     def max_number_of_leaves(first_node, second_node):
         return max(first_node.number_of_direct_children(), second_node.number_of_direct_children())
-

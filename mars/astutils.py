@@ -12,26 +12,22 @@ class AstUtils:
         return not hasattr(node, "body")
 
     @staticmethod
-    def walk_all_nodes(node, postorder = True):
+    def walk_all_nodes(node):
         nodes = []
-        AstUtils.recursive(node, nodes, 0, None, 0, postorder)
+        AstUtils.recursive(node, nodes, 0, None, 0)
         return nodes
 
     @staticmethod
-    def recursive(node, nodes, level, parent, index, postorder = True):
+    def recursive(node, nodes, level, parent, index):
         if not AstUtils.is_leaf(node):
             detailed_node = DetailedNode(False, node, level, parent, index)
 
-            if not postorder:
-                nodes += [detailed_node]
+            nodes += [detailed_node]
 
             for child in ast.iter_child_nodes(node):
                 child_node, index = AstUtils.recursive(child, nodes, level+1, detailed_node, index + 1)
                 if child_node is not None:
                     detailed_node.children += [child_node]
-
-            if postorder:
-                nodes += [detailed_node]
 
             return detailed_node, index
 
@@ -39,6 +35,12 @@ class AstUtils:
             detailed_node = DetailedNode(True, node, level, parent, index)
             nodes += [detailed_node]
             return detailed_node, index
+
+    @staticmethod
+    def change_to_postorder(node, postorder_list):
+        for child in node.children:
+            AstUtils.change_to_postorder(child, postorder_list)
+        postorder_list += [node]
 
 
 class DetailedNode:

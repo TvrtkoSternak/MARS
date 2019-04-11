@@ -6,6 +6,8 @@ class AstUtils:
 
     @staticmethod
     def is_leaf(node):
+        if node.__class__ is _ast.Name:
+            return True
         for _ in ast.iter_child_nodes(node):
             return False
         return True
@@ -35,6 +37,8 @@ class AstUtils:
         else:
             detailed_node = DetailedNode(True, node, level, parent, index)
             nodes += [detailed_node]
+            if node.__class__ is _ast.Name:
+                index += 1
             return detailed_node, index
 
     @staticmethod

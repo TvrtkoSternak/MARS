@@ -9,7 +9,7 @@ class AstUtils:
         # for x in ast.iter_child_nodes(node):
         #     return False
         # return True
-        return (not hasattr(node, "body")) & (node.__class__ is not _ast.Compare)
+        return not hasattr(node, "body")
 
     @staticmethod
     def walk_all_nodes(node):
@@ -20,19 +20,18 @@ class AstUtils:
     @staticmethod
     def recursive(node, nodes, level, parent, index):
         if not AstUtils.is_leaf(node):
-            if node.__class__ is not _ast.Compare:
-                detailed_node = DetailedNode(False, node, level, parent, index)
-                nodes += [detailed_node]
-                for child in ast.iter_child_nodes(node):
-                    child_node = AstUtils.recursive(child, nodes, level+1, detailed_node, index)
-                    if child_node is not None:
-                        detailed_node.children += [child_node]
-                return detailed_node
+            detailed_node = DetailedNode(False, node, level, parent, index)
+            for child in ast.iter_child_nodes(node):
+                child_node, index = AstUtils.recursive(child, nodes, level+1, detailed_node, index + 1)
+                if child_node is not None:
+                    detailed_node.children += [child_node]
+            nodes += [detailed_node]
+            return detailed_node, index
+
         else:
-            index += 1
             detailed_node = DetailedNode(True, node, level, parent, index)
             nodes += [detailed_node]
-            return detailed_node
+            return detailed_node, index
 
 
 class DetailedNode:

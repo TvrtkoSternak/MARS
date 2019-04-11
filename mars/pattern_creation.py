@@ -145,14 +145,9 @@ class EditScriptGenerator:
 
         # Original ast, here we handle the delete, update and move
         i = 1
-        for x in detailed_first_ast:
-            print(x.node)
-        for y in self.similarity_list:
-            print(y)
         while i < detailed_first_ast.__len__():
             node = detailed_first_ast[i]
             found_match = self.find_node_pair(node, self.similarity_list)
-            print(found_match)
             if not found_match or found_match[0][2] < self.sim_treshold:
                 # No match, delete node
                 edit_script.add(Delete(node.index))
@@ -310,7 +305,10 @@ class TreeDifferencer:
         averaged_similarities = 0
         for first_child in first_node.children:
             first_node_pairs = [similarity for first, _, similarity in node_pairs if first_child == first]
-            averaged_similarities += sum(first_node_pairs) / first_node_pairs.__len__()
+            if first_node_pairs.__len__() == 0:
+                averaged_similarities = 0
+            else:
+                averaged_similarities += sum(first_node_pairs) / first_node_pairs.__len__()
 
         return averaged_similarities
 

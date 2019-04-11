@@ -172,6 +172,8 @@ class EditScriptGenerator:
 
             i += 1
 
+        return edit_script
+
 
 
     def find_node_pair(self, node, similarity_list):

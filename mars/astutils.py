@@ -76,6 +76,10 @@ class DetailedNode:
             return '>'
         elif self.node.__class__ is _ast.Str:
             return self.node.s
+        elif self.node.__class__ is _ast.Module:
+            return 'Module'
+        elif self.node.__class__ is _ast.If:
+            return 'If node'
         for child in ast.iter_child_nodes(self.node):
             if hasattr(child, 'id'):
                 value += child.id

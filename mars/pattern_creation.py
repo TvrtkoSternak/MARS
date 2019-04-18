@@ -260,6 +260,9 @@ class TreeDifferencer:
                         # elif self.weighted_match(x, y):
                         #     inner_nodes_matches.append((x, y, self.node_similarity(x, y)))
 
+        for node in first_ast[0].children:
+            self.bottom_prop_sims(node, node_pairs)
+
         node_pairs.sort(key=lambda tup: tup[2], reverse=True)
         matched = []
         for node_pair in node_pairs:
@@ -320,6 +323,24 @@ class TreeDifferencer:
                 averaged_similarities += sum(first_node_pairs) / first_node_pairs.__len__()
 
         return averaged_similarities
+
+    def bottom_prop_sims(self, node, similarity_list):
+        print('tu')
+        found_match = [item for item in similarity_list if node in item]
+
+        for match in found_match:
+            parent_match = [sim for first, second, sim in similarity_list if match[0].parent == first and match[1].parent == second]
+            parent_sim = 0
+            if parent_match:
+                parent_sim = parent_match[0]
+            index = similarity_list.index(match)
+            match[2] = min(parent_sim, match[2])
+            similarity_list[index] = match
+
+        for child_node in node.children:
+            self.bottom_prop_sims(child_node, similarity_list)
+
+
 
     @staticmethod
     def max_number_of_leaves(first_node, second_node):

@@ -445,7 +445,7 @@ class Move(ChangeOperation):
         Applies the move operation to the received AST.
     """
 
-    def __init__(self, insert_index, delete_index):
+    def __init__(self, delete_index, insert_index):
         """
         Initialises Move object. It creates Insert and Delete operations which combined implement move logic.
 

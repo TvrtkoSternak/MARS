@@ -63,8 +63,8 @@ class DetailedNode:
         value = ""
         if self.node.__class__ is _ast.Assign:
             return self.node.targets[0].id.__str__() + '=' + self.node.value.n.__str__()
-        elif self.node.__class__ is _ast.Expr:
-            return self.node.value.func.id.__str__() + self.node.value.args[0].s.__str__()
+        # elif self.node.__class__ is _ast.Expr:
+        #     return self.node.value.func.id.__str__() + self.node.value.args[0].s.__str__()
         elif self.node.__class__ is _ast.Compare:
             if self.node.ops[0].__class__ is _ast.Gt:
                 return self.node.left.id.__str__() + '>' + self.node.comparators[0].n.__str__()
@@ -74,6 +74,8 @@ class DetailedNode:
             return "@" + self.node.id
         elif self.node.__class__ is _ast.Gt:
             return '>'
+        elif self.node.__class__ is _ast.Str:
+            return self.node.s
         for child in ast.iter_child_nodes(self.node):
             if hasattr(child, 'id'):
                 value += child.id

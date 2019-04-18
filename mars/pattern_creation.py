@@ -139,9 +139,6 @@ class EditScriptGenerator:
         AstUtils.change_to_postorder(detailed_first_ast[0], postorder_first_ast)
         AstUtils.change_to_postorder(detailed_second_ast[0], postorder_second_ast)
 
-        for node in detailed_first_ast:
-            print(node.node, "::::", node.index, "::::", node.leaf, "::::", node.parent)
-
         self.similarity_list = self.tree_differencer.connect_nodes(postorder_first_ast, postorder_second_ast)
 
         edit_script = EditScript([])
@@ -151,7 +148,7 @@ class EditScriptGenerator:
         while i < detailed_first_ast.__len__():
             node = detailed_first_ast[i]
             found_match = self.find_node_pair(node, self.similarity_list)
-            if not found_match or found_match[0][2] < self.sim_treshold:
+            if not found_match:
                 # No match, delete node
                 edit_script.add(Delete(node.index))
                 if not node.leaf:
@@ -262,7 +259,7 @@ class TreeDifferencer:
         node_pairs.sort(key=lambda tup: tup[2], reverse=True)
         matched = []
         for node_pair in node_pairs:
-            print(node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2])
+            print('connect_nodes:::::',node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2])
         node_pairs = [tup for tup in node_pairs if self.best_matches(tup, matched)]
 
         print('----------------------------------------------------------------')

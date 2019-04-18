@@ -259,8 +259,10 @@ class TreeDifferencer:
                             node_pairs.append((x, y, similarity))
                         # elif self.weighted_match(x, y):
                         #     inner_nodes_matches.append((x, y, self.node_similarity(x, y)))
+        for node_pair in node_pairs:
+            print('connect_nodesbbbbbbb:::::',node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2])
 
-        for node in first_ast[0].children:
+        for node in first_ast[-1].children:
             self.bottom_prop_sims(node, node_pairs)
 
         node_pairs.sort(key=lambda tup: tup[2], reverse=True)
@@ -270,6 +272,13 @@ class TreeDifferencer:
         node_pairs = [tup for tup in node_pairs if self.best_matches(tup, matched)]
 
         print('----------------------------------------------------------------')
+
+
+        for pair in node_pairs:
+            if pair[0].leaf and pair[1].leaf:
+                sim = self.node_similarity(pair[0], pair[1])
+                node_pairs[node_pairs.index(pair)] = (pair[0], pair[1], sim)
+
         for node_pair in node_pairs:
             print(node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2])
 
@@ -285,8 +294,8 @@ class TreeDifferencer:
     def leaves_match(self, first_node, second_node):
         if first_node.node.__class__ is not second_node.node.__class__ or first_node.parent.node.__class__ is not second_node.parent.node.__class__:
             return False
-        elif self.node_similarity(first_node, second_node) < self.f:
-            return False
+        # elif self.node_similarity(first_node, second_node) < self.f:
+        #     return False
         return True
 
     def inner_nodes_match(self, first_node, second_node, node_pairs):
@@ -307,7 +316,7 @@ class TreeDifferencer:
                & (self.subtree_similarity(first_node, second_node) >= 0.8)
 
     def node_similarity(self, first_node, second_node):
-        return self.sorensen_dice.similarity(first_node.get_value(), second_node.get_value())
+        return self.sorensen_dice.similarity(first_node.get_value(), second_node.get_value()) / 2 + 0.5
 
     @staticmethod
     def common_nodes(first_node, second_node, node_pairs):
@@ -325,7 +334,6 @@ class TreeDifferencer:
         return averaged_similarities
 
     def bottom_prop_sims(self, node, similarity_list):
-        print('tu')
         found_match = [item for item in similarity_list if node in item]
 
         for match in found_match:
@@ -334,8 +342,8 @@ class TreeDifferencer:
             if parent_match:
                 parent_sim = parent_match[0]
             index = similarity_list.index(match)
-            match[2] = min(parent_sim, match[2])
-            similarity_list[index] = match
+            new_match = (match[0], match[1], (parent_sim + match[2])/2)
+            similarity_list[index] = new_match
 
         for child_node in node.children:
             self.bottom_prop_sims(child_node, similarity_list)

@@ -143,6 +143,9 @@ class EditScriptGenerator:
 
         edit_script = EditScript([])
 
+        for node in detailed_first_ast:
+            print(node.node, "::::", node.index, "::::", node.leaf, "::::", node.parent)
+
         # Original ast, here we handle the delete, update and move
         i = 1
         while i < detailed_first_ast.__len__():

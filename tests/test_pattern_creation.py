@@ -25,7 +25,7 @@ class TestEditScript(TestCase):
     #         print(DetailedNode.number_of_leaves(node))
 
     def test_print_generated_edit_script(self):
-        tree_diff = TreeDifferencer(2, 0.24)
+        tree_diff = TreeDifferencer(2, 0.24, 0.3)
         generator = EditScriptGenerator(tree_diff, 0.24)
         with open('resources/example1.py') as original:
             ex_one = ast.parse(original.read())

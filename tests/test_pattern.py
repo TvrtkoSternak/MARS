@@ -45,7 +45,7 @@ class TestEditScript(TestCase):
         self.delete_test('delete/original.py', 'delete/modified.py', 11)
 
     def test_ast_move(self):
-        self.move_test('move/original.py', 'move/modified.py', 11, 33)
+        self.move_test('move/original.py', 'move/modified.py', 33, 11)
 
     #region HELPERS
     def insert_test(self, original_code, change_code, modified_code, index):

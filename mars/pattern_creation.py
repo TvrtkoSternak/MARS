@@ -167,6 +167,7 @@ class EditScriptGenerator:
         # Modified ast, here we handle the insert
         i = 1
         while i < detailed_second_ast.__len__():
+            print(i)
             node = detailed_second_ast[i]
             found_match = self.find_node_pair(node, self.similarity_list)
 
@@ -279,7 +280,7 @@ class TreeDifferencer:
         return flag
 
     def leaves_match(self, first_node, second_node):
-        if first_node.node.__class__ is not second_node.node.__class__:
+        if first_node.node.__class__ is not second_node.node.__class__ or first_node.parent.node.__class__ is not second_node.parent.node.__class__:
             return False
         elif self.node_similarity(first_node, second_node) < self.f:
             return False

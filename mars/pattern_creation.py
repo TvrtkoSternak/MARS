@@ -271,7 +271,7 @@ class TreeDifferencer:
         #     print('connect_nodes:::::',node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2])
         node_pairs = [tup for tup in node_pairs if self.best_matches(tup, matched)]
 
-        print('----------------------------------------------------------------')
+        # print('----------------------------------------------------------------')
 
 
         for pair in node_pairs:
@@ -279,8 +279,8 @@ class TreeDifferencer:
                 sim = self.node_similarity(pair[0], pair[1])
                 node_pairs[node_pairs.index(pair)] = (pair[0], pair[1], sim)
 
-        for node_pair in node_pairs:
-            print(node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2])
+        # for node_pair in node_pairs:
+        #     print(node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2])
 
         return node_pairs
 

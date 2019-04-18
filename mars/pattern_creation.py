@@ -143,11 +143,11 @@ class EditScriptGenerator:
 
         edit_script = EditScript([])
 
-        for node in detailed_first_ast:
-            print(node.node, "::::", node.index, "::::", node.leaf, "::::", node.parent)
+        # for node in detailed_first_ast:
+        #     print(node.node, "::::", node.index, "::::", node.leaf, "::::", node.parent)
 
-        for node in detailed_second_ast:
-            print(node.node, "::::", node.index, "::::", node.leaf, "::::", node.parent)
+        # for node in detailed_second_ast:
+        #     print(node.node, "::::", node.index, "::::", node.leaf, "::::", node.parent)
 
         # Original ast, here we handle the delete, update and move
         i = 1
@@ -165,13 +165,13 @@ class EditScriptGenerator:
                     # Node is a leaf, update it
                     edit_script.add(Update(node.index, found_match[0][1].node))
                 else:
-                    print('tu', node)
+                    # print('tu', node)
                     # node is a subbtree, check if needs to move
                     parent_match = self.find_node_pair(found_match[0][0].parent, self.similarity_list)
                     if parent_match:
-                        print('tu sam')
+                        # print('tu sam')
                         if parent_match[0][1] is not found_match[0][1].parent:
-                            print('tu nisam')
+                            # print('tu nisam')
                             edit_script.add(Move(node.index, found_match[0][1].index))
 
             i += 1
@@ -271,16 +271,16 @@ class TreeDifferencer:
                             node_pairs.append((x, y, similarity))
                         # elif self.weighted_match(x, y):
                         #     inner_nodes_matches.append((x, y, self.node_similarity(x, y)))
-        for node_pair in node_pairs:
-            print('connect_nodesbbbbbbb:::::',node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2])
+        # for node_pair in node_pairs:
+        #     print('connect_nodesbbbbbbb:::::',node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2])
 
         for node in first_ast[-1].children:
             self.bottom_prop_sims(node, node_pairs)
 
         node_pairs.sort(key=lambda tup: tup[2], reverse=True)
         matched = []
-        for node_pair in node_pairs:
-            print('connect_nodes:::::',node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2])
+        # for node_pair in node_pairs:
+        #     print('connect_nodes:::::',node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2])
         node_pairs = [tup for tup in node_pairs if self.best_matches(tup, matched)]
 
         # print('----------------------------------------------------------------')
@@ -291,8 +291,8 @@ class TreeDifferencer:
                 sim = self.node_similarity(pair[0], pair[1])
                 node_pairs[node_pairs.index(pair)] = (pair[0], pair[1], sim)
 
-        for node_pair in node_pairs:
-            print(node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2])
+        # for node_pair in node_pairs:
+        #     print(node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2])
 
         return node_pairs
 

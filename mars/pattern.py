@@ -261,7 +261,7 @@ class Insert(ChangeOperation):
         string
             Human-readable interpretation of Insert
         """
-        return "Insert operation @index " + str(self.index)
+        return "Insert operation @index " + str(self.index) + " of AST: " + ast.dump(self.change)
 
     def generic_visit(self, node):
         if self.internal_index == self.index:
@@ -412,7 +412,7 @@ class Update(ChangeOperation):
         string
             Human-readable interpretation of Update
         """
-        return "Update operation @index " + str(self.index)
+        return "Update operation @index " + str(self.index) + " change AST: " + ast.dump(self.change)
 
     def generic_visit(self, node):
         if self.internal_index == self.index:
@@ -445,7 +445,7 @@ class Move(ChangeOperation):
         Applies the move operation to the received AST.
     """
 
-    def __init__(self, insert_index, delete_index):
+    def __init__(self, delete_index, insert_index):
         """
         Initialises Move object. It creates Insert and Delete operations which combined implement move logic.
 

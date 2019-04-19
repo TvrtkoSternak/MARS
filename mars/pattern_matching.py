@@ -92,7 +92,7 @@ class Recommender(Reader):
         Parses the IPatternMatcher object into the format determined by the parser.
     """
 
-    def __init__(self, parser):
+    def __init__(self, parser, source):
         """
         Initialises Recommender object
 
@@ -100,9 +100,14 @@ class Recommender(Reader):
         ----------
         parser : IPatternParser
             Parser object for parsing matches
+        source : String
+            Source code of uploaded code ready for matching
         """
         super().__init__()
         self.parser = parser
+        # TODO: Parse source to uploaded ast !!PREORDER!!
+        self.uploaded_ast = []
+        self.present_node = None
 
     def get_recommendations(self):
         """
@@ -113,7 +118,9 @@ class Recommender(Reader):
         File
             File with found recommendations
         """
-        pass
+        for node in self.uploaded_ast:
+            self.present_node = node
+            self.notify()
 
     def parse(self, pattern_matcher):
         """
@@ -124,7 +131,7 @@ class Recommender(Reader):
         pattern_matcher: IPatternMatcher
             IPatternMatcher to be parsed
         """
-        pass
+        self.parser.parse(pattern_matcher)
 
 
 class IListener(ABC):
@@ -140,7 +147,7 @@ class IListener(ABC):
     """
 
     @abstractmethod
-    def update(self):
+    def update(self, node):
         """
         Performs the appropriate update operation for the concrete implementation
         """

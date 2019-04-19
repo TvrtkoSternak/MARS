@@ -35,7 +35,7 @@ class Reader(ABC):
         """
         Notifies all subscribed listeners about change
         """
-        for listener in self.listeners:
+        for listener in self.listeners.copy():
             listener.update()
 
     def subscribe(self, listener):
@@ -333,7 +333,8 @@ class PatternFactoryListener(IPatternFactory, IPatternMatcher, IListener):
         current node from Recommender and checks for match, if the node matches then the PatternFactoryListener creates
         a designated PatternListener.
         """
-        pass
+        if self.check_match(self.reader.get_present_node()):
+            self.create_pattern()
 
     def create_pattern(self):
         """
@@ -344,7 +345,8 @@ class PatternFactoryListener(IPatternFactory, IPatternMatcher, IListener):
         IPatternMatcher
             IPatternMatcher that contains a Pattern that the concrete factory is responsible for creating
         """
-        pass
+        pattern_listener = PatternListener(self.pattern)
+        pattern_listener.subscribe(self.reader)
 
     def check_match(self, node):
         """

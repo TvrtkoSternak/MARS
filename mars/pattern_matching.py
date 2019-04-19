@@ -133,6 +133,17 @@ class Recommender(Reader):
         """
         self.parser.parse(pattern_matcher)
 
+    def get_present_node(self):
+        """
+        Used by listeners to get information about recommender position in souce ast
+
+        Returns
+        -------
+        DetailedNode
+            Node of ast thar the recommender is observing
+        """
+        return self.present_node
+
 
 class IListener(ABC):
     """

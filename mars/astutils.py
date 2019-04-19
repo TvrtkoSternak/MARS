@@ -118,6 +118,6 @@ class DetailedNode:
         if other.node.__class__ is not self.node.__class__:
             return False
         if self.leaf:
-            if self.get_value() == other.get_value():
-                return True
-        return False
+            if self.get_value() != other.get_value():
+                return False
+        return True

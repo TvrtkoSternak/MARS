@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 from .pattern import Pattern
+from .astutils import AstUtils
+import ast
 
 
 class Reader(ABC):
@@ -135,8 +137,7 @@ class Recommender(Reader):
         """
         super().__init__()
         self.parser = parser
-        # TODO: Parse source to uploaded ast !!PREORDER!!
-        self.uploaded_ast = []
+        self.uploaded_ast = AstUtils.walk_all_nodes(ast.parse(source))
         self.present_node = None
 
     def get_recommendations(self):

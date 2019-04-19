@@ -334,9 +334,20 @@ class PatternFactoryListener(IPatternFactory, IPatternMatcher, IListener):
         pass
 
     def subscribe(self, reader):
+        """
+        Subscribes the PatternFactoryListener to Reader
+
+        Parameters
+        ----------
+        reader : Reader
+            Reader object that the PatternFactoryListener will subscribe to
+        """
         pass
 
     def unsubscribe(self):
+        """
+        Removes itself from the list of listeners in the associated Reader object.
+        """
         pass
 
 
@@ -412,6 +423,14 @@ class PatternListener(IListener, IPatternMatcher):
         pass
 
     def subscribe(self, reader):
+        """
+        Subscribes the PatternListener to Reader
+
+        Parameters
+        ----------
+        reader : Reader
+            Reader object that the PatternListener will subscribe to
+        """
         pass
 
     def unsubscribe(self):

@@ -275,7 +275,8 @@ class IPatternMatcher(ABC):
             Pattern  object  that  is  being  checked  against  incoming  patterns  for matches
         """
         self.pattern = pattern
-        self.counter = 0
+        self.original_detailed = AstUtils.walk_all_nodes(self.pattern.original)
+        self.counter = 1
 
     @abstractmethod
     def check_match(self, node):
@@ -363,7 +364,7 @@ class PatternFactoryListener(IPatternFactory, IPatternMatcher, IListener):
         bool
             True if the nodes match, false otherwise
         """
-        pass
+        return node.__eq__(self.original_detailed[self.counter])
 
     def subscribe(self, reader):
         """
@@ -439,7 +440,7 @@ class PatternListener(IListener, IPatternMatcher):
         if not self.check_match(self.reader.get_present_node()):
             self.unsubscribe()
         else:
-            if self.counter == self.pattern.__len__():
+            if self.counter + 1 == self.pattern.__len__():
                 self.reader.parse(self)
                 self.unsubscribe()
             else:
@@ -459,7 +460,7 @@ class PatternListener(IListener, IPatternMatcher):
         bool
             True if the nodes match, false otherwise
         """
-        pass
+        return node.__eq__(self.original_detailed[self.counter])
 
     def subscribe(self, reader):
         """

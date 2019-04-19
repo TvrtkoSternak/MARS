@@ -31,7 +31,8 @@ class Reader(ABC):
         """
         Notifies all subscribed listeners about change
         """
-        pass
+        for listener in self.listeners:
+            listener.update()
 
     def subscribe(self, listener):
         """
@@ -42,7 +43,7 @@ class Reader(ABC):
         listener : IListener
             IListener to subscribe
         """
-        pass
+        self.listeners.append(listener)
 
     def unsubscribe(self, listener):
         """
@@ -53,7 +54,7 @@ class Reader(ABC):
         listener: IListener
             IListener to unsubscribe
         """
-        pass
+        self.listeners.remove(listener)
 
 
 class Recommender(Reader):

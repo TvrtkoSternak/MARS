@@ -113,7 +113,7 @@ class DetailedNode:
         return self.children.__len__()
 
     def __eq__(self, other):
-        if other is not DetailedNode:
+        if other.__class__ is not DetailedNode:
             return False
         if other.node.__class__ is not self.node.__class__:
             return False

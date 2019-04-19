@@ -336,6 +336,7 @@ class PatternFactoryListener(IPatternFactory, IPatternMatcher, IListener):
         a designated PatternListener.
         """
         if self.check_match(self.reader.get_present_node()):
+            print('Stvaram pattern')
             self.create_pattern()
 
     def create_pattern(self):
@@ -438,14 +439,13 @@ class PatternListener(IListener, IPatternMatcher):
         2) The matched node is not the last node in the pattern:
             Pattern listener increments its internal node count and continues to listen for updates from the reader.
         """
+        self.counter += 1
         if not self.check_match(self.reader.get_present_node()):
             self.unsubscribe()
         else:
-            if self.counter + 1 == self.original_detailed.__len__():
+            if self.counter == self.original_detailed.__len__()-1:
                 self.reader.parse(self)
                 self.unsubscribe()
-            else:
-                self.counter += 1
 
     def check_match(self, node):
         """

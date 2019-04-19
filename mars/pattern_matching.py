@@ -22,6 +22,10 @@ class Reader(ABC):
         Adds the received IListener object to the list of subscribed listeners.
     public void unsubscribe(self,listener)
         Removes the received IListener object from the list of subscribed listeners.
+    public void get_present_node(self)
+        Used by listeners to get information about reader position in source ast.
+    public void parse(self, pattern_matcher)
+        Parses the IPatternMatcher object into the format determined by the parser
     """
 
     def __init__(self):
@@ -55,6 +59,30 @@ class Reader(ABC):
             IListener to unsubscribe
         """
         self.listeners.remove(listener)
+
+    @abstractmethod
+    def get_present_node(self):
+        """
+        Used by listeners to get information about reader position in source ast
+
+        Returns
+        -------
+        ast
+            Node of ast thar the reader is observing
+        """
+        pass
+
+    @abstractmethod
+    def parse(self, pattern_matcher):
+        """
+        Parses the IPatternMatcher object into the format determined by the parser
+
+        Parameters
+        ----------
+        pattern_matcher: IPatternMatcher
+            IPatternMatcher to be parsed
+        """
+        pass
 
 
 class Recommender(Reader):
@@ -141,7 +169,7 @@ class Recommender(Reader):
 
         Returns
         -------
-        DetailedNode
+        ast
             Node of ast thar the recommender is observing
         """
         return self.present_node
@@ -246,6 +274,7 @@ class IPatternMatcher(ABC):
             Pattern  object  that  is  being  checked  against  incoming  patterns  for matches
         """
         self.pattern = pattern
+        self.counter = 0
 
     @abstractmethod
     def check_match(self, node):
@@ -343,14 +372,12 @@ class PatternFactoryListener(IPatternFactory, IPatternMatcher, IListener):
             Reader object that the PatternFactoryListener will subscribe to
         """
         self.reader = reader
-        pass
 
     def unsubscribe(self):
         """
         Removes itself from the list of listeners in the associated Reader object.
         """
         self.reader.unsubscribe(self)
-        pass
 
 
 class PatternListener(IListener, IPatternMatcher):
@@ -406,7 +433,14 @@ class PatternListener(IListener, IPatternMatcher):
         2) The matched node is not the last node in the pattern:
             Pattern listener increments its internal node count and continues to listen for updates from the reader.
         """
-        pass
+        if not self.check_match(self.reader.get_present_node()):
+            self.unsubscribe()
+        else:
+            if self.counter == self.pattern.__len__():
+                self.reader.parse(self)
+                self.unsubscribe()
+            else:
+                self.counter += 1
 
     def check_match(self, node):
         """
@@ -434,11 +468,9 @@ class PatternListener(IListener, IPatternMatcher):
             Reader object that the PatternListener will subscribe to
         """
         self.reader = reader
-        pass
 
     def unsubscribe(self):
         """
         Removes itself from the list of listeners in the associated Reader object.
         """
         self.reader.unsubscribe(self)
-        pass

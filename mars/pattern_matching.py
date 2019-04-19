@@ -441,7 +441,7 @@ class PatternListener(IListener, IPatternMatcher):
         if not self.check_match(self.reader.get_present_node()):
             self.unsubscribe()
         else:
-            if self.counter + 1 == self.pattern.__len__():
+            if self.counter + 1 == self.original_detailed.__len__():
                 self.reader.parse(self)
                 self.unsubscribe()
             else:

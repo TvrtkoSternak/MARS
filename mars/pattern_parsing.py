@@ -75,7 +75,6 @@ class XMLPatternParser(PatternParser):
         pass
 
 
-
 class ReadeablePatternParser(PatternParser):
     """
     This class is responsible for parsing the patterns into a human-readable
@@ -103,3 +102,13 @@ class ReadeablePatternParser(PatternParser):
             IPatternMatcher object that will be parsed and written to standard
             output
         """
+
+class CounterPatternParser(PatternParser):
+    def __init__(self):
+        self.counter = 0
+
+    def parse(self, pattern_matcher):
+        self.counter += 1
+
+    def get_count(self):
+        return self.counter

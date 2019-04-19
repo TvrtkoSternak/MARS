@@ -376,6 +376,7 @@ class PatternFactoryListener(IPatternFactory, IPatternMatcher, IListener):
             Reader object that the PatternFactoryListener will subscribe to
         """
         self.reader = reader
+        self.reader.subscribe(self)
 
     def unsubscribe(self):
         """
@@ -472,6 +473,7 @@ class PatternListener(IListener, IPatternMatcher):
             Reader object that the PatternListener will subscribe to
         """
         self.reader = reader
+        reader.subscribe(self)
 
     def unsubscribe(self):
         """

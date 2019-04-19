@@ -90,6 +90,8 @@ class Recommender(Reader):
         Finds the matches for uploaded code block and returns file with recommendations.
     public void parse(self, pattern_matcher)
         Parses the IPatternMatcher object into the format determined by the parser.
+    public void get_present_node(self)
+        Used by listeners to get information about recommender position in source ast.
     """
 
     def __init__(self, parser, source):
@@ -135,7 +137,7 @@ class Recommender(Reader):
 
     def get_present_node(self):
         """
-        Used by listeners to get information about recommender position in souce ast
+        Used by listeners to get information about recommender position in source ast
 
         Returns
         -------
@@ -155,14 +157,36 @@ class IListener(ABC):
     -------
     public void update(self)
         Performs the appropriate update operation for the concrete implementation
+    public void subscribe(self, reader)
+        Subscribes the listener to Reader object
+    public void unsubscribe(self)
+        Unsubscribes the Listener from the reader object
     """
 
     @abstractmethod
-    def update(self, node):
+    def update(self):
         """
         Performs the appropriate update operation for the concrete implementation
         """
         pass
+
+    @abstractmethod
+    def subscribe(self, reader):
+        """
+        Subscribes the listener to Reader
+
+        Parameters
+        ----------
+        reader : Reader
+            Reader object that the listener will subscribe to
+        """
+        pass
+
+    @abstractmethod
+    def unsubscribe(self):
+        """
+        Unsubscribes the Listener from the reader object
+        """
 
 
 class IPatternFactory(ABC):
@@ -260,8 +284,6 @@ class PatternFactoryListener(IPatternFactory, IPatternMatcher, IListener):
 
     Methods
     -------
-    public __init__(self, pattern, recommender)
-        Initialises PatternFactoryListener
     public void update(self)
         Method called by the Reader class. When this method is called PatternFactoryListener object retrieves the
         current node from Recommender and checks for match, if the node matches then the PatternFactoryListener creates
@@ -270,20 +292,11 @@ class PatternFactoryListener(IPatternFactory, IPatternMatcher, IListener):
         Creates and returns IPatternMatcher object for the detected pattern.
     public bool check_match(self, node):
         Check if the input node matches the IPatternMatcher node that is next in the pattern.
+    public void subscribe(self, reader)
+        Subscribes the listener to Reader object
+    public void unsubscribe(self)
+        Removes itself from the list of listeners in the associated Reader object.
     """
-
-    def __init__(self, pattern, recommender):
-        """
-        Initialises PatternFactoryListener.
-
-        Parameters
-        ----------
-        pattern : Pattern
-            Pattern it is creating
-        recommender : Recommender
-            Recommender object that the listener is listening to.s
-        """
-        pass
 
     def update(self):
         """
@@ -320,6 +333,12 @@ class PatternFactoryListener(IPatternFactory, IPatternMatcher, IListener):
         """
         pass
 
+    def subscribe(self, reader):
+        pass
+
+    def unsubscribe(self):
+        pass
+
 
 class PatternListener(IListener, IPatternMatcher):
     """
@@ -344,8 +363,6 @@ class PatternListener(IListener, IPatternMatcher):
 
     Methods
     -------
-    public __init__(self, pattern, recommender)
-        Initialises PatternListener
     public void update(self)
         Method called by the Reader class. When this method is called PatternListener object retrieves the current node
         from Recommender and checks for match. If the node is not a match, then PatternListener unsubscribes from the
@@ -359,22 +376,11 @@ class PatternListener(IListener, IPatternMatcher):
         Creates and returns IPatternMatcher object for the detected pattern.
     public bool check_match(self, node)
         Check if the input node matches the IPatternMatcher node that is next in the pattern.
+    public void subscribe(self, reader)
+        Subscribes the listener to Reader object
     public void unsubscribe(self)
         Removes itself from the list of listeners in the associated Reader object.
     """
-
-    def __init__(self, pattern, recommender):
-        """
-        Initialises PatternListener.
-
-        Parameters
-        ----------
-        pattern : Pattern
-            Pattern it is matching
-        recommender : Recommender
-            Recommender object that the listener is listening to.s
-        """
-        pass
 
     def update(self):
         """
@@ -403,6 +409,9 @@ class PatternListener(IListener, IPatternMatcher):
         bool
             True if the nodes match, false otherwise
         """
+        pass
+
+    def subscribe(self, reader):
         pass
 
     def unsubscribe(self):

@@ -112,3 +112,12 @@ class DetailedNode:
     def number_of_direct_children(self):
         return self.children.__len__()
 
+    def __eq__(self, other):
+        if other is not DetailedNode:
+            return False
+        if other.node.__class__ is not self.node.__class__:
+            return False
+        if self.leaf:
+            if self.get_value() != other.get_value():
+                return False
+        return True

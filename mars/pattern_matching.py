@@ -336,7 +336,6 @@ class PatternFactoryListener(IPatternFactory, IPatternMatcher, IListener):
         a designated PatternListener.
         """
         if self.check_match(self.reader.get_present_node()):
-            print('Stvaram pattern')
             self.create_pattern()
 
     def create_pattern(self):

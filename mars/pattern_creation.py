@@ -1,7 +1,7 @@
 import ast
 from similarity.sorensen_dice import SorensenDice
 
-from mars.astutils import AstUtils, DetailedNode
+from mars.astutils import AstUtils
 from mars.pattern import EditScript, Move, Delete, Insert, Update, Pattern
 
 

@@ -5,7 +5,7 @@ filename = "../resources/patterns.p"
 
 class StorageContext:
 
-    def __int__(self, file):
+    def __init__(self, file):
         self.filename = file
 
     def save(self, pattern):

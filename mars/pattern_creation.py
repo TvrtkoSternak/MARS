@@ -3,6 +3,7 @@ from similarity.sorensen_dice import SorensenDice
 
 from mars.astutils import AstUtils
 from mars.pattern import EditScript, Move, Delete, Insert, Update, Pattern
+from mars.pattern_storage import StorageContext
 
 
 class PatternCreator:
@@ -82,7 +83,7 @@ class PatternCreator:
         created_pattern : Pattern
             Pattern that is going to be saved in the pattern database
         """
-        pass
+        StorageContext.save(pattern)
 
 
 class EditScriptGenerator:

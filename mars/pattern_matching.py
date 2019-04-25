@@ -266,7 +266,7 @@ class IPatternMatcher(ABC):
         Check if the input node matches the IPatternMatcher node that is next in the pattern.
     """
 
-    def __init__(self, pattern):
+    def __init__(self, pattern, start_lineno):
         """
         Initialises IPatternMatcher with pattern to match
         Parameters
@@ -275,6 +275,8 @@ class IPatternMatcher(ABC):
             Pattern  object  that  is  being  checked  against  incoming  patterns  for matches
         """
         self.pattern = pattern
+        self.start_lineno = start_lineno
+        self.last_lineno = start_lineno
         self.original_detailed = AstUtils.walk_all_nodes(self.pattern.original)
         self.counter = 1
 
@@ -347,7 +349,7 @@ class PatternFactoryListener(IPatternFactory, IPatternMatcher, IListener):
         IPatternMatcher
             IPatternMatcher that contains a Pattern that the concrete factory is responsible for creating
         """
-        pattern_listener = PatternListener(self.pattern)
+        pattern_listener = PatternListener(self.pattern, self.reader.get_present_node().node.lineno)
         pattern_listener.subscribe(self.reader)
 
     def check_match(self, node):
@@ -439,9 +441,12 @@ class PatternListener(IListener, IPatternMatcher):
             Pattern listener increments its internal node count and continues to listen for updates from the reader.
         """
         self.counter += 1
-        if not self.check_match(self.reader.get_present_node()):
+        node = self.reader.get_present_node()
+        if not self.check_match(node):
             self.unsubscribe()
         else:
+            if hasattr(node.node, 'lineno'):
+                self.last_lineno = node.node.lineno
             if self.counter == self.original_detailed.__len__()-1:
                 self.reader.parse(self)
                 self.unsubscribe()

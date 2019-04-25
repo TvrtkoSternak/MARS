@@ -1,4 +1,7 @@
 from abc import ABC, abstractmethod
+import xml.etree.ElementTree as ET
+
+import astunparse
 
 
 class PatternParser(ABC):
@@ -61,18 +64,27 @@ class XMLPatternParser(PatternParser):
         output : File
             File in which the parser will write the parsed patterns
         """
-        pass
+        self.output = output
 
-    def parse(self, pattern):
+    def parse(self, pattern_matcher):
         """
         Parses the IPatternMatcher into a XML form and writes it to a file.
 
         Parameters
         ----------
-        pattern : IPatternMatcher
+        pattern_matcher : IPatternMatcher
             IPatternMatcher object that will be parsed and written to a file
         """
-        pass
+        change = ET.Element('change')
+        start = ET.SubElement(change, 'start')
+        start.set('start_line', pattern_matcher.start_lineno)
+        end = ET.SubElement(change, 'end')
+        end.set('end_line', pattern_matcher.end_lineno)
+        change_code = ET.SubElement(change, 'change_code')
+        change_code.set('change_code', astunparse.unparse(pattern_matcher.pattern.modified))
+
+        data = ET.tostring(change)
+        self.output.write(data)
 
 
 class ReadablePatternParser(PatternParser):

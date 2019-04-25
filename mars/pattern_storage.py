@@ -20,3 +20,4 @@ class StorageContext:
                     patterns.append(pickle.load(storage))
                 except EOFError:
                     break
+        return patterns

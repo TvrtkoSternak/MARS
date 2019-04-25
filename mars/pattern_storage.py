@@ -1,19 +1,19 @@
 import pickle
 
-filename = "patterns.p"
+filename = "../resources/patterns.p"
 
 
 class StorageContext:
 
     @staticmethod
     def save(pattern):
-        with open(filename) as storage:
+        with open(filename, 'ab') as storage:
             pickle.dump(pattern, storage)
 
     @staticmethod
     def load():
         patterns = []
-        with open(filename) as storage:
+        with open(filename, 'rb') as storage:
             while 1:
                 try:
                     patterns.append(pickle.load(storage))

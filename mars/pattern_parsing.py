@@ -75,7 +75,7 @@ class XMLPatternParser(PatternParser):
         pass
 
 
-class ReadeablePatternParser(PatternParser):
+class ReadablePatternParser(PatternParser):
     """
     This class is responsible for parsing the patterns into a human-readable
     form so that the system can present the user all the patterns used in code

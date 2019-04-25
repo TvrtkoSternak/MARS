@@ -2,7 +2,7 @@ import ast
 from similarity.sorensen_dice import SorensenDice
 
 from mars.astutils import AstUtils, DetailedNode
-from mars.pattern import EditScript, Move, Delete, Insert, Update
+from mars.pattern import EditScript, Move, Delete, Insert, Update, Pattern
 
 
 class PatternCreator:
@@ -43,8 +43,9 @@ class PatternCreator:
         script_generator : EditScriptGenerator
             Object used to generate EditScript from original and modified code
         """
-
-        pass
+        self.context = context
+        self.ast_parser = ast_parser
+        self.script_generator = script_generator
 
     def create_pattern(self, original_file, modified_file):
         """
@@ -62,7 +63,15 @@ class PatternCreator:
         Pattern
             Pattern object created from original and modified code
         """
-        pass
+        with open(original_file) as original:
+            text_original = original.read()
+        with open(modified_file) as modified:
+            text_modified = modified.read()
+
+        original_ast = ast.parse(text_original)
+        modified_ast = ast.parse(text_modified)
+
+        return Pattern(original_ast, modified_ast, self.script_generator.generate(original_ast, modified_ast))
 
     def save_pattern(self, pattern):
         """

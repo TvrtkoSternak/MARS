@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 
 from mars.pattern_matching import PatternFactoryListener, PatternListener
-from mars.pattern_storage import StorageContext
 
 
 class IPatternLoader(ABC):
@@ -68,7 +67,7 @@ class PatternLoader(IPatternLoader):
         list of IPatternMatcher
             List of all loaded patterns
         """
-        return [PatternListener(pattern) for pattern in StorageContext.load()]
+        return [PatternListener(pattern) for pattern in self.context.load()]
 
 
 class PatternFactoryLoader(IPatternLoader):
@@ -102,7 +101,6 @@ class PatternFactoryLoader(IPatternLoader):
             Database where all the patterns are saved
         """
         self.context = context
-        pass
 
     def load(self):
         """
@@ -114,4 +112,4 @@ class PatternFactoryLoader(IPatternLoader):
         list of IPatternMatcher
             List of all loaded pattern factories
         """
-        return [PatternFactoryListener(pattern) for pattern in StorageContext.load()]
+        return [PatternFactoryListener(pattern) for pattern in self.context.load()]

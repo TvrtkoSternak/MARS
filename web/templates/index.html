@@ -9,11 +9,36 @@
         <input type="file" class="autosubmit" />
     </form>
     <button onclick="" id="buttonAnalyse">Analyse uploaded code</button>
+    <br>
+    <br>
+    <form id="form_upload" action="/upload" method="POST" enctype="multipart/form-data">
+        {% csrf_token %} {{form}}
+        <input type="file" name="picture" id="picture" />
+        <input type="hidden" id="X-Progress-ID" name="X-Progress-ID" value=""/>
+        <input type="hidden" id="id" name="id" value=""/>
+        <input id="form_submit_button" class="tp-button" type="submit" value="Submit" />
+    </form>
+
 </body>
 
 <script>
     $('form .autosubmit').on('change', function() {
         this.form.submit();
     });
+    $('#X-Progress-ID').val('random string');
+        var options = {
+          dataType: 'xml',
+          url: '/upload?X-Progress-ID='+$('#X-Progress-ID').val(),
+          beforeSubmit: showRequest,
+          success: showResponse
+        }
+    $('#form_upload').ajaxSubmit(options);
+    function showRequest(formData, jqForm, options) {
+    // do something with formData
+        return True;
+    }
+    function showResponse(response) {
+    // do something with response
+    }
 </script>
 </html>

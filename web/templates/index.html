@@ -5,7 +5,15 @@
     <title>MARS Homepage</title>
 </head>
 <body>
-    <button onclick="" id="buttonUpload">Upload code</button>
+    <form>
+        <input type="file" class="autosubmit" />
+    </form>
     <button onclick="" id="buttonAnalyse">Analyse uploaded code</button>
 </body>
+
+<script>
+    $('form .autosubmit').on('change', function() {
+        this.form.submit();
+    });
+</script>
 </html>

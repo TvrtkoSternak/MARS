@@ -1,17 +1,16 @@
-from django.http import HttpResponse
-from django.template import loader
+from django.shortcuts import render
+from django.utils.html import format_html
 
 
 def index(request):
-    template = loader.get_template('index.html')
-    return HttpResponse(template.render(None,request))
+    return render(request, 'index.html', {})
 
-def upload(request):
-    id = request.POST['id']
-    path = '/var/www/pictures/%s' % id
-    f = request.FILES['picture']
-    destination = open(path, 'wb+')
-    for chunk in f.chunks():
-        destination.write(chunk)
-    destination.close()
-    # return HttpResponse(open(path).read())
+
+def analyse_code(request):
+    print("hello")
+    source_code_file = request.FILES["source_code"]
+    source_code_lines_list = list()
+    for line in source_code_file.read().decode("utf-8").split('\n'):
+        print(line)
+        source_code_lines_list.append(line)
+    return render(request, 'index.html', {"source_code":source_code_lines_list})

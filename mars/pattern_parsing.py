@@ -79,7 +79,7 @@ class XMLPatternParser(PatternParser):
         start = ET.SubElement(change, 'start')
         start.set('start_line', pattern_matcher.start_lineno)
         end = ET.SubElement(change, 'end')
-        end.set('end_line', pattern_matcher.end_lineno)
+        end.set('end_line', pattern_matcher.last_lineno)
         change_code = ET.SubElement(change, 'change_code')
         change_code.set('change_code', astunparse.unparse(pattern_matcher.pattern.modified))
 
@@ -114,6 +114,7 @@ class ReadablePatternParser(PatternParser):
             IPatternMatcher object that will be parsed and written to standard
             output
         """
+
 
 class CounterPatternParser(PatternParser):
     def __init__(self):

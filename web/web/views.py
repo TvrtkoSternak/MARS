@@ -10,6 +10,5 @@ def analyse_code(request):
     source_code_file = request.FILES["source_code"]
     source_code_lines_list = list()
     for line in source_code_file.read().decode("utf-8").split('\n'):
-        print(line)
         source_code_lines_list.append(line)
     return render(request, 'index.html', {"source_code": source_code_lines_list})

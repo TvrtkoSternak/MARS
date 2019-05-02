@@ -79,7 +79,7 @@ class XMLPatternParser(PatternParser):
         start = ET.SubElement(change, 'start')
         start.set('start_line', pattern_matcher.start_lineno)
         end = ET.SubElement(change, 'end')
-        end.set('end_line', pattern_matcher.end_lineno)
+        end.set('end_line', pattern_matcher.last_lineno)
         change_code = ET.SubElement(change, 'change_code')
         change_code.set('change_code', astunparse.unparse(pattern_matcher.pattern.modified))
 
@@ -103,17 +103,26 @@ class ReadablePatternParser(PatternParser):
         it to standard output.
     """
 
-    def parse(self, pattern):
+    def parse(self, pattern_matcher):
         """
         Parses the IPatternMatcher into a human-readable form and writes it to
         standard output.
 
         Parameters
         ----------
-        pattern : IPatternMatcher
+        pattern_matcher : IPatternMatcher
             IPatternMatcher object that will be parsed and written to standard
             output
         """
+
+
+class StoreRecommendationsPatternParser(PatternParser):
+    def __init__(self):
+        self.recommendation = ''
+
+    def parse(self, pattern_matcher):
+        self.recommendation = astunparse.unparse(pattern_matcher.pattern.modified)
+
 
 class CounterPatternParser(PatternParser):
     def __init__(self):

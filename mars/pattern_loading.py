@@ -67,7 +67,7 @@ class PatternLoader(IPatternLoader):
         list of IPatternMatcher
             List of all loaded patterns
         """
-        return [PatternListener(pattern) for pattern in self.context.load()]
+        return [PatternListener(pattern, 0) for pattern in self.context.load()]
 
 
 class PatternFactoryLoader(IPatternLoader):
@@ -112,4 +112,4 @@ class PatternFactoryLoader(IPatternLoader):
         list of IPatternMatcher
             List of all loaded pattern factories
         """
-        return [PatternFactoryListener(pattern) for pattern in self.context.load()]
+        return [PatternFactoryListener(pattern, 0) for pattern in self.context.load()]

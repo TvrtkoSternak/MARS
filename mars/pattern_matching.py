@@ -124,7 +124,7 @@ class Recommender(Reader):
         Used by listeners to get information about recommender position in source ast.
     """
 
-    def __init__(self, parser, source):
+    def __init__(self, parser):
         """
         Initialises Recommender object
 
@@ -137,10 +137,10 @@ class Recommender(Reader):
         """
         super().__init__()
         self.parser = parser
-        self.uploaded_ast = AstUtils.walk_all_nodes(ast.parse(source))
+        # self.uploaded_ast = AstUtils.walk_all_nodes(ast.parse(source))
         self.present_node = None
 
-    def get_recommendations(self):
+    def get_recommendations(self, source):
         """
         Finds the matches for uploaded code block and returns file with recommendations
 
@@ -149,7 +149,7 @@ class Recommender(Reader):
         File
             File with found recommendations
         """
-        for node in self.uploaded_ast:
+        for node in AstUtils.walk_all_nodes(ast.parse(source)):
             self.present_node = node
             self.notify()
 

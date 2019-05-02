@@ -1,8 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1">
     <title>MARS Homepage</title>
+    <style>
+* {
+  box-sizing: border-box;
+}
+
+/* Create two equal columns that floats next to each other */
+.column {
+  float: left;
+  width: 50%;
+  padding: 10px;
+  height: 300px; /* Should be removed. Only for demonstration */
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+</style>
 </head>
 <body>
     <form action=analyse_code method="post" enctype="multipart/form-data">
@@ -16,11 +36,21 @@
                    value="Analyse">
                 </form>
 
-    <p></p>
-        <hr>
-        {% for row in source_code %}
+    <div class="row">
+        <div class="column" style="background-color:#aaa;">
+        <h2>Source code</h2>
+        <p>{% for row in source_code %}
             {{row}}
             <br>
-        {% endfor %}
+        {% endfor %}</p>
+        </div>
+        <div class="column" style="background-color:#bbb;">
+        <h2>Recommendations</h2>
+        <p>{% for row in recommendations %}
+            {{row}}
+            <br>
+        {% endfor %}</p>
+      </div>
+    </div>
 </body>
 </html>

@@ -68,7 +68,10 @@ class PatternRefiner:
             If all pattern similarities are greater than max_distance, the refinement process
             ends.
         """
-        pass
+        self.context = context
+        self.optimiser = optimiser
+        self.min_pattern = min_pattern
+        self.max_pattern = max_pattern
 
     def refine(self):
         """

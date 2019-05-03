@@ -47,6 +47,12 @@ class AstUtils:
             AstUtils.change_to_postorder(child, postorder_list)
         postorder_list += [node]
 
+    @staticmethod
+    def find_functions(node):
+        finder = FunctionFinder()
+        finder.generic_visit(node)
+        return finder.context
+
 
 class DetailedNode:
 
@@ -121,3 +127,18 @@ class DetailedNode:
             if self.get_value() != other.get_value():
                 return False
         return True
+
+
+class FunctionFinder(ast.NodeVisitor):
+    def __init__(self):
+        self.context = dict()
+        self.current_class = ''
+
+    def visit_FunctionDef(self, node):
+        self.context[self.current_class][node.name] = node
+        self.generic_visit(node)
+
+    def visit_ClassDef(self, node):
+        self.current_class = node.name
+        self.context[node.name] = dict()
+        self.generic_visit(node)

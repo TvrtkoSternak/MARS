@@ -132,7 +132,8 @@ class DetailedNode:
 class FunctionFinder(ast.NodeVisitor):
     def __init__(self):
         self.context = dict()
-        self.current_class = ''
+        self.current_class = 'no_class'
+        self.context[self.current_class] = dict()
 
     def visit_FunctionDef(self, node):
         self.context[self.current_class][node.name] = node

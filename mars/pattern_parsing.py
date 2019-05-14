@@ -114,6 +114,7 @@ class ReadablePatternParser(PatternParser):
             IPatternMatcher object that will be parsed and written to standard
             output
         """
+        pass
 
 
 class StoreRecommendationsPatternParser(PatternParser):

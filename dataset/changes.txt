@@ -25,14 +25,6 @@ def complex_function(a, b, c):
 
 --------------------------------------------------------------
 
-if attr == True:
-    print 'True!'
-
-if attr == None:
-    print 'attr is None!'
-
-+++++++++++++++++++++++++++++++++
-
 Check if a variable equals a constant
 
 You don’t need to explicitly compare a value to True, or None, or 0 – you can just add it to the if statement. See Truth Value Testing for a list of what is considered false.
@@ -168,3 +160,47 @@ with open('file.txt') as f:
 The with statement is better because it will ensure you always close the file, even if an exception is raised inside the with block.
 
 --------------------------------------------------------------------
+
+# Not recommended
+my_list = []
+if not len(my_list):
+    print('List is empty!')
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# Recommended
+my_list = []
+if not my_list:
+    print('List is empty!')
+
+--------------------------------------------------------------------
+
+# Recommended
+if x is not None:
+    return 'x exists!'
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# Not recommended
+if not x is None:
+    return 'x exists!'
+
+--------------------------------------------------------------------
+
+def calculation(*args):
+    """calculation of the total"""
+
+    x, y = args
+    return (x+y)
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#good
+
+def calculation(x,y):
+    """calculation of the total"""
+
+    total = x + y
+    return (total)
+
+----------------------------------------------------------------------

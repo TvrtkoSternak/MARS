@@ -29,7 +29,7 @@ def compare_commits(a_commit, b_commit):
                     except IOError:
                         pass
                         #print("exception in unparsing")
-        except (SyntaxError, UnicodeDecodeError) as e:
+        except (SyntaxError, UnicodeDecodeError, ValueError) as e:
             pass
             # print("exception in function extraction, syn err")
             # print(str(e))
@@ -129,9 +129,15 @@ for index, pair in enumerate(commits):
     #print(pair)
     original, modified = pair[0]
 
-    with open("/home/tvrtko/Documents/Fer/patterns/pattern_" + str(index) + "_org.py", "w") as original_file:
-        original_file.write(original)
-    with open("/home/tvrtko/Documents/Fer/patterns/pattern_" + str(index) + "_mod.py", "w") as original_file:
-        original_file.write(modified)
+    with open("/projects/patterns/pattern_" + str(index) + "_org.py", "w") as original_file:
+        try:
+            original_file.write(original)
+        except UnicodeEncodeError:
+            print('err')
+    with open("/projects/patterns/pattern_" + str(index) + "_mod.py", "w") as original_file:
+        try:
+            original_file.write(modified)
+        except UnicodeEncodeError:
+            print('err')
 
 

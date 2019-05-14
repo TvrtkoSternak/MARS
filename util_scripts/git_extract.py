@@ -20,10 +20,10 @@ def compare_commits(a_commit, b_commit):
             b_classes = extract_functions(ast.parse(b_blob))
             for pair in pair_functions(a_classes, b_classes):
                 if pair[0] is not None and pair[1] is not None:
+                    pair = (unparse_function_body_and_remove_docstring(pair[0]),
+                            unparse_function_body_and_remove_docstring(pair[1]))
                     try:
-                        s = SequenceMatcher(None,
-                                            unparse_function_body_and_remove_docstring(pair[0]),
-                                            unparse_function_body_and_remove_docstring(pair[1]))
+                        s = SequenceMatcher(None, pair[0], pair[1])
                         if s.ratio() < 1.0:
                             accepted_commits.append(pair)
                     except IOError:
@@ -114,14 +114,24 @@ def remove_comments_and_docstrings(source):
     return out
 
 
-repo = git.Repo("/home/tvrtko/Documents/Fer/django")
-commits_list = list(repo.iter_commits('master'))
+repo = git.Repo("/home/tvrtko/Documents/Fer/MARS")
+commits_list = list(repo.iter_commits('development'))
 commits = list()
 for i in range(len(commits_list)-1):
-    print(str(i/len(commits_list)) + "% done")
+    print(str(i/len(commits_list) * 100) + "% done")
     returned_commits = compare_commits(commits_list[i+1], commits_list[i])
     if returned_commits is not None and returned_commits:
         commits.append(returned_commits)
 
 print(len(commits))
+
+for index, pair in enumerate(commits):
+    #print(pair)
+    original, modified = pair[0]
+
+    with open("/home/tvrtko/Documents/Fer/patterns/pattern_" + str(index) + "_org.py", "w") as original_file:
+        original_file.write(original)
+    with open("/home/tvrtko/Documents/Fer/patterns/pattern_" + str(index) + "_mod.py", "w") as original_file:
+        original_file.write(modified)
+
 

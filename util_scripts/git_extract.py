@@ -26,11 +26,11 @@ def compare_commits(a_commit, b_commit):
                                             unparse_function_body_and_remove_docstring(pair[1]))
                         if s.ratio() < 1.0:
                             accepted_commits.append(pair)
-                    except:
+                    except IOError:
                         print("exception in unparsing")
-            print(len(accepted_commits))
-        except:
-            print("exception in function extraction")
+        except SyntaxError as e:
+            print("exception in function extraction, syn err")
+            print(str(e))
 
         return accepted_commits
 
@@ -43,10 +43,13 @@ def pair_functions(a_classes, b_classes):
     pairs = []
     for class_name in a_classes.keys():
         for func_name in a_classes[class_name].keys():
-            pairs.append((
-                a_classes[class_name][func_name],
-                b_classes[class_name][func_name]
-            ))
+            try:
+                pairs.append((
+                    a_classes[class_name][func_name],
+                    b_classes[class_name][func_name]
+                ))
+            except KeyError:
+                print("func or class not found")
     return pairs
 
 def unparse_function_body_and_remove_docstring(function):

@@ -27,10 +27,12 @@ def compare_commits(a_commit, b_commit):
                         if s.ratio() < 1.0:
                             accepted_commits.append(pair)
                     except IOError:
-                        print("exception in unparsing")
+                        pass
+                        #print("exception in unparsing")
         except SyntaxError as e:
-            print("exception in function extraction, syn err")
-            print(str(e))
+            pass
+            # print("exception in function extraction, syn err")
+            # print(str(e))
 
         return accepted_commits
 
@@ -116,6 +118,7 @@ repo = git.Repo("/home/tvrtko/Documents/Fer/MARS")
 commits_list = list(repo.iter_commits('development'))
 commits = list()
 for i in range(len(commits_list)-1):
+    print(i/len(commits_list) + "% done")
     returned_commits = compare_commits(commits_list[i+1], commits_list[i])
     if returned_commits is not None and returned_commits:
         commits.append(returned_commits)

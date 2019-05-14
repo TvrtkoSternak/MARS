@@ -13,9 +13,9 @@ def compare_commits(a_commit, b_commit):
     diff_index = a_commit.diff(b_commit)
     accepted_commits = list()
     for diff_item in diff_index.iter_change_type('M'):
-        a_blob = diff_item.a_blob.data_stream.read().decode('utf-8')
-        b_blob = diff_item.b_blob.data_stream.read().decode('utf-8')
         try:
+            a_blob = diff_item.a_blob.data_stream.read().decode('utf-8')
+            b_blob = diff_item.b_blob.data_stream.read().decode('utf-8')
             a_classes = extract_functions(ast.parse(a_blob))
             b_classes = extract_functions(ast.parse(b_blob))
             for pair in pair_functions(a_classes, b_classes):
@@ -29,7 +29,7 @@ def compare_commits(a_commit, b_commit):
                     except IOError:
                         pass
                         #print("exception in unparsing")
-        except SyntaxError as e:
+        except (SyntaxError, UnicodeDecodeError) as e:
             pass
             # print("exception in function extraction, syn err")
             # print(str(e))
@@ -114,11 +114,11 @@ def remove_comments_and_docstrings(source):
     return out
 
 
-repo = git.Repo("/home/tvrtko/Documents/Fer/MARS")
-commits_list = list(repo.iter_commits('development'))
+repo = git.Repo("/home/tvrtko/Documents/Fer/django")
+commits_list = list(repo.iter_commits('master'))
 commits = list()
 for i in range(len(commits_list)-1):
-    print(i/len(commits_list) + "% done")
+    print(str(i/len(commits_list)) + "% done")
     returned_commits = compare_commits(commits_list[i+1], commits_list[i])
     if returned_commits is not None and returned_commits:
         commits.append(returned_commits)

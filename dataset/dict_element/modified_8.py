@@ -1,0 +1,1 @@
+print(mapped.get('map_guide', 'no key'))

@@ -1,0 +1,1 @@
+print(dictionary.get('value1', 'dict dont have that key'))

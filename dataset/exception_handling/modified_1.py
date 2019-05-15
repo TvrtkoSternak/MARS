@@ -1,5 +1,5 @@
-collection = get_list()
 key = 0
+collection = get_list()
 try:
     value = collection[key]
 except KeyError:

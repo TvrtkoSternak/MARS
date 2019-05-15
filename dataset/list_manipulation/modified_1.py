@@ -1,0 +1,1 @@
+filtered_values = [i for i in a if i > 4]

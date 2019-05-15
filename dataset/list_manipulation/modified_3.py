@@ -1,0 +1,1 @@
+vars_list = [var in vars_list if var]

@@ -1,1 +1,1 @@
-values = [value in values if value > 4]
+values = [value for value in values if value > 4]

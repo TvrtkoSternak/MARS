@@ -1,1 +1,1 @@
-vars_list = [var in vars_list if var]
+vars_list = [var for var in vars_list if var]

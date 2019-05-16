@@ -1,0 +1,1 @@
+result = some_function([value for value, index in tuple_list])

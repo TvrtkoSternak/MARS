@@ -1,8 +1,9 @@
-file_to_read = open("path/to/reading", "r")
-file_to_write = open("path/to/write", "w")
+file_one = open("filepath", "w")
+file_two = open("filepath2", "rb")
 
-for line in file_to_read.readlines():
-    file_to_write.write(line)
+for line in file_two.read():
+    file_two.write(from_bin_to_str(line))
+    print("recalculated line")
 
-file_to_read.close()
-file_to_write.close()
+file_one.close()
+file_two.close()

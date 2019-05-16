@@ -1,3 +1,3 @@
 if not attr == True:
-    print 'False!'
+    print('False!')
     do_some_calculations_to_remedy()

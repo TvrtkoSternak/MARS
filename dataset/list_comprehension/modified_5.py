@@ -1,0 +1,1 @@
+valedictorian = max((student.gpa, student.name) for student in graduates)

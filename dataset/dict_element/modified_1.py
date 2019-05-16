@@ -1,1 +1,1 @@
-print d.get('hello', 'default_value')
+print(d.get('hello', 'default_value'))

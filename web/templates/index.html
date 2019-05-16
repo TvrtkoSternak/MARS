@@ -8,6 +8,21 @@
   box-sizing: border-box;
 }
 
+.inline-div {
+    display: inline-block;
+    float: left;
+    padding: 10px;
+    width: 50%;
+}
+
+.inline-textarea {
+    resize:none;
+    width: 100%;
+}
+
+.recommendations {
+    border:2px solid red;
+}
 /* Create two equal columns that floats next to each other */
 .column {
   float: left;
@@ -36,21 +51,13 @@
                    value="Analyse">
                 </form>
 
-    <div class="row">
-        <div class="column" style="background-color:#aaa;">
-        <h2>Source code</h2>
-        <p>{% for row in source_code %}
-            {{row}}
-            <br>
-        {% endfor %}</p>
-        </div>
-        <div class="column" style="background-color:#bbb;">
-        <h2>Recommendations</h2>
-        <p>{% for row in recommendations %}
-            {{row}}
-            <br>
-        {% endfor %}</p>
-      </div>
+    <div class="inline-div">
+        <p align="center">Original</p>
+        <textarea rows="50" class="inline-textarea" readonly>{% for row in source_code %}{{row}}{% endfor %}</textarea>
+    </div>
+    <div class="inline-div">
+        <p align="center">Recommendations</p>
+        <textarea rows="50" class="inline-textarea recommendations" readonly>{% for row in recommendations %}{{row}}{% endfor %}</textarea>
     </div>
 </body>
 </html>

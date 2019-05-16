@@ -214,25 +214,25 @@ def calculation(x,y):
 
 ----------------------------------------------------------------------
 
-Additionally, for all try/except clauses, limit the try clause to the absolute minimum amount of code necessary. Again, this avoids masking bugs.
+                    Additionally, for all try/except clauses, limit the try clause to the absolute minimum amount of code necessary. Again, this avoids masking bugs.
 
-Yes:
+                    Yes:
 
-try:
-    value = collection[key]
-except KeyError:
-    return key_not_found(key)
-else:
-    return handle_value(value)
+                    try:
+                        value = collection[key]
+                    except KeyError:
+                        return key_not_found(key)
+                    else:
+                        return handle_value(value)
 
-No:
+                    No:
 
-try:
-    # Too broad!
-    return handle_value(collection[key])
-except KeyError:
-    # Will also catch KeyError raised by handle_value()
-    return key_not_found(key)
+                    try:
+                        # Too broad!
+                        return handle_value(collection[key])
+                    except KeyError:
+                        # Will also catch KeyError raised by handle_value()
+                        return key_not_found(key)
 
 ------------------------------------------------------------------
 

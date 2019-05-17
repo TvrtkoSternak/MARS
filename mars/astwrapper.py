@@ -141,6 +141,8 @@ class FunctionName:
 
 class Function:
     def __init__(self, args, value):
+        self.start = Startnode()
+        self.end = Endnode()
         self.args = args
         self.value = value
 
@@ -161,11 +163,11 @@ class Function:
         tree = list()
         if not postorder:
             tree.append(self)
-        tree.append(Startnode())
+        tree.append(self.start)
         tree.extend(self.value.walk(postorder=postorder))
         for arg in self.args:
             tree.extend(arg.walk(postorder=postorder))
-        tree.append(Endnode())
+        tree.append(self.end)
         if postorder:
             tree.append(self)
         return tree
@@ -201,8 +203,10 @@ class Function:
 
     def get_children(self, node):
         children = list()
+        children.append(node.start)
         children.append(node.value)
         children.extend(node.args)
+        children.append(node.end)
         return children
 
 
@@ -403,7 +407,9 @@ class If:
 
 class Body:
     def __init__(self, children):
+        self.start = Startnode()
         self.children = children
+        self.end = Endnode()
 
     def print_me(self):
         print("Body {")
@@ -422,10 +428,10 @@ class Body:
         tree = list()
         if not postorder:
             tree.append(self)
-        tree.append(Startnode())
+        tree.append(self.start)
         for child in self.children:
             tree.extend(child.walk(postorder = postorder))
-        tree.append(Endnode())
+        tree.append(self.end)
         if postorder:
             tree.append(self)
         return tree
@@ -457,7 +463,11 @@ class Body:
             return children_sim / max(num_keys, max(len(self.children), len(node.children)), 1)
 
     def get_children(self, node):
-        return node.children
+        children = list()
+        children.append(node.start)
+        children.extend(node.children)
+        children.append(node.end)
+        return children
 
 
 class BoolOperation:

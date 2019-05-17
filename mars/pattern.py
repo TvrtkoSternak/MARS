@@ -339,6 +339,7 @@ class Delete(ChangeOperation):
     def generic_visit(self, node):
         if self.internal_index == self.index:
             self.internal_index += 1
+            print("brisem: ", node)
             return None
         self.internal_index += 1
         ast.NodeTransformer.generic_visit(self, node)

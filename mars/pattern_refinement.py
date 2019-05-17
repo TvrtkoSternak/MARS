@@ -332,6 +332,7 @@ class MatchInserter(EditScriptOptimiserDecorator):
             second_pattern : Pattern
             Pattern that is chosen for refinement
         """
+        
         pass
 
     def __insert(self):

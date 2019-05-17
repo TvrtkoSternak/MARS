@@ -1,6 +1,8 @@
 import _ast
 import ast
 
+from mars.astwrapper import Body, Function, Constant
+
 
 class AstUtils:
 
@@ -68,6 +70,8 @@ class DetailedNode:
     def get_value(self):
         value = ""
         if self.node.__class__ is _ast.Assign:
+            if self.node.value.__class__ is _ast.Call:
+                return self.node.targets[0].id.__str__() + '=' + self.node.value.func.id
             return self.node.targets[0].id.__str__() + '=' + self.node.value.n.__str__()
         # elif self.node.__class__ is _ast.Expr:
         #     return self.node.value.func.id.__str__() + self.node.value.args[0].s.__str__()
@@ -81,7 +85,8 @@ class DetailedNode:
         elif self.node.__class__ is _ast.Gt:
             return '>'
         elif self.node.__class__ is _ast.Str:
-            return self.node.s
+            return 'str'
+            # return self.node.s
         elif self.node.__class__ is _ast.Module:
             return 'Module'
         elif self.node.__class__ is _ast.If:
@@ -108,7 +113,11 @@ class DetailedNode:
 
     def count_recursive(self, count_inner_nodes):
         if self.leaf:
-            return 1 if self.node.__class__ is not _ast.Name else 2
+            if self.node.__class__ is _ast.Name:
+                return 2
+            if self.node.__class__ is _ast.Call:
+                return 3
+            return 1
         else:
             count = 0
             for child in self.children:
@@ -126,6 +135,9 @@ class DetailedNode:
         if self.leaf:
             if self.get_value() != other.get_value():
                 return False
+        if other.node.__class__ is _ast.Call:
+            # print(other.node.func)
+            return other.node.func.id == self.node.func.id
         return True
 
 
@@ -143,3 +155,32 @@ class FunctionFinder(ast.NodeVisitor):
         self.current_class = node.name
         self.context[node.name] = dict()
         self.generic_visit(node)
+
+
+class AstWrapper(ast.NodeTransformer):
+    def __init__(self):
+        self.body = Body(list())
+        self.current_node = self.body
+
+    def visit_Module(self, node):
+        children = list()
+        for child in node.body:
+            children.append(self.visit(child))
+        return Body(children)
+
+    def visit_Expr(self, node):
+        return self.visit(node.value)
+
+    def visit_Call(self, node):
+        print("args: ", node.args)
+        args = list()
+        for arg in node.args:
+            args.append(self.visit(arg))
+        function = Function(args, node.func.id)
+        return function
+
+    def visit_Num(self, node):
+        return Constant(node.n, "NUMBER")
+
+    def visit_Str(self, node):
+        return Constant(node.s, "STRING")

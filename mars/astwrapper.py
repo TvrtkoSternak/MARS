@@ -109,6 +109,7 @@ class Assign:
         children = list()
         children.append(self.variable)
         children.append(self.value)
+        return children
 
 
 class FunctionName:
@@ -202,6 +203,7 @@ class Function:
         children = list()
         children.append(self.value)
         children.extend(self.args)
+        return children
 
 
 class Condition:
@@ -241,6 +243,7 @@ class Condition:
     def children(self):
         children = list()
         children.append(self.value)
+        return children
 
 
 class ElIf:
@@ -297,6 +300,7 @@ class ElIf:
         children.append(self.condition)
         children.append(self.body)
         children.append(self.next_if)
+        return children
 
 
 class Else:
@@ -337,6 +341,7 @@ class Else:
     def children(self):
         children = list()
         children.append(self.body)
+        return children
 
 
 class If:
@@ -393,6 +398,7 @@ class If:
         children.append(self.condition)
         children.append(self.body)
         children.append(self.next_if)
+        return children
 
 
 class Body:
@@ -504,6 +510,7 @@ class BoolOperation:
         children.append(self.first)
         children.append(self.second)
         children.append(self.operation)
+        return children
 
 
 class UnaryOperation:
@@ -550,6 +557,7 @@ class UnaryOperation:
         children = list()
         children.append(self.first)
         children.append(self.operation)
+        return children
 
 
 class Compare:
@@ -604,6 +612,7 @@ class Compare:
         children.append(self.first)
         children.append(self.second)
         children.append(self.operation)
+        return children
 
 
 class EmptyNode:

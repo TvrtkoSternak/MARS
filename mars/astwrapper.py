@@ -511,6 +511,9 @@ class BoolOperation:
                 and not isinstance(node, UnaryOperation) \
                 and not isinstance(node, Compare):
             return 0
+        elif isinstance(node, UnaryOperation):
+            first_sim = node_pairs.get((self.first, node.first), 0)
+            return first_sim**2
         else:
             first_sim = node_pairs.get((self.first, node.first), 0)
             second_sim = node_pairs.get((self.second, node.second), 0)
@@ -617,6 +620,9 @@ class Compare:
                 and not isinstance(node, BoolOperation) \
                 and not isinstance(node, UnaryOperation):
             return 0
+        elif isinstance(node, UnaryOperation):
+            first_sim = node_pairs.get((self.first, node.first), 0)
+            return first_sim**2
         else:
             first_sim = node_pairs.get((self.first, node.first), 0)
             second_sim = node_pairs.get((self.second, node.second), 0)

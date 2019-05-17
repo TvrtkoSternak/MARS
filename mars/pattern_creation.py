@@ -6,6 +6,7 @@ import copy
 from similarity.sorensen_dice import SorensenDice
 
 from mars.astutils import AstUtils
+from mars.astwrapper import Startnode, Endnode
 from mars.pattern import EditScript, Move, Delete, Insert, Update, Pattern
 
 
@@ -300,8 +301,8 @@ class TreeDifferencer:
         sorted_node_pairs = collections.OrderedDict(sorted_x)
 
         for key, value in sorted_node_pairs.items():
-            print(key, value)
             print("-------------------------------------")
+            print(key, value)
             key[0].unparse(0)
             print()
             key[1].unparse(0)
@@ -340,12 +341,17 @@ class TreeDifferencer:
                         for child_y in y.get_children(y):
                             children_sim = node_pairs.get((child_x, child_y), 0)
                             if children_sim != 0:
-                                sim = node_pairs[(child_x, child_y)]
-                                harm_mean = self.harmonic_mean(current_sim, children_sim)
-                                if harm_mean <= f:
+                                if isinstance(child_x, (Startnode, Endnode)):
+                                    mean = self.harmonic_mean(current_sim, children_sim)
+                                else:
+                                    mean = self.arithmetic_mean(current_sim, children_sim)
+                                if mean <= f:
                                     del node_pairs[(child_x, child_y)]
                                 else:
-                                    node_pairs[(child_x, child_y)] = harm_mean
+                                    node_pairs[(child_x, child_y)] = mean
 
     def harmonic_mean(self, x, y):
         return (2*x*y) / (x+y)
+
+    def arithmetic_mean(self, x, y):
+        return (x+y) / 2

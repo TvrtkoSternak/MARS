@@ -525,4 +525,4 @@ class Endnode:
         if not isinstance(node, self.__class__):
             return 0
         else:
-            0.5
+            return 0.5

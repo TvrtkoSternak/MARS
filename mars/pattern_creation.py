@@ -246,15 +246,14 @@ class TreeDifferencer:
 
     """
 
-    def __init__(self, k=2, f=0.6, t=0.6):
+    def __init__(self, f=0.6, t=0.6):
         """
         Initialises TreeDifferencer object.
         """
         self.f = f
         self.t = t
-        self.sorensen_dice = SorensenDice(k)
 
-    def connect_nodes(self, first_ast, second_ast):
+    def connect_nodes(self, post_order_first_ast, post_order_second_ast):
         """
         Generates a dictionary of AST node indexes that describes which AST nodes
         are corresponding in original and modified ASTs.
@@ -274,69 +273,47 @@ class TreeDifferencer:
             The keys of the dictionary are original AST node indexes and values are
             modified AST node indexes.
         """
+        node_pairs = self.find_leaf_pairs(post_order_first_ast, post_order_second_ast)
 
-        node_pairs = []
-        for x in first_ast:
-            if x.leaf and (x.parent and not (x.parent.node.__class__ is _ast.Call)):
-                # print('x ', x.node)
-                for y in second_ast:
-                    if y.leaf:
-                        # print('y ', y.node)
-                        print("usporedujem ", x, " ", y)
-                        if self.leaves_match(x, y):
-                            print("++++++ ", x, " ", y)
-                            # leaves_matches[(x, y)] = self.node_similarity(x, y)
-                            node_pairs.append((x, y, self.node_similarity(x, y)))
-                            # print(x.get_value(), ' - ', y.get_value(), ' : ', self.node_similarity(x, y))
-        # for leaf_pair in leaves_matches_tmp:
-        #     print(leaf_pair[0].get_value(), leaf_pair[1].get_value(), leaf_pair[2])
-
-        print("-----------------------------------------------")
-        for x in first_ast:
-            if not x.leaf:
-                for y in second_ast:
-                    if not y.leaf:
-                        print("usporedujem ", x, " ", y)
-
-                        match, similarity = self.inner_nodes_match(x, y, node_pairs)
-                        if match:
-                            node_pairs.append((x, y, similarity))
-                        # elif self.weighted_match(x, y):
-                        #     inner_nodes_matches.append((x, y, self.node_similarity(x, y)))
-        for node_pair in node_pairs:
-            print('connect_nodesbbbbbbb:::::',node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2])
-
-        for node in first_ast[-1].children:
-            self.bottom_prop_sims(node, node_pairs)
-
-        node_pairs.sort(key=lambda tup: tup[2], reverse=True)
-        matched = []
+        # for x in post_order_first_ast:
+        #     if not x.leaf:
+        #         for y in post_order_second_ast:
+        #             if not y.leaf:
+        #                 print("usporedujem ", x, " ", y)
+        #
+        #                 match, similarity = self.inner_nodes_match(x, y, node_pairs)
+        #                 if match:
+        #                     node_pairs.append((x, y, similarity))
+        #                 # elif self.weighted_match(x, y):
+        #                 #     inner_nodes_matches.append((x, y, self.node_similarity(x, y)))
         # for node_pair in node_pairs:
-        #     print('connect_nodes:::::', node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2],
-        #           node_pair[0].node, node_pair[1].node)
-        node_pairs = [tup for tup in node_pairs if self.best_matches(tup, matched)]
-
-
-
-        # print('----------------------------------------------------------------')
-        # for node_pair in node_pairs:
-        #     if node_pair[0].node.__class__ is _ast.Name:
-        #         print(node_pair[0].node.id, node_pair[0].node.ctx)
-        #     print('connect_nodes:::::',node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2], node_pair[0].node, node_pair[1].node)
-
-
-        for pair in node_pairs:
-            if pair[0].leaf and pair[1].leaf:
-                sim = self.node_similarity(pair[0], pair[1])
-                node_pairs[node_pairs.index(pair)] = (pair[0], pair[1], sim)
-
-        # for node_pair in node_pairs:
-        #     print(node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2])
-
-        node_pairs.sort(key=lambda tup: tup[2], reverse=True)
-
-
+        #     print('connect_nodesbbbbbbb:::::',node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2])
+        #
+        # for node in post_order_first_ast[-1].children:
+        #     self.bottom_prop_sims(node, node_pairs)
+        #
+        # node_pairs.sort(key=lambda tup: tup[2], reverse=True)
+        # matched = []
+        # node_pairs = [tup for tup in node_pairs if self.best_matches(tup, matched)]
+        #
+        # for pair in node_pairs:
+        #     if pair[0].leaf and pair[1].leaf:
+        #         sim = self.node_similarity(pair[0], pair[1])
+        #         node_pairs[node_pairs.index(pair)] = (pair[0], pair[1], sim)
+        #
+        # node_pairs.sort(key=lambda tup: tup[2], reverse=True)
         return node_pairs
+
+    def find_leaf_pairs(self, post_order_first_ast, post_order_second_ast):
+        leaf_pairs = dict()
+        leaves_first = [x for x in post_order_first_ast if x.is_leaf]
+        leaves_second = [x for x in post_order_second_ast if x.is_leaf]
+        for x in leaves_first:
+            for y in leaves_second:
+                similarity = x.similarity(y)
+                if similarity >= self.f:
+                    leaf_pairs[(x, y)] = x.similarity(y)
+        return leaf_pairs
 
     def best_matches(self, tup, matched):
         flag = (tup[0].node not in matched) and (tup[1].node not in matched)
@@ -345,14 +322,15 @@ class TreeDifferencer:
             matched.append(tup[1].node)
         return flag
 
-    def leaves_match(self, first_node, second_node):
-        if first_node.node.__class__ is not second_node.node.__class__ or first_node.parent.node.__class__ is not second_node.parent.node.__class__:
-        # if first_node.node.__class__ is not second_node.node.__class__:
-            print(first_node.parent, " ", second_node.parent)
-            return False
-        # elif self.node_similarity(first_node, second_node) < self.f:
-        #     return False
-        return True
+    # def leaves_match(self, first_node, second_node):
+    #     return first_node.
+    #     #if first_node.node.__class__ is not second_node.node.__class__ or first_node.parent.node.__class__ is not second_node.parent.node.__class__:
+    #     # if first_node.node.__class__ is not second_node.node.__class__:
+    #         print(first_node.parent, " ", second_node.parent)
+    #         return False
+    #     # elif self.node_similarity(first_node, second_node) < self.f:
+    #     #     return False
+    #     return True
 
     def inner_nodes_match(self, first_node, second_node, node_pairs):
         print(first_node.parent, " ", second_node.parent)

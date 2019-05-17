@@ -8,6 +8,9 @@ class Variable:
     def unparse(self, num_tabs):
         print(self.value, end = '')
 
+    def walk(self):
+        return self
+
 
 class Constant:
     def __init__(self, value, type_of):
@@ -19,6 +22,9 @@ class Constant:
 
     def unparse(self, num_tabs):
         print(self.value, end='')
+
+    def walk(self):
+        return self
 
 
 class Assign:
@@ -36,9 +42,31 @@ class Assign:
 
     def unparse(self, num_tabs):
         self.variable.unparse(num_tabs)
-        print(" = ", end='')
+        print(self.operation, end='')
         self.value.unparse(num_tabs)
 
+    def walk(self):
+        tree = list()
+        tree.append(self)
+        tree.append(Startnode())
+        tree.append(self.variable.walk())
+        tree.append(self.value.walk())
+        tree.append(Endnode())
+        return tree
+
+
+class FunctionName:
+    def __init__(self, value):
+        self.value = value
+
+    def print_me(self):
+        print("FunctionName {", self.value, "}")
+
+    def unparse(self, num_tabs):
+        print("{0}(".format(self.value), end='')
+
+    def walk(self):
+        return self
 
 class Function:
     def __init__(self, args, value):
@@ -46,16 +74,27 @@ class Function:
         self.value = value
 
     def print_me(self):
-        print(self.value, "{")
+        print("Function {")
+        self.value.print_me()
         for arg in self.args:
             arg.print_me()
         print("}")
 
     def unparse(self, num_tabs):
-        print("{0}(".format(self.value), end='')
+        self.value.unparse(num_tabs)
         for arg in self.args:
             arg.unparse(num_tabs)
         print(")", end='')
+
+    def walk(self):
+        tree = list()
+        tree.append(self)
+        tree.append(Startnode())
+        tree.append(self.value.walk())
+        for arg in self.args:
+            tree.append(arg.walk())
+        tree.append(Endnode())
+        return tree
 
 
 class Condition:
@@ -69,6 +108,12 @@ class Condition:
 
     def unparse(self, num_tabs):
         self.value.unparse(num_tabs)
+
+    def walk(self):
+        tree = list()
+        tree.append(self)
+        tree.append(self.value.walk())
+        return tree
 
 
 class ElIf:
@@ -91,6 +136,15 @@ class ElIf:
         self.body.unparse(num_tabs + 1)
         self.next_if.unparse(num_tabs)
 
+    def walk(self):
+        tree = list()
+        tree.append(self)
+        tree.append(self.condition.walk())
+        tree.append(self.body.walk())
+        tree.append(self.next_if.walk())
+        return tree
+
+
 class Else:
     def __init__(self, body):
         self.body = body
@@ -103,6 +157,13 @@ class Else:
     def unparse(self, num_tabs):
         print("\t"*num_tabs, "else:", sep='')
         self.body.unparse(num_tabs + 1)
+
+    def walk(self):
+        tree = list()
+        tree.append(self)
+        tree.append(self.body.walk())
+        return tree
+
 
 class If:
     def __init__(self, condition, body, next_if):
@@ -123,6 +184,13 @@ class If:
         print(":")
         self.body.unparse(num_tabs + 1)
         self.next_if.unparse(num_tabs)
+
+    def walk(self):
+        tree = list()
+        tree.append(self)
+        tree.append(self.body.walk())
+        tree.append(self.next_if.walk())
+        return tree
 
 
 class Body:
@@ -145,6 +213,13 @@ class Body:
             if not hasattr(child, 'body') and not isinstance(child, (Startnode, Endnode)):
                 print()
 
+    def walk(self):
+        tree = list()
+        tree.append(self)
+        for child in self.children:
+            tree.append(child.walk())
+        return tree
+
 
 class BoolOperation:
     def __init__(self, operation, first, second):
@@ -154,13 +229,21 @@ class BoolOperation:
 
     def print_me(self):
         self.first.print_me()
-        print(self.operation)
+        self.operation.print_me()
         self.second.print_me()
 
     def unparse(self, num_tabs):
         self.first.unparse(num_tabs)
-        print("", self.operation, "", end='')
+        self.operation.unparse(num_tabs)
         self.second.unparse(num_tabs)
+
+    def walk(self):
+        tree = list()
+        tree.append(self)
+        tree.append(self.first.walk())
+        tree.append(self.operation.walk())
+        tree.append(self.second.walk())
+        return tree
 
 
 class UnaryOperation:
@@ -169,13 +252,20 @@ class UnaryOperation:
         self.first = first
 
     def print_me(self):
-        print(self.operation, " {")
+        self.operation.print_me()
         self.first.print_me()
         print("}")
 
     def unparse(self, num_tabs):
-        print(self.operation, "", end='')
+        self.operation.unparse(num_tabs)
         self.first.unparse(num_tabs)
+
+    def walk(self):
+        tree = list()
+        tree.append(self)
+        tree.append(self.operation.walk())
+        tree.append(self.first.walk())
+        return tree
 
 
 class Compare:
@@ -187,14 +277,22 @@ class Compare:
     def print_me(self):
         print("{")
         self.first.print_me()
-        print(self.operation)
+        self.operation.print_me()
         self.second.print_me()
         print("}")
 
     def unparse(self, num_tabs):
         self.first.unparse(num_tabs)
-        print("", self.operation, "", end='')
+        self.operation.unparse(num_tabs)
         self.second.unparse(num_tabs)
+
+    def walk(self):
+        tree = list()
+        tree.append(self)
+        tree.append(self.first.walk())
+        tree.append(self.opeeration.walk())
+        tree.append(self.second.walk())
+        return tree
 
 
 class EmptyNode:
@@ -204,12 +302,19 @@ class EmptyNode:
     def unparse(self, num_tabs):
         pass
 
+    def walk(self):
+        return self
+
+
 class Startnode:
     def print_me(self):
         print("Start Node")
 
     def unparse(self, num_tabs):
         pass
+
+    def walk(self):
+        return self
 
 
 class Endnode:
@@ -219,3 +324,5 @@ class Endnode:
     def unparse(self, num_tabs):
         pass
 
+    def walk(self):
+        return self

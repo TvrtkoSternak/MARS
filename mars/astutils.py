@@ -2,7 +2,7 @@ import _ast
 import ast
 
 from mars.astwrapper import Body, Function, Constant, If, Variable, EmptyNode, Condition, BoolOperation, Compare, \
-    UnaryOperation, Assign, ElIf, Else
+    UnaryOperation, Assign, ElIf, Else, FunctionName
 
 
 class AstUtils:
@@ -175,7 +175,7 @@ class AstWrapper(ast.NodeTransformer):
         args = list()
         for arg in node.args:
             args.append(self.visit(arg))
-        function = Function(args, node.func.id)
+        function = Function(args, FunctionName(node.func.id))
         return function
 
     def visit_Name(self, node):
@@ -197,46 +197,46 @@ class AstWrapper(ast.NodeTransformer):
         return UnaryOperation(self.visit(node.op), self.visit(node.operand))
 
     def visit_Not(self, node):
-        return "not"
+        return Constant(" not ", "UNARYOP")
 
     def visit_Is(self, node):
-        return "is"
+        return Constant(" is ", "CMPOP")
 
     def visit_In(self, node):
-        return "in"
+        return Constant(" in ", "CMPOP")
 
     def visit_NameConstant(self, node):
         return Constant(node.value, "CONSTANT")
 
     def visit_NotIn(self, node):
-        return "not in"
+        return Constant(" not in ", "CMPOP")
 
     def visit_Eq(self, node):
-        return "=="
+        return Constant(" == ", "CMPOP")
 
     def visit_NotEq(self, node):
-        return "!="
+        return Constant(" != ", "CMPOP")
 
     def visit_Lt(self, node):
-        return "<"
+        return Constant(" < ", "CMPOP")
 
     def visit_LtE(self, node):
-        return "<="
+        return Constant(" <= ", "CMPOP")
 
     def visit_Gt(self, node):
-        return ">"
+        return Constant(" > ", "CMPOP")
 
     def visit_GtE(self, node):
-        return ">="
+        return Constant(" >= ", "CMPOP")
 
     def visit_IsNot(self, node):
-        return "is not"
+        return Constant(" is not ", "CMPOP")
 
     def visit_And(self, node):
-        return "and"
+        return Constant(" and ", "BOOLOP")
 
     def visit_Or(self, node):
-        return "or"
+        return Constant(" or ", "BOOLOP")
 
     def visit_If(self, node):
         expressions = list()

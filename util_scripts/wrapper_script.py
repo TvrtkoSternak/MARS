@@ -10,3 +10,5 @@ body = wrapper.visit(original_code)
 
 body.print_me()
 body.unparse(0)
+
+print(body.walk())

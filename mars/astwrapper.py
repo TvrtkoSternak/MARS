@@ -128,6 +128,8 @@ class If:
 class Body:
     def __init__(self, children):
         self.children = children
+        self.children.insert(0, Startnode())
+        self.children.append(Endnode())
 
     def print_me(self):
         print("Body {")
@@ -137,9 +139,10 @@ class Body:
 
     def unparse(self, num_tabs):
         for child in self.children:
-            print("\t"*num_tabs, end='')
+            if not isinstance(child, (Startnode, Endnode)):
+                print("\t"*num_tabs, end='')
             child.unparse(num_tabs)
-            if not hasattr(child, 'body'):
+            if not hasattr(child, 'body') and not isinstance(child, (Startnode, Endnode)):
                 print()
 
 
@@ -197,6 +200,21 @@ class Compare:
 class EmptyNode:
     def print_me(self):
         pass
+
+    def unparse(self, num_tabs):
+        pass
+
+class Startnode:
+    def print_me(self):
+        print("Start Node")
+
+    def unparse(self, num_tabs):
+        pass
+
+
+class Endnode:
+    def print_me(self):
+        print("End Node")
 
     def unparse(self, num_tabs):
         pass

@@ -1,5 +1,6 @@
 import _ast
 import ast
+import collections
 import copy
 
 from similarity.sorensen_dice import SorensenDice
@@ -274,37 +275,38 @@ class TreeDifferencer:
             modified AST node indexes.
         """
         in_org = first_ast.walk()
-        in_mod = first_ast.walk()
+        in_mod = second_ast.walk()
 
         post_org = first_ast.walk(True)
         post_mod = second_ast.walk(True)
 
         node_pairs = self.init_leaf_pairs(post_org, post_mod, 0.1)
-        for key, value in node_pairs.items():
-            print("LEAF MATCHES: ", key, value)
+        # for key, value in node_pairs.items():
+        #     print("LEAF MATCHES: ", key, value)
 
-        print("----------------------------------------")
+        # print("----------------------------------------")
 
         self.bottom_up(post_org, post_mod, node_pairs, 0.1)
-        for key, value in node_pairs.items():
-            print("BOTTOM UP: ", key, value)
+        # for key, value in node_pairs.items():
+        #     print("BOTTOM UP: ", key, value)
 
-        print("----------------------------------------")
+        # print("----------------------------------------")
 
         self.top_down(in_org, in_mod, node_pairs, 0.1)
-        for key, value in node_pairs.items():
-            print("TOP DOWN: ", key, value)
-        #
-        # node_pairs.sort(key=lambda tup: tup[2], reverse=True)
-        # matched = []
-        # node_pairs = [tup for tup in node_pairs if self.best_matches(tup, matched)]
-        #
-        # for pair in node_pairs:
-        #     if pair[0].leaf and pair[1].leaf:
-        #         sim = self.node_similarity(pair[0], pair[1])
-        #         node_pairs[node_pairs.index(pair)] = (pair[0], pair[1], sim)
-        #
-        # node_pairs.sort(key=lambda tup: tup[2], reverse=True)
+        # for key, value in node_pairs.items():
+        #     print("TOP DOWN: ", key, value)
+
+        sorted_x = sorted(node_pairs.items(), key=lambda kv: kv[1], reverse=True)
+        sorted_node_pairs = collections.OrderedDict(sorted_x)
+
+        for key, value in sorted_node_pairs.items():
+            print(key, value)
+            print("-------------------------------------")
+            key[0].unparse(0)
+            print()
+            key[1].unparse(0)
+            print()
+        
         return node_pairs
 
     def init_leaf_pairs(self, post_order_first_ast, post_order_second_ast, f):
@@ -333,90 +335,17 @@ class TreeDifferencer:
         for x in inner_nodes_first:
             for y in inner_nodes_second:
                 current_sim = node_pairs.get((x, y), 0)
-                if current_sim != 0:
-                    for child_x in x.children():
-                        for child_y in y.children():
+                if current_sim >= 0:
+                    for child_x in x.get_children(x):
+                        for child_y in y.get_children(y):
                             children_sim = node_pairs.get((child_x, child_y), 0)
                             if children_sim != 0:
-                                print("mijenjam")
-                                node_pairs[(child_x, child_y)] = self.harmonic_mean(current_sim, children_sim)
+                                sim = node_pairs[(child_x, child_y)]
+                                harm_mean = self.harmonic_mean(current_sim, children_sim)
+                                if harm_mean <= f:
+                                    del node_pairs[(child_x, child_y)]
+                                else:
+                                    node_pairs[(child_x, child_y)] = harm_mean
 
     def harmonic_mean(self, x, y):
         return (2*x*y) / (x+y)
-
-
-
-    def best_matches(self, tup, matched):
-        flag = (tup[0].node not in matched) and (tup[1].node not in matched)
-        if flag:
-            matched.append(tup[0].node)
-            matched.append(tup[1].node)
-        return flag
-
-    # def leaves_match(self, first_node, second_node):
-    #     return first_node.
-    #     #if first_node.node.__class__ is not second_node.node.__class__ or first_node.parent.node.__class__ is not second_node.parent.node.__class__:
-    #     # if first_node.node.__class__ is not second_node.node.__class__:
-    #         print(first_node.parent, " ", second_node.parent)
-    #         return False
-    #     # elif self.node_similarity(first_node, second_node) < self.f:
-    #     #     return False
-    #     return True
-
-    def inner_nodes_match(self, first_node, second_node, node_pairs):
-        print(first_node.parent, " ", second_node.parent)
-
-        if first_node.node.__class__ is not second_node.node.__class__:
-            return False, 0
-        sim = self.subtree_similarity(first_node, second_node, node_pairs)
-        if first_node.number_of_children() < 4:
-            return (sim >= self.t/2), sim
-        return (sim >= self.t), sim
-        # elif self.node_similarity(first_node, second_node) < self.f:
-        #     return False
-
-    def subtree_similarity(self, first_node, second_node, node_pairs):
-        return TreeDifferencer.common_nodes(first_node, second_node, node_pairs)/TreeDifferencer.max_number_of_leaves(first_node, second_node)
-
-    def weighted_match(self, first_node, second_node):
-        return (self.node_similarity(first_node, second_node) < self.f)\
-               & (self.subtree_similarity(first_node, second_node) >= 0.8)
-
-    def node_similarity(self, first_node, second_node):
-        return self.sorensen_dice.similarity(first_node.get_value(), second_node.get_value()) / 2 + 0.5
-
-    @staticmethod
-    def common_nodes(first_node, second_node, node_pairs):
-        found_pairs = []
-        for first_child in first_node.children:
-            for second_child in second_node.children:
-                found_pairs += [(first, second, sim) for first, second, sim in node_pairs if first_child == first and second_child == second]
-
-        averaged_similarities = 0
-        for first_child in first_node.children:
-            first_node_pairs = [similarity for first, _, similarity in found_pairs if first_child == first]
-            if not first_node_pairs.__len__() == 0:
-                averaged_similarities += sum(first_node_pairs) / first_node_pairs.__len__()
-
-        return averaged_similarities
-
-    def bottom_prop_sims(self, node, similarity_list):
-        found_match = [item for item in similarity_list if node in item]
-
-        for match in found_match:
-            parent_match = [sim for first, second, sim in similarity_list if match[0].parent == first and match[1].parent == second]
-            parent_sim = 0
-            if parent_match:
-                parent_sim = parent_match[0]
-            index = similarity_list.index(match)
-            new_match = (match[0], match[1], (parent_sim + match[2])/2)
-            similarity_list[index] = new_match
-
-        for child_node in node.children:
-            self.bottom_prop_sims(child_node, similarity_list)
-
-
-
-    @staticmethod
-    def max_number_of_leaves(first_node, second_node):
-        return max(first_node.number_of_direct_children(), second_node.number_of_direct_children())

@@ -189,7 +189,7 @@ class Function:
                     if (self_arg, node_arg) in node_pairs:
                         num_keys += 1
                         arg_sim += node_pairs.get((self_arg, node_arg), 0)
-            arg_sim = arg_sim / max(num_keys, max(len(self.args), len(node.args)))
+            arg_sim = arg_sim / max(num_keys, max(len(self.args), len(node.args)), 1)
 
             return (func_name_sim + arg_sim) / 2
 
@@ -418,7 +418,7 @@ class Body:
                         num_keys += 1
                         children_sim += node_pairs.get((self_child, node_child), 0)
 
-            return children_sim / max(num_keys, max(len(self.children), len(node.children)))
+            return children_sim / max(num_keys, max(len(self.children), len(node.children)), 1)
 
 
 class BoolOperation:

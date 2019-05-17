@@ -12,7 +12,7 @@ body = wrapper.visit(original_code)
 body.print_me()
 body.unparse(0)
 
-tree = body.walk()
+tree = body.walk(postorder=True)
 
 print(tree)
 re = tree.pop(0).reconstruct(tree)

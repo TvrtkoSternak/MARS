@@ -8,7 +8,7 @@ class Variable:
     def unparse(self, num_tabs):
         print(self.value, end = '')
 
-    def walk(self):
+    def walk(self, postorder = False):
         return [self]
 
     def reconstruct(self, tree):
@@ -29,7 +29,7 @@ class Constant:
     def unparse(self, num_tabs):
         print(self.value, end='')
 
-    def walk(self):
+    def walk(self, postorder = False):
         return [self]
 
     def reconstruct(self, tree):
@@ -57,11 +57,14 @@ class Assign:
         print('', self.operation, '', end='')
         self.value.unparse(num_tabs)
 
-    def walk(self):
+    def walk(self, postorder = False):
         tree = list()
-        tree.append(self)
-        tree.extend(self.variable.walk())
-        tree.extend(self.value.walk())
+        if not postorder:
+            tree.append(self)
+        tree.extend(self.variable.walk(postorder=postorder))
+        tree.extend(self.value.walk(postorder=postorder))
+        if postorder:
+            tree.append(self)
         return tree
 
     def reconstruct(self, tree):
@@ -83,7 +86,7 @@ class FunctionName:
     def unparse(self, num_tabs):
         print("{0}(".format(self.value), end='')
 
-    def walk(self):
+    def walk(self, postorder = False):
         return [self]
 
     def reconstruct(self, tree):
@@ -111,14 +114,17 @@ class Function:
             arg.unparse(num_tabs)
         print(")", end='')
 
-    def walk(self):
+    def walk(self, postorder = False):
         tree = list()
-        tree.append(self)
+        if not postorder:
+            tree.append(self)
         tree.append(Startnode())
-        tree.extend(self.value.walk())
+        tree.extend(self.value.walk(postorder=postorder))
         for arg in self.args:
-            tree.extend(arg.walk())
+            tree.extend(arg.walk(postorder=postorder))
         tree.append(Endnode())
+        if postorder:
+            tree.append(self)
         return tree
 
     def reconstruct(self, tree):
@@ -147,10 +153,13 @@ class Condition:
     def unparse(self, num_tabs):
         self.value.unparse(num_tabs)
 
-    def walk(self):
+    def walk(self, postorder = False):
         tree = list()
-        tree.append(self)
-        tree.extend(self.value.walk())
+        if not postorder:
+            tree.append(self)
+        tree.extend(self.value.walk(postorder = postorder))
+        if postorder:
+            tree.append(self)
         return tree
 
     def reconstruct(self, tree):
@@ -181,12 +190,15 @@ class ElIf:
         self.body.unparse(num_tabs + 1)
         self.next_if.unparse(num_tabs)
 
-    def walk(self):
+    def walk(self, postorder = False):
         tree = list()
-        tree.append(self)
-        tree.extend(self.condition.walk())
-        tree.extend(self.body.walk())
-        tree.extend(self.next_if.walk())
+        if not postorder:
+            tree.append(self)
+        tree.extend(self.condition.walk(postorder = postorder))
+        tree.extend(self.body.walk(postorder = postorder))
+        tree.extend(self.next_if.walk(postorder = postorder))
+        if postorder:
+            tree.append(self)
         return tree
 
     def reconstruct(self, tree):
@@ -212,10 +224,13 @@ class Else:
         print("\t"*num_tabs, "else:", sep='')
         self.body.unparse(num_tabs + 1)
 
-    def walk(self):
+    def walk(self, postorder = False):
         tree = list()
-        tree.append(self)
-        tree.extend(self.body.walk())
+        if not postorder:
+            tree.append(self)
+        tree.extend(self.body.walk(postorder = postorder))
+        if postorder:
+            tree.append(self)
         return tree
 
     def reconstruct(self, tree):
@@ -246,12 +261,15 @@ class If:
         self.body.unparse(num_tabs + 1)
         self.next_if.unparse(num_tabs)
 
-    def walk(self):
+    def walk(self, postorder = False):
         tree = list()
-        tree.append(self)
-        tree.extend(self.condition.walk())
-        tree.extend(self.body.walk())
-        tree.extend(self.next_if.walk())
+        if not postorder:
+            tree.append(self)
+        tree.extend(self.condition.walk(postorder = postorder))
+        tree.extend(self.body.walk(postorder = postorder))
+        tree.extend(self.next_if.walk(postorder = postorder))
+        if postorder:
+            tree.append(self)
         return tree
 
     def reconstruct(self, tree):
@@ -281,13 +299,16 @@ class Body:
             if not hasattr(child, 'body'):
                 print()
 
-    def walk(self):
+    def walk(self, postorder = False):
         tree = list()
-        tree.append(self)
+        if not postorder:
+            tree.append(self)
         tree.append(Startnode())
         for child in self.children:
-            tree.extend(child.walk())
+            tree.extend(child.walk(postorder = postorder))
         tree.append(Endnode())
+        if postorder:
+            tree.append(self)
         return tree
 
     def reconstruct(self, tree):
@@ -319,12 +340,15 @@ class BoolOperation:
         self.operation.unparse(num_tabs)
         self.second.unparse(num_tabs)
 
-    def walk(self):
+    def walk(self, postorder = False):
         tree = list()
-        tree.append(self)
-        tree.extend(self.first.walk())
-        tree.extend(self.operation.walk())
-        tree.extend(self.second.walk())
+        if not postorder:
+            tree.append(self)
+        tree.extend(self.first.walk(postorder = postorder))
+        tree.extend(self.operation.walk(postorder = postorder))
+        tree.extend(self.second.walk(postorder = postorder))
+        if postorder:
+            tree.append(self)
         return tree
 
     def reconstruct(self, tree):
@@ -351,11 +375,14 @@ class UnaryOperation:
         self.operation.unparse(num_tabs)
         self.first.unparse(num_tabs)
 
-    def walk(self):
+    def walk(self, postorder = False):
         tree = list()
-        tree.append(self)
-        tree.extend(self.operation.walk())
-        tree.extend(self.first.walk())
+        if not postorder:
+            tree.append(self)
+        tree.extend(self.operation.walk(postorder = postorder))
+        tree.extend(self.first.walk(postorder = postorder))
+        if postorder:
+            tree.append(self)
         return tree
 
     def reconstruct(self, tree):
@@ -385,12 +412,15 @@ class Compare:
         self.operation.unparse(num_tabs)
         self.second.unparse(num_tabs)
 
-    def walk(self):
+    def walk(self, postorder = False):
         tree = list()
-        tree.append(self)
-        tree.extend(self.first.walk())
-        tree.extend(self.operation.walk())
-        tree.extend(self.second.walk())
+        if not postorder:
+            tree.append(self)
+        tree.extend(self.first.walk(postorder = postorder))
+        tree.extend(self.operation.walk(postorder = postorder))
+        tree.extend(self.second.walk(postorder = postorder))
+        if postorder:
+            tree.append(self)
         return tree
 
     def reconstruct(self, tree):
@@ -410,7 +440,7 @@ class EmptyNode:
     def unparse(self, num_tabs):
         pass
 
-    def walk(self):
+    def walk(self, postorder = False):
         return [self]
 
     def reconstruct(self, tree):
@@ -427,7 +457,7 @@ class Startnode:
     def unparse(self, num_tabs):
         pass
 
-    def walk(self):
+    def walk(self, postorder = False):
         return [self]
 
     def reconstruct(self, tree):
@@ -444,7 +474,7 @@ class Endnode:
     def unparse(self, num_tabs):
         pass
 
-    def walk(self):
+    def walk(self, postorder = False):
         return [self]
 
     def reconstruct(self, tree):

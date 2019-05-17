@@ -508,8 +508,8 @@ class BoolOperation:
 
     def similarity(self, node, node_pairs):
         if not isinstance(node, self.__class__) \
-                or not isinstance(node, UnaryOperation) \
-                or not isinstance(node, Compare):
+                and not isinstance(node, UnaryOperation) \
+                and not isinstance(node, Compare):
             return 0
         else:
             first_sim = node_pairs.get((self.first, node.first), 0)
@@ -559,8 +559,8 @@ class UnaryOperation:
 
     def similarity(self, node, node_pairs):
         if not isinstance(node, self.__class__) \
-                or not isinstance(node, BoolOperation)\
-                or not isinstance(node, Compare):
+                and not isinstance(node, BoolOperation)\
+                and not isinstance(node, Compare):
             return 0
         else:
             first_sim = node_pairs.get((self.first, node.first), 0)
@@ -614,8 +614,8 @@ class Compare:
 
     def similarity(self, node, node_pairs):
         if not isinstance(node, self.__class__) \
-                or not isinstance(node, BoolOperation) \
-                or not isinstance(node, UnaryOperation):
+                and not isinstance(node, BoolOperation) \
+                and not isinstance(node, UnaryOperation):
             return 0
         else:
             first_sim = node_pairs.get((self.first, node.first), 0)

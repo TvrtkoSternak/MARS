@@ -9,6 +9,9 @@ class Variable:
         print(self.value, end = '')
 
     def walk(self):
+        return [self]
+
+    def reconstruct(self, tree):
         return self
 
 
@@ -24,6 +27,9 @@ class Constant:
         print(self.value, end='')
 
     def walk(self):
+        return [self]
+
+    def reconstruct(self, tree):
         return self
 
 
@@ -42,17 +48,20 @@ class Assign:
 
     def unparse(self, num_tabs):
         self.variable.unparse(num_tabs)
-        print(self.operation, end='')
+        print('', self.operation, '', end='')
         self.value.unparse(num_tabs)
 
     def walk(self):
         tree = list()
         tree.append(self)
-        tree.append(Startnode())
-        tree.append(self.variable.walk())
-        tree.append(self.value.walk())
-        tree.append(Endnode())
+        tree.extend(self.variable.walk())
+        tree.extend(self.value.walk())
         return tree
+
+    def reconstruct(self, tree):
+        self.variable = tree.pop(0).reconstruct(tree)
+        self.value = tree.pop(0).reconstruct(tree)
+        return self
 
 
 class FunctionName:
@@ -66,7 +75,11 @@ class FunctionName:
         print("{0}(".format(self.value), end='')
 
     def walk(self):
+        return [self]
+
+    def reconstruct(self, tree):
         return self
+
 
 class Function:
     def __init__(self, args, value):
@@ -90,11 +103,21 @@ class Function:
         tree = list()
         tree.append(self)
         tree.append(Startnode())
-        tree.append(self.value.walk())
+        tree.extend(self.value.walk())
         for arg in self.args:
-            tree.append(arg.walk())
+            tree.extend(arg.walk())
         tree.append(Endnode())
         return tree
+
+    def reconstruct(self, tree):
+        self.args.clear()
+        tree.pop(0)
+        self.value = tree.pop(0).reconstruct(tree)
+        child = tree.pop(0)
+        while not isinstance(child, Endnode):
+            self.args.append(child.reconstruct(tree))
+            child = tree.pop(0)
+        return self
 
 
 class Condition:
@@ -112,8 +135,12 @@ class Condition:
     def walk(self):
         tree = list()
         tree.append(self)
-        tree.append(self.value.walk())
+        tree.extend(self.value.walk())
         return tree
+
+    def reconstruct(self, tree):
+        self.value = tree.pop(0).reconstruct(tree)
+        return self
 
 
 class ElIf:
@@ -139,10 +166,16 @@ class ElIf:
     def walk(self):
         tree = list()
         tree.append(self)
-        tree.append(self.condition.walk())
-        tree.append(self.body.walk())
-        tree.append(self.next_if.walk())
+        tree.extend(self.condition.walk())
+        tree.extend(self.body.walk())
+        tree.extend(self.next_if.walk())
         return tree
+
+    def reconstruct(self, tree):
+        self.condition = tree.pop(0).reconstruct(tree)
+        self.body = tree.pop(0).reconstruct(tree)
+        self.next_if = tree.pop(0).reconstruct(tree)
+        return self
 
 
 class Else:
@@ -161,8 +194,12 @@ class Else:
     def walk(self):
         tree = list()
         tree.append(self)
-        tree.append(self.body.walk())
+        tree.extend(self.body.walk())
         return tree
+
+    def reconstruct(self, tree):
+        self.body = tree.pop(0).reconstruct(tree)
+        return self
 
 
 class If:
@@ -188,16 +225,21 @@ class If:
     def walk(self):
         tree = list()
         tree.append(self)
-        tree.append(self.body.walk())
-        tree.append(self.next_if.walk())
+        tree.extend(self.condition.walk())
+        tree.extend(self.body.walk())
+        tree.extend(self.next_if.walk())
         return tree
+
+    def reconstruct(self, tree):
+        self.condition = tree.pop(0).reconstruct(tree)
+        self.body = tree.pop(0).reconstruct(tree)
+        self.next_if = tree.pop(0).reconstruct(tree)
+        return self
 
 
 class Body:
     def __init__(self, children):
         self.children = children
-        self.children.insert(0, Startnode())
-        self.children.append(Endnode())
 
     def print_me(self):
         print("Body {")
@@ -207,18 +249,28 @@ class Body:
 
     def unparse(self, num_tabs):
         for child in self.children:
-            if not isinstance(child, (Startnode, Endnode)):
-                print("\t"*num_tabs, end='')
+            print("\t"*num_tabs, end='')
             child.unparse(num_tabs)
-            if not hasattr(child, 'body') and not isinstance(child, (Startnode, Endnode)):
+            if not hasattr(child, 'body'):
                 print()
 
     def walk(self):
         tree = list()
         tree.append(self)
+        tree.append(Startnode())
         for child in self.children:
-            tree.append(child.walk())
+            tree.extend(child.walk())
+        tree.append(Endnode())
         return tree
+
+    def reconstruct(self, tree):
+        self.children.clear()
+        tree.pop(0)
+        child = tree.pop(0)
+        while not isinstance(child, Endnode):
+            self.children.append(child.reconstruct(tree))
+            child = tree.pop(0)
+        return self
 
 
 class BoolOperation:
@@ -240,10 +292,16 @@ class BoolOperation:
     def walk(self):
         tree = list()
         tree.append(self)
-        tree.append(self.first.walk())
-        tree.append(self.operation.walk())
-        tree.append(self.second.walk())
+        tree.extend(self.first.walk())
+        tree.extend(self.operation.walk())
+        tree.extend(self.second.walk())
         return tree
+
+    def reconstruct(self, tree):
+        self.first = tree.pop(0).reconstruct(tree)
+        self.operation = tree.pop(0).reconstruct(tree)
+        self.second = tree.pop(0).reconstruct(tree)
+        return self
 
 
 class UnaryOperation:
@@ -263,9 +321,14 @@ class UnaryOperation:
     def walk(self):
         tree = list()
         tree.append(self)
-        tree.append(self.operation.walk())
-        tree.append(self.first.walk())
+        tree.extend(self.operation.walk())
+        tree.extend(self.first.walk())
         return tree
+
+    def reconstruct(self, tree):
+        self.operation = tree.pop(0).reconstruct(tree)
+        self.first = tree.pop(0).reconstruct(tree)
+        return self
 
 
 class Compare:
@@ -289,10 +352,16 @@ class Compare:
     def walk(self):
         tree = list()
         tree.append(self)
-        tree.append(self.first.walk())
-        tree.append(self.opeeration.walk())
-        tree.append(self.second.walk())
+        tree.extend(self.first.walk())
+        tree.extend(self.operation.walk())
+        tree.extend(self.second.walk())
         return tree
+
+    def reconstruct(self, tree):
+        self.first = tree.pop(0).reconstruct(tree)
+        self.operation = tree.pop(0).reconstruct(tree)
+        self.second = tree.pop(0).reconstruct(tree)
+        return self
 
 
 class EmptyNode:
@@ -303,6 +372,9 @@ class EmptyNode:
         pass
 
     def walk(self):
+        return [self]
+
+    def reconstruct(self, tree):
         return self
 
 
@@ -314,6 +386,9 @@ class Startnode:
         pass
 
     def walk(self):
+        return [self]
+
+    def reconstruct(self, tree):
         return self
 
 
@@ -325,4 +400,7 @@ class Endnode:
         pass
 
     def walk(self):
+        return [self]
+
+    def reconstruct(self, tree):
         return self

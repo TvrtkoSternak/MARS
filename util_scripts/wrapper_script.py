@@ -1,6 +1,7 @@
 import ast
 
 from mars.astutils import AstWrapper
+from mars.astwrapper import Body
 
 with open("../dataset/variable_check/original_1.py") as original:
     original_code = ast.parse(original.read())
@@ -11,4 +12,10 @@ body = wrapper.visit(original_code)
 body.print_me()
 body.unparse(0)
 
-print(body.walk())
+tree = body.walk()
+
+print(tree)
+re = tree.pop(0).reconstruct(tree)
+
+print("----------------")
+re.unparse(0)

@@ -105,10 +105,10 @@ class Assign:
             node_sim /= 2
             return sqrt(node_sim)
 
-    def children(self):
+    def get_children(self, node):
         children = list()
-        children.append(self.variable)
-        children.append(self.value)
+        children.append(node.variable)
+        children.append(node.value)
         return children
 
 
@@ -199,10 +199,10 @@ class Function:
 
             return (func_name_sim + arg_sim) / 2
 
-    def get_children(self):
+    def get_children(self, node):
         children = list()
-        children.append(self.value)
-        children.extend(self.args)
+        children.append(node.value)
+        children.extend(node.args)
         return children
 
 
@@ -240,9 +240,9 @@ class Condition:
         else:
             return node_pairs.get((self.value, node.value), 0)
 
-    def get_children(self):
+    def get_children(self, node):
         children = list()
-        children.append(self.value)
+        children.append(node.value)
         return children
 
 
@@ -295,11 +295,11 @@ class ElIf:
             elif_sim = node_pairs.get((self.next_if, node.next_if), 0)
             return (2*cond_sim + body_sim + elif_sim) / 4
 
-    def get_children(self):
+    def get_children(self, node):
         children = list()
-        children.append(self.condition)
-        children.append(self.body)
-        children.append(self.next_if)
+        children.append(node.condition)
+        children.append(node.body)
+        children.append(node.next_if)
         return children
 
 
@@ -338,9 +338,9 @@ class Else:
         else:
             return node_pairs.get((self.body, node.body), 0)
 
-    def get_children(self):
+    def get_children(self, node):
         children = list()
-        children.append(self.body)
+        children.append(node.body)
         return children
 
 
@@ -393,11 +393,11 @@ class If:
             elif_sim = node_pairs.get((self.next_if, node.next_if), 0)
             return (2*cond_sim + body_sim + elif_sim) / 4
 
-    def get_children(self):
+    def get_children(self, node):
         children = list()
-        children.append(self.condition)
-        children.append(self.body)
-        children.append(self.next_if)
+        children.append(node.condition)
+        children.append(node.body)
+        children.append(node.next_if)
         return children
 
 
@@ -456,8 +456,8 @@ class Body:
 
             return children_sim / max(num_keys, max(len(self.children), len(node.children)), 1)
 
-    def get_children(self):
-        return self.children
+    def get_children(self, node):
+        return node.children
 
 
 class BoolOperation:
@@ -505,11 +505,11 @@ class BoolOperation:
             op_sim = node_pairs.get((self.operation, node.operation), 0)
             return (2*op_sim + first_sim + second_sim) / 4
 
-    def get_children(self):
+    def get_children(self, node):
         children = list()
-        children.append(self.first)
-        children.append(self.second)
-        children.append(self.operation)
+        children.append(node.first)
+        children.append(node.second)
+        children.append(node.operation)
         return children
 
 
@@ -553,10 +553,10 @@ class UnaryOperation:
             op_sim = node_pairs.get((self.operation, node.operation), 0)
             return (1.5*op_sim + first_sim) / 2.5
 
-    def get_children(self):
+    def get_children(self, node):
         children = list()
-        children.append(self.first)
-        children.append(self.operation)
+        children.append(node.first)
+        children.append(node.operation)
         return children
 
 
@@ -607,11 +607,11 @@ class Compare:
             op_sim = node_pairs.get((self.operation, node.operation), 0)
             return (2*op_sim + first_sim + second_sim) / 4
 
-    def get_children(self):
+    def get_children(self, node):
         children = list()
-        children.append(self.first)
-        children.append(self.second)
-        children.append(self.operation)
+        children.append(node.first)
+        children.append(node.second)
+        children.append(node.operation)
         return children
 
 

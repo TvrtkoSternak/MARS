@@ -199,7 +199,7 @@ class Function:
 
             return (func_name_sim + arg_sim) / 2
 
-    def children(self):
+    def get_children(self):
         children = list()
         children.append(self.value)
         children.extend(self.args)
@@ -240,7 +240,7 @@ class Condition:
         else:
             return node_pairs.get((self.value, node.value), 0)
 
-    def children(self):
+    def get_children(self):
         children = list()
         children.append(self.value)
         return children
@@ -295,7 +295,7 @@ class ElIf:
             elif_sim = node_pairs.get((self.next_if, node.next_if), 0)
             return (2*cond_sim + body_sim + elif_sim) / 4
 
-    def children(self):
+    def get_children(self):
         children = list()
         children.append(self.condition)
         children.append(self.body)
@@ -338,7 +338,7 @@ class Else:
         else:
             return node_pairs.get((self.body, node.body), 0)
 
-    def children(self):
+    def get_children(self):
         children = list()
         children.append(self.body)
         return children
@@ -393,7 +393,7 @@ class If:
             elif_sim = node_pairs.get((self.next_if, node.next_if), 0)
             return (2*cond_sim + body_sim + elif_sim) / 4
 
-    def children(self):
+    def get_children(self):
         children = list()
         children.append(self.condition)
         children.append(self.body)
@@ -456,7 +456,7 @@ class Body:
 
             return children_sim / max(num_keys, max(len(self.children), len(node.children)), 1)
 
-    def children(self):
+    def get_children(self):
         return self.children
 
 
@@ -505,7 +505,7 @@ class BoolOperation:
             op_sim = node_pairs.get((self.operation, node.operation), 0)
             return (2*op_sim + first_sim + second_sim) / 4
 
-    def children(self):
+    def get_children(self):
         children = list()
         children.append(self.first)
         children.append(self.second)
@@ -553,7 +553,7 @@ class UnaryOperation:
             op_sim = node_pairs.get((self.operation, node.operation), 0)
             return (1.5*op_sim + first_sim) / 2.5
 
-    def children(self):
+    def get_children(self):
         children = list()
         children.append(self.first)
         children.append(self.operation)
@@ -607,7 +607,7 @@ class Compare:
             op_sim = node_pairs.get((self.operation, node.operation), 0)
             return (2*op_sim + first_sim + second_sim) / 4
 
-    def children(self):
+    def get_children(self):
         children = list()
         children.append(self.first)
         children.append(self.second)

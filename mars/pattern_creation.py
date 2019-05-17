@@ -253,7 +253,7 @@ class TreeDifferencer:
         self.f = f
         self.t = t
 
-    def connect_nodes(self, post_order_first_ast, post_order_second_ast):
+    def connect_nodes(self, first_ast, second_ast):
         """
         Generates a dictionary of AST node indexes that describes which AST nodes
         are corresponding in original and modified ASTs.
@@ -273,24 +273,27 @@ class TreeDifferencer:
             The keys of the dictionary are original AST node indexes and values are
             modified AST node indexes.
         """
-        node_pairs = self.find_leaf_pairs(post_order_first_ast, post_order_second_ast)
+        in_org = first_ast.walk()
+        in_mod = first_ast.walk()
 
-        # for x in post_order_first_ast:
-        #     if not x.leaf:
-        #         for y in post_order_second_ast:
-        #             if not y.leaf:
-        #                 print("usporedujem ", x, " ", y)
-        #
-        #                 match, similarity = self.inner_nodes_match(x, y, node_pairs)
-        #                 if match:
-        #                     node_pairs.append((x, y, similarity))
-        #                 # elif self.weighted_match(x, y):
-        #                 #     inner_nodes_matches.append((x, y, self.node_similarity(x, y)))
-        # for node_pair in node_pairs:
-        #     print('connect_nodesbbbbbbb:::::',node_pair[0].get_value(), node_pair[1].get_value(), node_pair[2])
-        #
-        # for node in post_order_first_ast[-1].children:
-        #     self.bottom_prop_sims(node, node_pairs)
+        post_org = first_ast.walk(True)
+        post_mod = second_ast.walk(True)
+
+        node_pairs = self.init_leaf_pairs(post_org, post_mod, 0.1)
+        for key, value in node_pairs.items():
+            print("LEAF MATCHES: ", key, value)
+
+        print("----------------------------------------")
+
+        self.bottom_up(post_org, post_mod, node_pairs, 0.1)
+        for key, value in node_pairs.items():
+            print("BOTTOM UP: ", key, value)
+
+        print("----------------------------------------")
+
+        self.top_down(in_org, in_mod, node_pairs, 0.1)
+        for key, value in node_pairs.items():
+            print("TOP DOWN: ", key, value)
         #
         # node_pairs.sort(key=lambda tup: tup[2], reverse=True)
         # matched = []
@@ -304,16 +307,44 @@ class TreeDifferencer:
         # node_pairs.sort(key=lambda tup: tup[2], reverse=True)
         return node_pairs
 
-    def find_leaf_pairs(self, post_order_first_ast, post_order_second_ast):
+    def init_leaf_pairs(self, post_order_first_ast, post_order_second_ast, f):
         leaf_pairs = dict()
-        leaves_first = [x for x in post_order_first_ast if x.is_leaf]
-        leaves_second = [x for x in post_order_second_ast if x.is_leaf]
+        leaves_first = [x for x in post_order_first_ast if x.is_leaf()]
+        leaves_second = [x for x in post_order_second_ast if x.is_leaf()]
         for x in leaves_first:
             for y in leaves_second:
                 similarity = x.similarity(y)
-                if similarity >= self.f:
-                    leaf_pairs[(x, y)] = x.similarity(y)
+                if similarity > f:
+                    leaf_pairs[(x, y)] = similarity
         return leaf_pairs
+
+    def bottom_up(self, post_order_first_ast, post_order_second_ast, node_pairs, t):
+        inner_nodes_first = [x for x in post_order_first_ast if not x.is_leaf()]
+        inner_nodes_second = [x for x in post_order_second_ast if not x.is_leaf()]
+        for x in inner_nodes_first:
+            for y in inner_nodes_second:
+                similarity = x.similarity(y, node_pairs)
+                if similarity > t:
+                    node_pairs[(x, y)] = similarity
+
+    def top_down(self, first_ast, second_ast, node_pairs, f):
+        inner_nodes_first = [x for x in first_ast if not x.is_leaf()]
+        inner_nodes_second = [x for x in second_ast if not x.is_leaf()]
+        for x in inner_nodes_first:
+            for y in inner_nodes_second:
+                current_sim = node_pairs.get((x, y), 0)
+                if current_sim != 0:
+                    for child_x in x.children():
+                        for child_y in y.children():
+                            children_sim = node_pairs.get((child_x, child_y), 0)
+                            if children_sim != 0:
+                                print("mijenjam")
+                                node_pairs[(child_x, child_y)] = self.harmonic_mean(current_sim, children_sim)
+
+    def harmonic_mean(self, x, y):
+        return (2*x*y) / (x+y)
+
+
 
     def best_matches(self, tup, matched):
         flag = (tup[0].node not in matched) and (tup[1].node not in matched)

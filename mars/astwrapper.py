@@ -1,4 +1,5 @@
 from difflib import SequenceMatcher
+from math import sqrt
 
 
 class Variable:
@@ -94,6 +95,16 @@ class Assign:
     def is_leaf(self):
         return False
 
+    def similarity(self, node, node_pairs):
+        if not isinstance(node, self.__class__):
+            return 0
+        if self.operation != node.operation:
+            return 0
+        else:
+            node_sim = node_pairs.get((self.value, node.value), 0) + node_pairs.get((self.variable, node.variable), 0)
+            node_sim /= 2
+            return sqrt(node_sim)
+
 
 class FunctionName:
     def __init__(self, value):
@@ -166,6 +177,22 @@ class Function:
     def is_leaf(self):
         return False
 
+    def similarity(self, node, node_pairs):
+        if not isinstance(node, self.__class__):
+            return 0
+        else:
+            func_name_sim = node_pairs.get((self.value, node.value), 0)
+            arg_sim = 0
+            num_keys = 0
+            for self_arg in self.args:
+                for node_arg in node.args:
+                    if (self_arg, node_arg) in node_pairs:
+                        num_keys += 1
+                        arg_sim += node_pairs.get((self_arg, node_arg), 0)
+            arg_sim = arg_sim / max(num_keys, max(len(self.args), len(node.args)))
+
+            return (func_name_sim + arg_sim) / 2
+
 
 class Condition:
     def __init__(self, value):
@@ -194,6 +221,12 @@ class Condition:
 
     def is_leaf(self):
         return False
+
+    def similarity(self, node, node_pairs):
+        if not isinstance(node, self.__class__):
+            return 0
+        else:
+            return node_pairs.get((self.value, node.value), 0)
 
 
 class ElIf:
@@ -236,6 +269,15 @@ class ElIf:
     def is_leaf(self):
         return False
 
+    def similarity(self, node, node_pairs):
+        if not isinstance(node, self.__class__):
+            return 0
+        else:
+            cond_sim = node_pairs.get((self.condition, node.condition), 0)
+            body_sim = node_pairs.get((self.body, node.body), 0)
+            elif_sim = node_pairs.get((self.next_if, node.next_if), 0)
+            return (2*cond_sim + body_sim + elif_sim) / 4
+
 
 class Else:
     def __init__(self, body):
@@ -265,6 +307,12 @@ class Else:
 
     def is_leaf(self):
         return False
+
+    def similarity(self, node, node_pairs):
+        if not isinstance(node, self.__class__):
+            return 0
+        else:
+            return node_pairs.get((self.body, node.body), 0)
 
 
 class If:
@@ -306,6 +354,15 @@ class If:
 
     def is_leaf(self):
         return False
+
+    def similarity(self, node, node_pairs):
+        if not isinstance(node, self.__class__):
+            return 0
+        else:
+            cond_sim = node_pairs.get((self.condition, node.condition), 0)
+            body_sim = node_pairs.get((self.body, node.body), 0)
+            elif_sim = node_pairs.get((self.next_if, node.next_if), 0)
+            return (2*cond_sim + body_sim + elif_sim) / 4
 
 
 class Body:
@@ -349,6 +406,20 @@ class Body:
     def is_leaf(self):
         return False
 
+    def similarity(self, node, node_pairs):
+        if not isinstance(node, self.__class__):
+            return 0
+        else:
+            children_sim = 0
+            num_keys = 0
+            for self_child in self.children:
+                for node_child in node.children:
+                    if (self_child, node_child) in node_pairs:
+                        num_keys += 1
+                        children_sim += node_pairs.get((self_child, node_child), 0)
+
+            return children_sim / max(num_keys, max(len(self.children), len(node.children)))
+
 
 class BoolOperation:
     def __init__(self, operation, first, second):
@@ -386,6 +457,15 @@ class BoolOperation:
     def is_leaf(self):
         return False
 
+    def similarity(self, node, node_pairs):
+        if not isinstance(node, self.__class__):
+            return 0
+        else:
+            first_sim = node_pairs.get((self.first, node.first), 0)
+            second_sim = node_pairs.get((self.second, node.second), 0)
+            op_sim = node_pairs.get((self.operation, node.operation), 0)
+            return (2*op_sim + first_sim + second_sim) / 4
+
 
 class UnaryOperation:
     def __init__(self, operation, first):
@@ -418,6 +498,14 @@ class UnaryOperation:
 
     def is_leaf(self):
         return False
+
+    def similarity(self, node, node_pairs):
+        if not isinstance(node, self.__class__):
+            return 0
+        else:
+            first_sim = node_pairs.get((self.first, node.first), 0)
+            op_sim = node_pairs.get((self.operation, node.operation), 0)
+            return (1.5*op_sim + first_sim) / 2.5
 
 
 class Compare:
@@ -457,6 +545,15 @@ class Compare:
 
     def is_leaf(self):
         return False
+
+    def similarity(self, node, node_pairs):
+        if not isinstance(node, self.__class__):
+            return 0
+        else:
+            first_sim = node_pairs.get((self.first, node.first), 0)
+            second_sim = node_pairs.get((self.second, node.second), 0)
+            op_sim = node_pairs.get((self.operation, node.operation), 0)
+            return (2*op_sim + first_sim + second_sim) / 4
 
 
 class EmptyNode:

@@ -1,7 +1,8 @@
 import _ast
 import ast
 
-from mars.astwrapper import Body, Function, Constant
+from mars.astwrapper import Body, Function, Constant, If, Variable, EmptyNode, Condition, BoolOperation, Compare, \
+    UnaryOperation, Assign, ElIf, Else
 
 
 class AstUtils:
@@ -159,8 +160,7 @@ class FunctionFinder(ast.NodeVisitor):
 
 class AstWrapper(ast.NodeTransformer):
     def __init__(self):
-        self.body = Body(list())
-        self.current_node = self.body
+        pass
 
     def visit_Module(self, node):
         children = list()
@@ -172,15 +172,92 @@ class AstWrapper(ast.NodeTransformer):
         return self.visit(node.value)
 
     def visit_Call(self, node):
-        print("args: ", node.args)
         args = list()
         for arg in node.args:
             args.append(self.visit(arg))
         function = Function(args, node.func.id)
         return function
 
+    def visit_Name(self, node):
+        return Variable(node.id)
+
     def visit_Num(self, node):
         return Constant(node.n, "NUMBER")
 
     def visit_Str(self, node):
         return Constant(node.s, "STRING")
+
+    def visit_Compare(self, node):
+        return Compare(self.visit(node.ops[0]), self.visit(node.left), self.visit(node.comparators[0]))
+
+    def visit_BoolOp(self, node):
+        return BoolOperation(self.visit(node.op), self.visit(node.values[0]), self.visit(node.values[1]))
+
+    def visit_UnaryOp(self, node):
+        return UnaryOperation(self.visit(node.op), self.visit(node.operand))
+
+    def visit_Not(self, node):
+        return "not"
+
+    def visit_Is(self, node):
+        return "is"
+
+    def visit_In(self, node):
+        return "in"
+
+    def visit_NameConstant(self, node):
+        return Constant(node.value, "CONSTANT")
+
+    def visit_NotIn(self, node):
+        return "not in"
+
+    def visit_Eq(self, node):
+        return "=="
+
+    def visit_NotEq(self, node):
+        return "!="
+
+    def visit_Lt(self, node):
+        return "<"
+
+    def visit_LtE(self, node):
+        return "<="
+
+    def visit_Gt(self, node):
+        return ">"
+
+    def visit_GtE(self, node):
+        return ">="
+
+    def visit_IsNot(self, node):
+        return "is not"
+
+    def visit_And(self, node):
+        return "and"
+
+    def visit_Or(self, node):
+        return "or"
+
+    def visit_If(self, node):
+        expressions = list()
+        for expression in node.body:
+            expressions.append(self.visit(expression))
+        if node.orelse:
+            if len(node.orelse) == 1 and isinstance(node.orelse[0], ast.If):
+                elif_node = self.visit(node.orelse[0])
+                if_node = If(Condition(self.visit(node.test)), Body(expressions),
+                             ElIf(elif_node.condition, elif_node.body, elif_node.next_if))
+            else:
+                else_expressions = list()
+                for expression in node.orelse:
+                    else_expressions.append(self.visit(expression))
+                if_node = If(Condition(self.visit(node.test)), Body(expressions), Else(Body(else_expressions)))
+        else:
+            if_node = If(Condition(self.visit(node.test)), Body(expressions), EmptyNode())
+        return if_node
+
+    def visit_Assign(self, node):
+        print(node._fields)
+        print(node.targets)
+        print(node.value)
+        return Assign(self.visit(node.targets[0]), "=", self.visit(node.value))

@@ -1,3 +1,6 @@
+from difflib import SequenceMatcher
+
+
 class Variable:
     def __init__(self, value):
         self.value = value
@@ -16,6 +19,13 @@ class Variable:
 
     def is_leaf(self):
         return True
+
+    def similarity(self, node):
+        if not isinstance(node, self.__class__):
+            return 0
+        else:
+            s = SequenceMatcher(None, self.value, node.value)
+            return s.ratio()
 
 
 class Constant:
@@ -37,6 +47,15 @@ class Constant:
 
     def is_leaf(self):
         return True
+
+    def similarity(self, node):
+        if not isinstance(node, self.__class__):
+            return 0
+        if not self.type_of == node.type_of:
+            return 0
+        else:
+            s = SequenceMatcher(None, self.value, node.value)
+            return s.ratio()
 
 
 class Assign:
@@ -94,6 +113,13 @@ class FunctionName:
 
     def is_leaf(self):
         return True
+
+    def similarity(self, node):
+        if not isinstance(node, self.__class__):
+            return 0
+        else:
+            s = SequenceMatcher(None, self.value, node.value)
+            return s.ratio()
 
 
 class Function:
@@ -449,6 +475,12 @@ class EmptyNode:
     def is_leaf(self):
         return True
 
+    def similarity(self, node):
+        if not isinstance(node, self.__class__):
+            return 0
+        else:
+            return 1
+
 
 class Startnode:
     def print_me(self):
@@ -466,6 +498,12 @@ class Startnode:
     def is_leaf(self):
         return True
 
+    def similarity(self, node):
+        if not isinstance(node, self.__class__):
+            return 0
+        else:
+            return 0.5
+
 
 class Endnode:
     def print_me(self):
@@ -482,3 +520,9 @@ class Endnode:
 
     def is_leaf(self):
         return True
+
+    def similarity(self, node):
+        if not isinstance(node, self.__class__):
+            return 0
+        else:
+            0.5

@@ -105,6 +105,11 @@ class Assign:
             node_sim /= 2
             return sqrt(node_sim)
 
+    def children(self):
+        children = list()
+        children.append(self.variable)
+        children.append(self.value)
+
 
 class FunctionName:
     def __init__(self, value):
@@ -193,6 +198,11 @@ class Function:
 
             return (func_name_sim + arg_sim) / 2
 
+    def children(self):
+        children = list()
+        children.append(self.value)
+        children.extend(self.args)
+
 
 class Condition:
     def __init__(self, value):
@@ -227,6 +237,10 @@ class Condition:
             return 0
         else:
             return node_pairs.get((self.value, node.value), 0)
+
+    def children(self):
+        children = list()
+        children.append(self.value)
 
 
 class ElIf:
@@ -278,6 +292,12 @@ class ElIf:
             elif_sim = node_pairs.get((self.next_if, node.next_if), 0)
             return (2*cond_sim + body_sim + elif_sim) / 4
 
+    def children(self):
+        children = list()
+        children.append(self.condition)
+        children.append(self.body)
+        children.append(self.next_if)
+
 
 class Else:
     def __init__(self, body):
@@ -313,6 +333,10 @@ class Else:
             return 0
         else:
             return node_pairs.get((self.body, node.body), 0)
+
+    def children(self):
+        children = list()
+        children.append(self.body)
 
 
 class If:
@@ -363,6 +387,12 @@ class If:
             body_sim = node_pairs.get((self.body, node.body), 0)
             elif_sim = node_pairs.get((self.next_if, node.next_if), 0)
             return (2*cond_sim + body_sim + elif_sim) / 4
+
+    def children(self):
+        children = list()
+        children.append(self.condition)
+        children.append(self.body)
+        children.append(self.next_if)
 
 
 class Body:
@@ -420,6 +450,9 @@ class Body:
 
             return children_sim / max(num_keys, max(len(self.children), len(node.children)), 1)
 
+    def children(self):
+        return self.children
+
 
 class BoolOperation:
     def __init__(self, operation, first, second):
@@ -466,6 +499,12 @@ class BoolOperation:
             op_sim = node_pairs.get((self.operation, node.operation), 0)
             return (2*op_sim + first_sim + second_sim) / 4
 
+    def children(self):
+        children = list()
+        children.append(self.first)
+        children.append(self.second)
+        children.append(self.operation)
+
 
 class UnaryOperation:
     def __init__(self, operation, first):
@@ -506,6 +545,11 @@ class UnaryOperation:
             first_sim = node_pairs.get((self.first, node.first), 0)
             op_sim = node_pairs.get((self.operation, node.operation), 0)
             return (1.5*op_sim + first_sim) / 2.5
+
+    def children(self):
+        children = list()
+        children.append(self.first)
+        children.append(self.operation)
 
 
 class Compare:
@@ -554,6 +598,12 @@ class Compare:
             second_sim = node_pairs.get((self.second, node.second), 0)
             op_sim = node_pairs.get((self.operation, node.operation), 0)
             return (2*op_sim + first_sim + second_sim) / 4
+
+    def children(self):
+        children = list()
+        children.append(self.first)
+        children.append(self.second)
+        children.append(self.operation)
 
 
 class EmptyNode:

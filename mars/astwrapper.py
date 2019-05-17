@@ -14,6 +14,9 @@ class Variable:
     def reconstruct(self, tree):
         return self
 
+    def is_leaf(self):
+        return True
+
 
 class Constant:
     def __init__(self, value, type_of):
@@ -31,6 +34,9 @@ class Constant:
 
     def reconstruct(self, tree):
         return self
+
+    def is_leaf(self):
+        return True
 
 
 class Assign:
@@ -63,6 +69,9 @@ class Assign:
         self.value = tree.pop(0).reconstruct(tree)
         return self
 
+    def is_leaf(self):
+        return False
+
 
 class FunctionName:
     def __init__(self, value):
@@ -79,6 +88,9 @@ class FunctionName:
 
     def reconstruct(self, tree):
         return self
+
+    def is_leaf(self):
+        return True
 
 
 class Function:
@@ -119,6 +131,9 @@ class Function:
             child = tree.pop(0)
         return self
 
+    def is_leaf(self):
+        return False
+
 
 class Condition:
     def __init__(self, value):
@@ -141,6 +156,9 @@ class Condition:
     def reconstruct(self, tree):
         self.value = tree.pop(0).reconstruct(tree)
         return self
+
+    def is_leaf(self):
+        return False
 
 
 class ElIf:
@@ -177,6 +195,9 @@ class ElIf:
         self.next_if = tree.pop(0).reconstruct(tree)
         return self
 
+    def is_leaf(self):
+        return False
+
 
 class Else:
     def __init__(self, body):
@@ -200,6 +221,9 @@ class Else:
     def reconstruct(self, tree):
         self.body = tree.pop(0).reconstruct(tree)
         return self
+
+    def is_leaf(self):
+        return False
 
 
 class If:
@@ -235,6 +259,9 @@ class If:
         self.body = tree.pop(0).reconstruct(tree)
         self.next_if = tree.pop(0).reconstruct(tree)
         return self
+
+    def is_leaf(self):
+        return False
 
 
 class Body:
@@ -272,6 +299,9 @@ class Body:
             child = tree.pop(0)
         return self
 
+    def is_leaf(self):
+        return False
+
 
 class BoolOperation:
     def __init__(self, operation, first, second):
@@ -303,6 +333,9 @@ class BoolOperation:
         self.second = tree.pop(0).reconstruct(tree)
         return self
 
+    def is_leaf(self):
+        return False
+
 
 class UnaryOperation:
     def __init__(self, operation, first):
@@ -329,6 +362,9 @@ class UnaryOperation:
         self.operation = tree.pop(0).reconstruct(tree)
         self.first = tree.pop(0).reconstruct(tree)
         return self
+
+    def is_leaf(self):
+        return False
 
 
 class Compare:
@@ -363,6 +399,9 @@ class Compare:
         self.second = tree.pop(0).reconstruct(tree)
         return self
 
+    def is_leaf(self):
+        return False
+
 
 class EmptyNode:
     def print_me(self):
@@ -376,6 +415,9 @@ class EmptyNode:
 
     def reconstruct(self, tree):
         return self
+
+    def is_leaf(self):
+        return True
 
 
 class Startnode:
@@ -391,6 +433,9 @@ class Startnode:
     def reconstruct(self, tree):
         return self
 
+    def is_leaf(self):
+        return True
+
 
 class Endnode:
     def print_me(self):
@@ -404,3 +449,6 @@ class Endnode:
 
     def reconstruct(self, tree):
         return self
+
+    def is_leaf(self):
+        return True

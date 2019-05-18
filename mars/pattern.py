@@ -35,7 +35,6 @@ class Pattern:
         edit_script : EditScript
             EditScript object that describes how to transform the original AST to modified AST
         """
-
         self.original = original
         self.modified = modified
         self.node_pairs = node_pairs
@@ -154,24 +153,8 @@ class ChangeOperation(ABC):
         Returns change operation in a human-readable form.
     """
 
-    def make_change(self, original_list_of_nodes):
-        self.specific_change(original_list_of_nodes)
-
     @abstractmethod
-    def specific_change(self, original_list_of_nodes):
-        """
-        Applies the change operation to the received AST.
-
-        Parameters
-        ----------
-        original : ast
-            AST of original code
-
-        Returns
-        -------
-        ast
-            Modified AST
-        """
+    def make_change(self, original_list_of_nodes):
         pass
 
     @abstractmethod
@@ -223,7 +206,7 @@ class Insert(ChangeOperation):
         self.index = index
         self.change = change
 
-    def specific_change(self, original_list_of_nodes):
+    def make_change(self, original_list_of_nodes):
         """
         Applies the insert operation to the received AST.
 
@@ -287,7 +270,7 @@ class Delete(ChangeOperation):
 
         self.index = index
 
-    def specific_change(self, original_list_of_nodes):
+    def make_change(self, original_list_of_nodes):
         """
         Applies the delete operation to the received AST.
 
@@ -305,7 +288,7 @@ class Delete(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        end_index = original_list_of_nodes[self.index].num_children() + self.index
+        end_index = original_list_of_nodes[self.index].num_children() + self.index + 1
         del original_list_of_nodes[self.index:end_index]
         return original_list_of_nodes
 
@@ -357,7 +340,7 @@ class Update(ChangeOperation):
         self.index = index
         self.change = change
 
-    def specific_change(self, original_list_of_nodes):
+    def make_change(self, original_list_of_nodes):
         """
         Applies the update operation to the received AST.
 
@@ -377,7 +360,6 @@ class Update(ChangeOperation):
         """
         end_index = original_list_of_nodes[self.index].num_children() + self.index
         del original_list_of_nodes[self.index:end_index]
-
         original_list_of_nodes[self.index:self.index] = self.change.walk()
         return original_list_of_nodes
 

@@ -298,14 +298,22 @@ class TreeDifferencer:
         # for key, value in node_pairs.items():
         #     print("TOP DOWN: ", key, value)
 
-        for i in range(10):
+        for i in range(1000):
             self.bottom_up(post_org, post_mod, node_pairs, 0.1)
             self.top_down(in_org, in_mod, node_pairs, 0.1)
 
         sorted_x = sorted(node_pairs.items(), key=lambda kv: kv[1], reverse=True)
         sorted_node_pairs = collections.OrderedDict(sorted_x)
 
+        matched = list()
+        no_duplicates_node_pairs = dict()
         for key, value in sorted_node_pairs.items():
+            if key[0] not in matched and key[1] not in matched:
+                no_duplicates_node_pairs[key] = value
+                matched.append(key[0])
+                matched.append(key[1])
+
+        for key, value in no_duplicates_node_pairs.items():
             print("-------------------------------------")
             print(key, value)
             key[0].unparse(0)

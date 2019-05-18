@@ -26,7 +26,10 @@ class Variable:
             return 0
         else:
             s = SequenceMatcher(None, self.value, node.value)
-            return s.ratio()
+            return (2*s.ratio() + 1)/3
+
+    def is_mutable(self, node):
+        return True
 
 
 class Constant:
@@ -57,6 +60,9 @@ class Constant:
         else:
             s = SequenceMatcher(None, self.value, node.value)
             return s.ratio()
+
+    def is_mutable(self, node):
+        return True
 
 
 class Assign:
@@ -111,6 +117,12 @@ class Assign:
         children.append(node.value)
         return children
 
+    def is_mutable(self, node):
+        if isinstance(node, self.__class__):
+            return True
+        else:
+            return False
+
 
 class FunctionName:
     def __init__(self, value):
@@ -137,6 +149,9 @@ class FunctionName:
         else:
             s = SequenceMatcher(None, self.value, node.value)
             return s.ratio()
+
+    def is_mutable(self, node):
+        return True
 
 
 class Function:
@@ -209,6 +224,12 @@ class Function:
         children.append(node.end)
         return children
 
+    def is_mutable(self, node):
+        if isinstance(node, self.__class__):
+            return True
+        else:
+            return False
+
 
 class Condition:
     def __init__(self, value):
@@ -248,6 +269,12 @@ class Condition:
         children = list()
         children.append(node.value)
         return children
+
+    def is_mutable(self, node):
+        if isinstance(node, self.__class__):
+            return True
+        else:
+            return False
 
 
 class ElIf:
@@ -306,6 +333,12 @@ class ElIf:
         children.append(node.next_if)
         return children
 
+    def is_mutable(self, node):
+        if isinstance(node, self.__class__):
+            return True
+        else:
+            return False
+
 
 class Else:
     def __init__(self, body):
@@ -346,6 +379,12 @@ class Else:
         children = list()
         children.append(node.body)
         return children
+
+    def is_mutable(self, node):
+        if isinstance(node, self.__class__):
+            return True
+        else:
+            return False
 
 
 class If:
@@ -403,6 +442,12 @@ class If:
         children.append(node.body)
         children.append(node.next_if)
         return children
+
+    def is_mutable(self, node):
+        if isinstance(node, self.__class__):
+            return True
+        else:
+            return False
 
 
 class Body:
@@ -468,6 +513,12 @@ class Body:
         children.append(node.end)
         return children
 
+    def is_mutable(self, node):
+        if isinstance(node, self.__class__):
+            return True
+        else:
+            return False
+
 
 class BoolOperation:
     def __init__(self, operation, first, second):
@@ -526,6 +577,12 @@ class BoolOperation:
         children.append(node.operation)
         return children
 
+    def is_mutable(self, node):
+        if isinstance(node, self.__class__):
+            return True
+        else:
+            return False
+
 
 class UnaryOperation:
     def __init__(self, operation, first):
@@ -574,6 +631,12 @@ class UnaryOperation:
         children.append(node.first)
         children.append(node.operation)
         return children
+
+    def is_mutable(self, node):
+        if isinstance(node, self.__class__):
+            return True
+        else:
+            return False
 
 
 class Compare:
@@ -635,6 +698,12 @@ class Compare:
         children.append(node.operation)
         return children
 
+    def is_mutable(self, node):
+        if isinstance(node, self.__class__):
+            return True
+        else:
+            return False
+
 
 class EmptyNode:
     def print_me(self):
@@ -657,6 +726,9 @@ class EmptyNode:
             return 0
         else:
             return 1
+
+    def is_mutable(self, node):
+        return True
 
 
 class Startnode:
@@ -681,6 +753,9 @@ class Startnode:
         else:
             return 0.5
 
+    def is_mutable(self, node):
+        return False
+
 
 class Endnode:
     def print_me(self):
@@ -703,3 +778,7 @@ class Endnode:
             return 0
         else:
             return 0.5
+
+    def is_mutable(self, node):
+        return False
+

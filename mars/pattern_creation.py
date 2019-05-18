@@ -155,6 +155,12 @@ class EditScriptGenerator:
 
         index = 1
 
+        for i, node in enumerate(list_first_ast):
+            print(i, ";", node)
+
+        for i, node in enumerate(list_second_ast):
+            print(i, ";", node)
+
         while index < list_first_ast.__len__():
             node = list_first_ast[index]
             pair, similarity = self.find_node_pair(node, similarity_list)
@@ -163,7 +169,6 @@ class EditScriptGenerator:
                     edit_script.append(("delete", node))
                     similarity_list = self.filter_node_pairs(node, similarity_list)
                     index += node.num_children()
-                    print("tu", similarity)
                 elif not node.is_mutable(pair[1]):
                     edit_script.append(("delete", node))
                     similarity_list = self.filter_node_pairs(node, similarity_list)
@@ -181,6 +186,7 @@ class EditScriptGenerator:
             if not isinstance(node, (Startnode, Endnode)):
                 if similarity < self.sim_treshold:
                     edit_script.append(("insert", node))
+                    index += node.num_children()
                 elif not pair[0].is_mutable(pair[1]):
                     edit_script.append(("insert", node))
                     index += node.num_children()
@@ -191,9 +197,12 @@ class EditScriptGenerator:
             print(op[0])
             if isinstance(op[1], list):
                 op[1][0].unparse(0)
+                print()
                 op[1][1].unparse(0)
+                print()
             else:
                 op[1].unparse(0)
+                print()
 
         return edit_script
 
@@ -322,7 +331,10 @@ class TreeDifferencer:
     def parrent_sim_softmax(self, first_node, second_node, node_pairs):
         parents_sim = exp(node_pairs.get((first_node, second_node), 0))
         others_sim = sum(exp(value) for key, value in node_pairs.items() if first_node in key or second_node in key)
-        return parents_sim / others_sim
+        if parents_sim == 1:
+            return 0
+        else:
+            return parents_sim / others_sim
 
     def remove_duplicates(self, node_pairs):
         matched = list()

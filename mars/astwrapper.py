@@ -64,7 +64,7 @@ class Constant:
         if not self.type_of == node.type_of:
             return 0
         else:
-            s = SequenceMatcher(None, self.value, node.value)
+            s = SequenceMatcher(None, str(self.value), str(node.value))
             return s.ratio()
 
     def is_mutable(self, node):
@@ -262,7 +262,7 @@ class Function:
     def num_children(self):
         num_children = 3
         for arg in self.args:
-            num_children += arg.num_children()
+            num_children += arg.num_children() + 1
         return num_children + self.value.num_children()
 
     def get_all_children(self):
@@ -610,7 +610,7 @@ class Body:
     def num_children(self):
         num_children = 2
         for child in self.children:
-            num_children += child.num_children()
+            num_children += child.num_children() + 1
         return num_children
 
     def get_all_children(self):

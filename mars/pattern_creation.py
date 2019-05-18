@@ -2,6 +2,7 @@ import _ast
 import ast
 import collections
 import copy
+from math import exp
 
 from similarity.sorensen_dice import SorensenDice
 
@@ -297,6 +298,10 @@ class TreeDifferencer:
         # for key, value in node_pairs.items():
         #     print("TOP DOWN: ", key, value)
 
+        for i in range(10000):
+            self.bottom_up(post_org, post_mod, node_pairs, 0.1)
+            self.top_down(in_org, in_mod, node_pairs, 0.1)
+
         sorted_x = sorted(node_pairs.items(), key=lambda kv: kv[1], reverse=True)
         sorted_node_pairs = collections.OrderedDict(sorted_x)
 
@@ -335,14 +340,14 @@ class TreeDifferencer:
         inner_nodes_second = [x for x in second_ast if not x.is_leaf()]
         for x in inner_nodes_first:
             for y in inner_nodes_second:
-                current_sim = node_pairs.get((x, y), 0)
+                current_sim = self.parrent_sim_softmax(x, y,node_pairs)
                 if current_sim >= 0:
                     for child_x in x.get_children(x):
                         for child_y in y.get_children(y):
                             children_sim = node_pairs.get((child_x, child_y), 0)
                             if children_sim != 0:
                                 if isinstance(child_x, (Startnode, Endnode)):
-                                    mean = self.harmonic_mean(current_sim, children_sim)
+                                    mean = self.arithmetic_mean(current_sim, children_sim)
                                 else:
                                     mean = self.arithmetic_mean(current_sim, children_sim)
                                 if mean <= f:
@@ -355,3 +360,8 @@ class TreeDifferencer:
 
     def arithmetic_mean(self, x, y):
         return (x+y) / 2
+
+    def parrent_sim_softmax(self, first_node, second_node, node_pairs):
+        parents_sim = exp(node_pairs.get((first_node, second_node), 0))
+        others_sim = sum(exp(value) for key, value in node_pairs.items() if first_node in key or second_node in key)
+        return parents_sim / others_sim

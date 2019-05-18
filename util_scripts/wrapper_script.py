@@ -2,7 +2,7 @@ import ast
 
 from mars.astutils import AstWrapper
 from mars.pattern_creation import TreeDifferencer
-from mars.pattern_creation_marst import EditScriptGenerator
+from mars.pattern_creation import EditScriptGenerator
 
 with open("../dataset/variable_check/original_2.py") as original, open("../dataset/variable_check/modified_2.py") as modified:
     original_code = ast.parse(original.read())

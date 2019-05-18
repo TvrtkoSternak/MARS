@@ -125,7 +125,6 @@ class EditScriptGenerator:
             original and modified code ASTs
         """
         self.tree_differencer = tree_differencer
-        self.similarity_list = None
         self.sim_treshold = sim_treshold
 
     def generate(self, first_ast, second_ast):
@@ -147,86 +146,60 @@ class EditScriptGenerator:
             Generated EditScript object that describes the modifications
             necessary to transform the original AST to modified AST
         """
-        detailed_first_ast = AstUtils.walk_all_nodes(first_ast)
-        detailed_second_ast = AstUtils.walk_all_nodes(second_ast)
-        postorder_first_ast = []
-        postorder_second_ast = []
-        AstUtils.change_to_postorder(detailed_first_ast[0], postorder_first_ast)
-        AstUtils.change_to_postorder(detailed_second_ast[0], postorder_second_ast)
 
-        self.similarity_list = self.tree_differencer.connect_nodes(postorder_first_ast, postorder_second_ast)
+        similarity_list = self.tree_differencer.connect_nodes(first_ast, second_ast)
+        list_first_ast = first_ast.walk()
+        list_second_ast = second_ast.walk()
 
-        print("Slicnosti")
-        for somethin in self.similarity_list:
-            print(somethin[0].node, somethin[1].node, somethin[2], somethin[0].get_value())
+        edit_script = list()
 
-        edit_script = EditScript([])
+        index = 1
 
-        # for node in detailed_first_ast:
-        #     print(node.node, "::::", node.index, "::::", node.leaf, "::::", node.parent)
+        while index < list_first_ast.__len__():
+            node = list_first_ast[index]
+            pair, similarity = self.find_node_pair(node, similarity_list)
 
-        # for node in detailed_second_ast:
-        #     print(node.node, "::::", node.index, "::::", node.leaf, "::::", node.parent)
+            if similarity < self.sim_treshold:
+                edit_script.append(("delete", node))
+                index += node.num_children()
+            elif not node.is_mutable(pair[1]):
+                edit_script.append(("delete", node))
+                index += node.num_children()
+            elif node.is_leaf() and node.similarity(pair[1]) < 1.0:
+                edit_script.append(("update", [node, pair[1]]))
 
-        # Original ast, here we handle the delete, update and move
-        copy_sim = copy.deepcopy(self.similarity_list)
-        i = 1
-        num_deleted_nodes = 0
-        while i < detailed_first_ast.__len__():
-            node = detailed_first_ast[i]
-            print("prvi prolaz: ", node)
-            found_match = self.find_node_pair(node, copy_sim)
-            if not found_match:
-                # No match, delete node
-                edit_script.add(Delete(node.index - num_deleted_nodes))
-                if not node.leaf:
-                    # Increment by number of children so that we don't delete them again
-                    i += node.number_of_children(count_inner_nodes=True)
-                    num_deleted_nodes += node.number_of_children(True) + 1
-                else:
-                    num_deleted_nodes += 1
-            elif 1 > found_match[0][2] > self.sim_treshold:
-                print('######################## ', found_match[0][0], " ", found_match[0][1])
+            index += 1
 
-                if node.leaf:
-                    # Node is a leaf, update it
-                    edit_script.add(Update(node.index - num_deleted_nodes, found_match[0][1].node))
-                # else:
-                #     # print('tu', node)
-                #     # node is a subbtree, check if needs to move
-                #     parent_match = self.find_node_pair(found_match[0][0].parent, copy_sim)
-                #     if parent_match:
-                #         # print('tu sam')
-                #         if parent_match[0][1] is not found_match[0][1].parent:
-                #             # print('tu nisam')
-                #             edit_script.add(Move(node.index, found_match[0][1].index))
-                    print("size: ", len(copy_sim))
-                    copy_sim.remove(found_match[0])
-                    print("size: ", len(copy_sim))
+        index = 1
 
-            i += 1
+        while index < list_second_ast.__len__():
+            node = list_second_ast[index]
+            pair, similarity = self.find_node_pair(node, similarity_list)
 
-        # Modified ast, here we handle the insert
-        i = 1
-        while i < detailed_second_ast.__len__():
-            # print(i)
-            node = detailed_second_ast[i]
-            found_match = self.find_node_pair(node, self.similarity_list)
+            if similarity < self.sim_treshold:
+                edit_script.append(("insert", node))
+            elif not pair[0].is_mutable(pair[1]):
+                edit_script.append(("insert", node))
+                index += node.num_children()
 
-            if not found_match:
-                # No match, insert node
-                edit_script.add(Insert(node.index, node.node))
-                if not node.leaf:
-                    # Increment by number of children so that we don't insert them again
-                    i += node.number_of_children(count_inner_nodes=True)
+            index += 1
 
-            i += 1
+        for op in edit_script:
+            print(op[0])
+            if isinstance(op[1], list):
+                op[1][0].print_me()
+                op[1][1].print_me()
+            else:
+                op[1].print_me()
 
         return edit_script
 
     def find_node_pair(self, node, similarity_list):
-        found_match = [item for item in similarity_list if node in item]
-        return found_match
+        pair = [key for key, value in similarity_list.items() if node in key]
+        if pair:
+            return pair[0], similarity_list[pair[0]]
+        else:
+            return None, 0
 
 
 class TreeDifferencer:

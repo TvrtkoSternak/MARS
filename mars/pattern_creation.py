@@ -305,13 +305,7 @@ class TreeDifferencer:
         sorted_x = sorted(node_pairs.items(), key=lambda kv: kv[1], reverse=True)
         sorted_node_pairs = collections.OrderedDict(sorted_x)
 
-        matched = list()
-        no_duplicates_node_pairs = dict()
-        for key, value in sorted_node_pairs.items():
-            if key[0] not in matched and key[1] not in matched:
-                no_duplicates_node_pairs[key] = value
-                matched.append(key[0])
-                matched.append(key[1])
+        no_duplicates_node_pairs = self.remove_duplicates(sorted_node_pairs)
 
         for key, value in no_duplicates_node_pairs.items():
             print("-------------------------------------")
@@ -373,3 +367,13 @@ class TreeDifferencer:
         parents_sim = exp(node_pairs.get((first_node, second_node), 0))
         others_sim = sum(exp(value) for key, value in node_pairs.items() if first_node in key or second_node in key)
         return parents_sim / others_sim
+
+    def remove_duplicates(self, node_pairs):
+        matched = list()
+        no_duplicates_node_pairs = dict()
+        for key, value in node_pairs.items():
+            if key[0] not in matched and key[1] not in matched:
+                no_duplicates_node_pairs[key] = value
+                matched.append(key[0])
+                matched.append(key[1])
+        return no_duplicates_node_pairs

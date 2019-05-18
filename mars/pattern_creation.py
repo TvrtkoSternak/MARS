@@ -1,14 +1,9 @@
-import _ast
 import ast
 import collections
-import copy
 from math import exp
 
-from similarity.sorensen_dice import SorensenDice
-
-from mars.astutils import AstUtils
 from mars.astwrapper import Startnode, Endnode
-from mars.pattern import EditScript, Move, Delete, Insert, Update, Pattern
+from mars.pattern import EditScript, Pattern
 
 
 class PatternCreator:

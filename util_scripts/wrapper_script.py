@@ -12,7 +12,7 @@ wrapper = AstWrapper()
 org = wrapper.visit(original_code)
 mod = wrapper.visit(modified_code)
 
-tree_diff = TreeDifferencer(0.3, 0.3)
+tree_diff = TreeDifferencer(0.1)
 tree_diff.connect_nodes(org, mod)
 # wrapper = AstWrapper()
 # body = wrapper.visit(original_code)

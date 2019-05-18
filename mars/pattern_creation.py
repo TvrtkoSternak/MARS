@@ -249,12 +249,11 @@ class TreeDifferencer:
 
     """
 
-    def __init__(self, f=0.6, t=0.6):
+    def __init__(self, f=0.1):
         """
         Initialises TreeDifferencer object.
         """
         self.f = f
-        self.t = t
 
     def connect_nodes(self, first_ast, second_ast):
         """
@@ -282,38 +281,16 @@ class TreeDifferencer:
         post_org = first_ast.walk(True)
         post_mod = second_ast.walk(True)
 
-        node_pairs = self.init_leaf_pairs(post_org, post_mod, 0.1)
-        # for key, value in node_pairs.items():
-        #     print("LEAF MATCHES: ", key, value)
-
-        # print("----------------------------------------")
-
-        self.bottom_up(post_org, post_mod, node_pairs, 0.1)
-        # for key, value in node_pairs.items():
-        #     print("BOTTOM UP: ", key, value)
-
-        # print("----------------------------------------")
-
-        self.top_down(in_org, in_mod, node_pairs, 0.1)
-        # for key, value in node_pairs.items():
-        #     print("TOP DOWN: ", key, value)
+        node_pairs = self.init_leaf_pairs(post_org, post_mod, self.f)
 
         for i in range(1000):
-            self.bottom_up(post_org, post_mod, node_pairs, 0.1)
-            self.top_down(in_org, in_mod, node_pairs, 0.1)
+            self.bottom_up(post_org, post_mod, node_pairs, self.f)
+            self.top_down(in_org, in_mod, node_pairs, self.f)
 
         sorted_x = sorted(node_pairs.items(), key=lambda kv: kv[1], reverse=True)
         sorted_node_pairs = collections.OrderedDict(sorted_x)
 
         no_duplicates_node_pairs = self.remove_duplicates(sorted_node_pairs)
-
-        for key, value in no_duplicates_node_pairs.items():
-            print("-------------------------------------")
-            print(key, value)
-            key[0].unparse(0)
-            print()
-            key[1].unparse(0)
-            print()
         
         return no_duplicates_node_pairs
 
@@ -328,13 +305,13 @@ class TreeDifferencer:
                     leaf_pairs[(x, y)] = similarity
         return leaf_pairs
 
-    def bottom_up(self, post_order_first_ast, post_order_second_ast, node_pairs, t):
+    def bottom_up(self, post_order_first_ast, post_order_second_ast, node_pairs, f):
         inner_nodes_first = [x for x in post_order_first_ast if not x.is_leaf()]
         inner_nodes_second = [x for x in post_order_second_ast if not x.is_leaf()]
         for x in inner_nodes_first:
             for y in inner_nodes_second:
                 similarity = x.similarity(y, node_pairs)
-                if similarity > t:
+                if similarity > f:
                     node_pairs[(x, y)] = similarity
 
     def top_down(self, first_ast, second_ast, node_pairs, f):

@@ -158,15 +158,18 @@ class EditScriptGenerator:
         while index < list_first_ast.__len__():
             node = list_first_ast[index]
             pair, similarity = self.find_node_pair(node, similarity_list)
-
-            if similarity < self.sim_treshold:
-                edit_script.append(("delete", node))
-                index += node.num_children()
-            elif not node.is_mutable(pair[1]):
-                edit_script.append(("delete", node))
-                index += node.num_children()
-            elif node.is_leaf() and node.similarity(pair[1]) < 1.0:
-                edit_script.append(("update", [node, pair[1]]))
+            if not isinstance(node, (Startnode, Endnode)):
+                if similarity < self.sim_treshold:
+                    edit_script.append(("delete", node))
+                    similarity_list = self.filter_node_pairs(node, similarity_list)
+                    index += node.num_children()
+                    print("tu", similarity)
+                elif not node.is_mutable(pair[1]):
+                    edit_script.append(("delete", node))
+                    similarity_list = self.filter_node_pairs(node, similarity_list)
+                    index += node.num_children()
+                elif node.is_leaf() and node.similarity(pair[1]) < 1.0:
+                    edit_script.append(("update", [node, pair[1]]))
 
             index += 1
 
@@ -175,22 +178,22 @@ class EditScriptGenerator:
         while index < list_second_ast.__len__():
             node = list_second_ast[index]
             pair, similarity = self.find_node_pair(node, similarity_list)
-
-            if similarity < self.sim_treshold:
-                edit_script.append(("insert", node))
-            elif not pair[0].is_mutable(pair[1]):
-                edit_script.append(("insert", node))
-                index += node.num_children()
+            if not isinstance(node, (Startnode, Endnode)):
+                if similarity < self.sim_treshold:
+                    edit_script.append(("insert", node))
+                elif not pair[0].is_mutable(pair[1]):
+                    edit_script.append(("insert", node))
+                    index += node.num_children()
 
             index += 1
 
         for op in edit_script:
             print(op[0])
             if isinstance(op[1], list):
-                op[1][0].print_me()
-                op[1][1].print_me()
+                op[1][0].unparse(0)
+                op[1][1].unparse(0)
             else:
-                op[1].print_me()
+                op[1].unparse(0)
 
         return edit_script
 
@@ -200,6 +203,9 @@ class EditScriptGenerator:
             return pair[0], similarity_list[pair[0]]
         else:
             return None, 0
+
+    def filter_node_pairs(self, node, similarity_list):
+        return {key:value for key,value in similarity_list.items() if key[0] not in node.get_all_children()}
 
 
 class TreeDifferencer:

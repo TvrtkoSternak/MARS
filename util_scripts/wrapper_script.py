@@ -17,7 +17,12 @@ tree_diff = TreeDifferencer(0.1)
 # tree_diff.connect_nodes(org, mod)
 
 generator = EditScriptGenerator(tree_diff, 0.3)
-generator.generate(org, mod)
+edit_script = generator.generate(org, mod)
+
+for change in edit_script:
+    org = change.make_change(org)
+
+org.unparse(0)
 
 # wrapper = AstWrapper()
 # body = wrapper.visit(original_code)

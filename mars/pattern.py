@@ -67,16 +67,15 @@ class EditScript:
     add(self, change)
         Adds the specified ChangeOperation in changes
     """
-    def __init__(self, changes=None):
+    def __init__(self, changes=list()):
         """
         Initialises EditScript object
 
         Parameters
         ----------
         changes : list of ChangeOperation
-            List that contains change operations(default is None)
+            List that contains change operations(default is empty list)
         """
-
         self.changes = changes
 
     def __iter__(self):
@@ -155,13 +154,7 @@ class ChangeOperation(ABC, ast.NodeTransformer):
     """
 
     def make_change(self, original):
-        appender = EndBodyAppender()
-        appender.visit(original)
-
         self.specific_change(original)
-
-        remover = EndBodyRemover()
-        remover.visit(original)
 
     @abstractmethod
     def specific_change(self, original):
@@ -422,123 +415,3 @@ class Update(ChangeOperation):
         self.internal_index += 1
         ast.NodeTransformer.generic_visit(self, node)
         return node
-
-
-class Move(ChangeOperation):
-    """
-    A  class  that  implements  the  move  change  operation  logic.  It  combines  the  delete  and  insert operation
-    in a way that it deletes the AST node at first index and then inserts the deleted AST node at the second index.
-
-    ...
-
-    Attributes
-    ----------
-    insert_operation : Insert
-        Insert operation that should be executed as a part of move
-    delete_operation: Delete
-        Delete operation that should be executed as a part of move
-
-    Methods
-    -------
-    __init__(self, insert_index, delete_index)
-        Initialises Move object. It creates Insert and Delete operations which combined implement move logic.
-    make_change(self, ast)
-        Applies the move operation to the received AST.
-    """
-
-    def __init__(self, delete_index, insert_index):
-        """
-        Initialises Move object. It creates Insert and Delete operations which combined implement move logic.
-
-        Parameters
-        ----------
-        insert_index : int
-            The position in the AST to which node needs to be moved
-        delete_index : ast
-            The position of the AST node that needs to be moved
-        """
-        self.insert_index = insert_index
-        self.delete_index = delete_index
-        self.internal_index = 0
-        self.insert = None
-
-    def specific_change(self, original):
-        """
-        Applies the move operation to the received AST.
-
-        Parameters
-        ----------
-        original : ast
-            AST of original code
-
-        Returns
-        -------
-        ast
-            Modified AST
-
-        Raises
-        IndexError
-            If the specified index is out of range
-        """
-        self.internal_index = 0
-        self.visit(original)
-        remover = EndBodyRemover()
-        remover.visit(original)
-        self.insert.make_change(original)
-
-    def __str__(self):
-        """
-        Returns move operation in a human-readable form.
-
-        Returns
-        -------
-        string
-            Human-readable interpretation of Move
-        """
-        return "Move operation from index " + str(self.delete_index) \
-               + " to index " + str(self.insert_index)
-
-    def generic_visit(self, node):
-        if self.internal_index == self.delete_index:
-            counter = Counter()
-            counter.visit(node)
-            self.insert = Insert(self.insert_index-counter.count, node)
-            self.internal_index += 1
-            return None
-        self.internal_index += 1
-        ast.NodeTransformer.generic_visit(self, node)
-        return node
-
-
-class EndBodyAppender(ast.NodeTransformer):
-
-    def generic_visit(self, node):
-        if hasattr(node, 'body'):
-            import_node = EndBodyNode()
-            node.body.insert(len(node.body), import_node)
-        ast.NodeTransformer.generic_visit(self, node)
-        return node
-
-
-class EndBodyRemover(ast.NodeTransformer):
-
-    def generic_visit(self, node):
-        if type(node) is EndBodyNode:
-            return None
-        ast.NodeTransformer.generic_visit(self, node)
-        return node
-
-
-class Counter(ast.NodeVisitor):
-
-    def __init__(self):
-        self.count = 0
-
-    def generic_visit(self, node):
-        self.count += 1
-        ast.NodeVisitor.generic_visit(self, node)
-
-
-class EndBodyNode(ast.AST):
-    def __init__(self):
-        self.__type__ = 'end'

@@ -34,6 +34,9 @@ class Variable:
     def num_children(self):
         return 0
 
+    def get_all_children(self):
+        return list()
+
 
 class Constant:
     def __init__(self, value, type_of):
@@ -69,6 +72,9 @@ class Constant:
 
     def num_children(self):
         return 0
+
+    def get_all_children(self):
+        return list()
 
 
 class Assign:
@@ -132,6 +138,14 @@ class Assign:
     def num_children(self):
         return 2 + self.variable.num_children() + self.value.num_children()
 
+    def get_all_children(self):
+        children = list()
+        children.append(self.variable)
+        children.extend(self.variable.get_all_children())
+        children.append(self.value)
+        children.extend(self.value.get_all_children())
+        return children
+
 
 class FunctionName:
     def __init__(self, value):
@@ -164,6 +178,9 @@ class FunctionName:
 
     def num_children(self):
         return 0
+
+    def get_all_children(self):
+        return list()
 
 
 class Function:
@@ -248,6 +265,15 @@ class Function:
             num_children += arg.num_children()
         return num_children + self.value.num_children()
 
+    def get_all_children(self):
+        children = list()
+        for arg in self.args:
+            children.append(arg)
+            children.extend(arg.get_all_children())
+        children.append(self.value)
+        children.extend(self.value.get_all_children())
+        return children
+
 
 class Condition:
     def __init__(self, value):
@@ -296,6 +322,12 @@ class Condition:
 
     def num_children(self):
         return 1 + self.value.num_children()
+
+    def get_all_children(self):
+        children = list()
+        children.append(self.value)
+        children.extend(self.value.get_all_children())
+        return children
 
 
 class ElIf:
@@ -363,6 +395,16 @@ class ElIf:
     def num_children(self):
         return 3 + self.condition.num_children() + self.body.num_children() + self.next_if.num_children()
 
+    def get_all_children(self):
+        children = list()
+        children.append(self.condition)
+        children.extend(self.condition.get_all_children())
+        children.append(self.body)
+        children.extend(self.body.get_all_children())
+        children.append(self.next_if)
+        children.extend(self.next_if.get_all_children())
+        return children
+
 
 class Else:
     def __init__(self, body):
@@ -412,6 +454,12 @@ class Else:
 
     def num_children(self):
         return 1 + self.body.num_children()
+
+    def get_all_children(self):
+        children = list()
+        children.append(self.body)
+        children.extend(self.body.get_all_children())
+        return children
 
 
 class If:
@@ -478,6 +526,16 @@ class If:
 
     def num_children(self):
         return 3 + self.condition.num_children() + self.body.num_children() + self.next_if.num_children()
+
+    def get_all_children(self):
+        children = list()
+        children.append(self.condition)
+        children.extend(self.condition.get_all_children())
+        children.append(self.body)
+        children.extend(self.body.get_all_children())
+        children.append(self.next_if)
+        children.extend(self.next_if.get_all_children())
+        return children
 
 
 class Body:
@@ -555,6 +613,13 @@ class Body:
             num_children += child.num_children()
         return num_children
 
+    def get_all_children(self):
+        children = list()
+        for child in self.children:
+            children.append(child)
+            children.extend(child.get_all_children())
+        return children
+
 
 class BoolOperation:
     def __init__(self, operation, first, second):
@@ -622,6 +687,16 @@ class BoolOperation:
     def num_children(self):
         return 3 + self.first.num_children() + self.operation.num_children() + self.second.num_children()
 
+    def get_all_children(self):
+        children = list()
+        children.append(self.first)
+        children.extend(self.first.get_all_children())
+        children.append(self.second)
+        children.extend(self.second.get_all_children())
+        children.append(self.operation)
+        children.extend(self.operation.get_all_children())
+        return children
+
 
 class UnaryOperation:
     def __init__(self, operation, first):
@@ -679,6 +754,14 @@ class UnaryOperation:
 
     def num_children(self):
         return 2 + self.first.num_children() + self.operation.num_children()
+
+    def get_all_children(self):
+        children = list()
+        children.append(self.first)
+        children.extend(self.first.get_all_children())
+        children.append(self.operation)
+        children.extend(self.operation.get_all_children())
+        return children
 
 
 class Compare:
@@ -749,6 +832,16 @@ class Compare:
     def num_children(self):
         return 3 + self.first.num_children() + self.operation.num_children() + self.second.num_children()
 
+    def get_all_children(self):
+        children = list()
+        children.append(self.first)
+        children.extend(self.first.get_all_children())
+        children.append(self.second)
+        children.extend(self.second.get_all_children())
+        children.append(self.operation)
+        children.extend(self.operation.get_all_children())
+        return children
+
 
 class EmptyNode:
     def print_me(self):
@@ -777,6 +870,9 @@ class EmptyNode:
 
     def num_children(self):
         return 0
+
+    def get_all_children(self):
+        return list()
 
 
 class Startnode:
@@ -807,6 +903,9 @@ class Startnode:
     def num_children(self):
         return 0
 
+    def get_all_children(self):
+        return list()
+
 
 class Endnode:
     def print_me(self):
@@ -835,3 +934,6 @@ class Endnode:
 
     def num_children(self):
         return 0
+
+    def get_all_children(self):
+        return list()

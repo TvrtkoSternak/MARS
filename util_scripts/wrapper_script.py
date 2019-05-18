@@ -22,7 +22,7 @@ edit_script = generator.generate(org, mod)
 for change in edit_script:
     org = change.make_change(org)
 
-org.unparse(0)
+org[0].reconstruct(org).unparse(0)
 
 # wrapper = AstWrapper()
 # body = wrapper.visit(original_code)

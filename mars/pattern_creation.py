@@ -298,7 +298,7 @@ class TreeDifferencer:
         # for key, value in node_pairs.items():
         #     print("TOP DOWN: ", key, value)
 
-        for i in range(10000):
+        for i in range(10):
             self.bottom_up(post_org, post_mod, node_pairs, 0.1)
             self.top_down(in_org, in_mod, node_pairs, 0.1)
 

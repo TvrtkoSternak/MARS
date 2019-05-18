@@ -358,7 +358,7 @@ class Update(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        end_index = original_list_of_nodes[self.index].num_children() + self.index
+        end_index = original_list_of_nodes[self.index].num_children() + self.index + 1
         del original_list_of_nodes[self.index:end_index]
         original_list_of_nodes[self.index:self.index] = self.change.walk()
         return original_list_of_nodes

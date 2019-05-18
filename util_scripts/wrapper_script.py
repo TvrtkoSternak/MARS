@@ -19,6 +19,8 @@ tree_diff = TreeDifferencer(0.1)
 generator = EditScriptGenerator(tree_diff, 0.3)
 edit_script = generator.generate(org, mod)
 
+org = org.walk()
+
 for change in edit_script:
     org = change.make_change(org)
 

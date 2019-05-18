@@ -3,7 +3,7 @@ import collections
 from math import exp
 
 from mars.astwrapper import Startnode, Endnode
-from mars.pattern import EditScript, Pattern
+from mars.pattern import EditScript, Pattern, Delete, Update, Insert
 
 
 class PatternCreator:
@@ -150,27 +150,20 @@ class EditScriptGenerator:
 
         index = 1
 
-        for i, node in enumerate(list_first_ast):
-            print(i, ";", node)
-
-        for i, node in enumerate(list_second_ast):
-            print(i, ";", node)
-
         while index < list_first_ast.__len__():
             node = list_first_ast[index]
             pair, similarity = self.find_node_pair(node, similarity_list)
             if not isinstance(node, (Startnode, Endnode)):
                 if similarity < self.sim_treshold:
-                    edit_script.append(("delete", node))
+                    edit_script.append(Delete(index))
                     similarity_list = self.filter_node_pairs(node, similarity_list)
                     index += node.num_children()
                 elif not node.is_mutable(pair[1]):
-                    edit_script.append(("delete", node))
+                    edit_script.append(Delete(index))
                     similarity_list = self.filter_node_pairs(node, similarity_list)
                     index += node.num_children()
                 elif node.is_leaf() and node.similarity(pair[1]) < 1.0:
-                    edit_script.append(("update", [node, pair[1]]))
-
+                    edit_script.append(Update(index, pair[1]))
             index += 1
 
         index = 1
@@ -180,26 +173,14 @@ class EditScriptGenerator:
             pair, similarity = self.find_node_pair(node, similarity_list)
             if not isinstance(node, (Startnode, Endnode)):
                 if similarity < self.sim_treshold:
-                    edit_script.append(("insert", node))
+                    edit_script.append(Insert(index, node))
                     index += node.num_children()
                 elif not pair[0].is_mutable(pair[1]):
-                    edit_script.append(("insert", node))
+                    edit_script.append(Insert(index, node))
                     index += node.num_children()
-
             index += 1
 
-        for op in edit_script:
-            print(op[0])
-            if isinstance(op[1], list):
-                op[1][0].unparse(0)
-                print()
-                op[1][1].unparse(0)
-                print()
-            else:
-                op[1].unparse(0)
-                print()
-
-        return edit_script
+        return EditScript(edit_script)
 
     def find_node_pair(self, node, similarity_list):
         pair = [key for key, value in similarity_list.items() if node in key]
@@ -209,7 +190,7 @@ class EditScriptGenerator:
             return None, 0
 
     def filter_node_pairs(self, node, similarity_list):
-        return {key:value for key,value in similarity_list.items() if key[0] not in node.get_all_children()}
+        return {key: value for key, value in similarity_list.items() if key[0] not in node.get_all_children()}
 
 
 class TreeDifferencer:

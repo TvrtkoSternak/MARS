@@ -315,7 +315,7 @@ class TreeDifferencer:
             key[1].unparse(0)
             print()
         
-        return node_pairs
+        return no_duplicates_node_pairs
 
     def init_leaf_pairs(self, post_order_first_ast, post_order_second_ast, f):
         leaf_pairs = dict()

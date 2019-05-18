@@ -459,7 +459,6 @@ class Body:
                     if (self_child, node_child) in node_pairs:
                         num_keys += 1
                         children_sim += node_pairs.get((self_child, node_child), 0)
-
             return children_sim / max(num_keys, max(len(self.children), len(node.children)), 1)
 
     def get_children(self, node):

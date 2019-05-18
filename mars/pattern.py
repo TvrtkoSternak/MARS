@@ -22,7 +22,7 @@ class Pattern:
     __init__(self, original, modified, edit_script)
         Initialises Pattern object.
     """
-    def __init__(self, original, modified, edit_script):
+    def __init__(self, original, modified, node_pairs):
         """
         Initialises Pattern object
 
@@ -38,7 +38,7 @@ class Pattern:
 
         self.original = original
         self.modified = modified
-        self.edit_script = edit_script
+        self.node_pairs = node_pairs
 
 
 class EditScript:

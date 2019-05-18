@@ -31,6 +31,9 @@ class Variable:
     def is_mutable(self, node):
         return True
 
+    def num_children(self):
+        return 0
+
 
 class Constant:
     def __init__(self, value, type_of):
@@ -63,6 +66,9 @@ class Constant:
 
     def is_mutable(self, node):
         return True
+
+    def num_children(self):
+        return 0
 
 
 class Assign:
@@ -123,6 +129,9 @@ class Assign:
         else:
             return False
 
+    def num_children(self):
+        return 2 + self.variable.num_children() + self.value.num_children()
+
 
 class FunctionName:
     def __init__(self, value):
@@ -152,6 +161,9 @@ class FunctionName:
 
     def is_mutable(self, node):
         return True
+
+    def num_children(self):
+        return 0
 
 
 class Function:
@@ -230,6 +242,12 @@ class Function:
         else:
             return False
 
+    def num_children(self):
+        num_children = 3
+        for arg in self.args:
+            num_children += arg.num_children()
+        return num_children + self.value.num_children()
+
 
 class Condition:
     def __init__(self, value):
@@ -275,6 +293,9 @@ class Condition:
             return True
         else:
             return False
+
+    def num_children(self):
+        return 1 + self.value.num_children()
 
 
 class ElIf:
@@ -339,6 +360,9 @@ class ElIf:
         else:
             return False
 
+    def num_children(self):
+        return 3 + self.condition.num_children() + self.body.num_children() + self.next_if.num_children()
+
 
 class Else:
     def __init__(self, body):
@@ -385,6 +409,9 @@ class Else:
             return True
         else:
             return False
+
+    def num_children(self):
+        return 1 + self.body.num_children()
 
 
 class If:
@@ -448,6 +475,9 @@ class If:
             return True
         else:
             return False
+
+    def num_children(self):
+        return 3 + self.condition.num_children() + self.body.num_children() + self.next_if.num_children()
 
 
 class Body:
@@ -519,6 +549,12 @@ class Body:
         else:
             return False
 
+    def num_children(self):
+        num_children = 2
+        for child in self.children:
+            num_children += child.num_children()
+        return num_children
+
 
 class BoolOperation:
     def __init__(self, operation, first, second):
@@ -583,6 +619,9 @@ class BoolOperation:
         else:
             return False
 
+    def num_children(self):
+        return 3 + self.first.num_children() + self.operation.num_children() + self.second.num_children()
+
 
 class UnaryOperation:
     def __init__(self, operation, first):
@@ -637,6 +676,9 @@ class UnaryOperation:
             return True
         else:
             return False
+
+    def num_children(self):
+        return 2 + self.first.num_children() + self.operation.num_children()
 
 
 class Compare:
@@ -704,6 +746,9 @@ class Compare:
         else:
             return False
 
+    def num_children(self):
+        return 3 + self.first.num_children() + self.operation.num_children() + self.second.num_children()
+
 
 class EmptyNode:
     def print_me(self):
@@ -729,6 +774,9 @@ class EmptyNode:
 
     def is_mutable(self, node):
         return True
+
+    def num_children(self):
+        return 0
 
 
 class Startnode:
@@ -756,6 +804,9 @@ class Startnode:
     def is_mutable(self, node):
         return False
 
+    def num_children(self):
+        return 0
+
 
 class Endnode:
     def print_me(self):
@@ -782,3 +833,5 @@ class Endnode:
     def is_mutable(self, node):
         return False
 
+    def num_children(self):
+        return 0

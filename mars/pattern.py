@@ -76,7 +76,7 @@ class EditScript:
         changes : list of ChangeOperation
             List that contains change operations(default is empty list)
         """
-        self.changes = changes
+        self.changes = sorted(changes, key=lambda x: x.index, reverse=True)
 
     def __iter__(self):
         """
@@ -137,9 +137,10 @@ class EditScript:
             ChangeOperation to be added in changes
         """
         self.changes.append(change)
+        self.changes.sort(key=lambda x: x.index, reverse=True)
 
 
-class ChangeOperation(ABC, ast.NodeTransformer):
+class ChangeOperation(ABC):
     """
     A class that represents the operations used to transform the original code to modified code.
 
@@ -153,11 +154,11 @@ class ChangeOperation(ABC, ast.NodeTransformer):
         Returns change operation in a human-readable form.
     """
 
-    def make_change(self, original):
-        self.specific_change(original)
+    def make_change(self, original_list_of_nodes):
+        self.specific_change(original_list_of_nodes)
 
     @abstractmethod
-    def specific_change(self, original):
+    def specific_change(self, original_list_of_nodes):
         """
         Applies the change operation to the received AST.
 
@@ -219,12 +220,10 @@ class Insert(ChangeOperation):
         change : ast
             AST of inserted code
         """
-
         self.index = index
         self.change = change
-        self.internal_index = 0
 
-    def specific_change(self, original):
+    def specific_change(self, original_list_of_nodes):
         """
         Applies the insert operation to the received AST.
 
@@ -242,8 +241,8 @@ class Insert(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        self.internal_index = 0
-        self.visit(original)
+        original_list_of_nodes[self.index:self.index] = self.change.walk()
+        return original_list_of_nodes
 
     def __str__(self):
         """
@@ -255,14 +254,6 @@ class Insert(ChangeOperation):
             Human-readable interpretation of Insert
         """
         return "Insert operation @index " + str(self.index) + " of AST: " + ast.dump(self.change)
-
-    def generic_visit(self, node):
-        if self.internal_index == self.index:
-            self.internal_index += 1
-            return [self.change] + [node]
-        self.internal_index += 1
-        ast.NodeTransformer.generic_visit(self, node)
-        return node
 
 
 class Delete(ChangeOperation):
@@ -295,9 +286,8 @@ class Delete(ChangeOperation):
         """
 
         self.index = index
-        self.internal_index = 0
 
-    def specific_change(self, original):
+    def specific_change(self, original_list_of_nodes):
         """
         Applies the delete operation to the received AST.
 
@@ -315,8 +305,9 @@ class Delete(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        self.internal_index = 0
-        self.visit(original)
+        end_index = original_list_of_nodes[self.index].num_children() + self.index
+        del original_list_of_nodes[self.index:end_index]
+        return original_list_of_nodes
 
     def __str__(self):
         """
@@ -328,15 +319,6 @@ class Delete(ChangeOperation):
             Human-readable interpretation of Delete
         """
         return "Delete operation @index " + str(self.index)
-
-    def generic_visit(self, node):
-        if self.internal_index == self.index:
-            self.internal_index += 1
-            print("brisem: ", node)
-            return None
-        self.internal_index += 1
-        ast.NodeTransformer.generic_visit(self, node)
-        return node
 
 
 class Update(ChangeOperation):
@@ -374,9 +356,8 @@ class Update(ChangeOperation):
         """
         self.index = index
         self.change = change
-        self.internal_index = 0
 
-    def specific_change(self, original):
+    def specific_change(self, original_list_of_nodes):
         """
         Applies the update operation to the received AST.
 
@@ -394,8 +375,11 @@ class Update(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        self.internal_index = 0
-        self.visit(original)
+        end_index = original_list_of_nodes[self.index].num_children() + self.index
+        del original_list_of_nodes[self.index:end_index]
+
+        original_list_of_nodes[self.index:self.index] = self.change.walk()
+        return original_list_of_nodes
 
     def __str__(self):
         """
@@ -407,11 +391,3 @@ class Update(ChangeOperation):
             Human-readable interpretation of Update
         """
         return "Update operation @index " + str(self.index) + " change AST: " + ast.dump(self.change)
-
-    def generic_visit(self, node):
-        if self.internal_index == self.index:
-            self.internal_index += 1
-            return self.change
-        self.internal_index += 1
-        ast.NodeTransformer.generic_visit(self, node)
-        return node

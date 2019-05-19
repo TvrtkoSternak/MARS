@@ -138,9 +138,9 @@ class PatternRefiner:
         offset = 0
         for operation in edit_script:
             if isinstance(operation, Insert):
-                wildcards[operation.index] = Insert(operation.index + offset, Wildcard(operation.change, operation.__class__))
+                wildcards[operation.index] = Insert(operation.index + offset, Wildcard(operation.change, operation))
             else:
-                wildcards[operation.index] = Update(operation.index, Wildcard(list_first_pattern[operation.index], operation.__class__))
+                wildcards[operation.index] = Update(operation.index, Wildcard(list_first_pattern[operation.index], operation))
                 if isinstance(operation, Delete):
                     offset += 1
 
@@ -174,9 +174,9 @@ class PatternRefiner:
         offset = 0
         for operation in edit_script:
             if isinstance(operation, Insert):
-                uses[operation.index] = Insert(operation.index + offset, Use(operation.change, operation.__class__))
+                uses[operation.index] = Insert(operation.index + offset, Use(operation.change, operation))
             else:
-                uses[operation.index] = Update(operation.index, Use(list_first_pattern[operation.index], operation.__class__))
+                uses[operation.index] = Update(operation.index, Use(list_first_pattern[operation.index], operation))
                 if isinstance(operation, Delete):
                     offset += 1
 
@@ -210,9 +210,9 @@ class PatternRefiner:
         i = 1
         for wildcard in wildcards:
             if isinstance(wildcard.type, Insert):
-                pair = [key for key, value in first_pattern_similarity_list.items() if wildcard.wrapped_node in key]
+                pair = next((key for key, value in second_pattern_similarity_list.items() if wildcard.wrapped_node in key), None)
             else:
-                pair = [key for key, value in second_pattern_similarity_list.items() if wildcard.wrapped_node in key]
+                pair = next((key for key, value in first_pattern_similarity_list.items() if wildcard.wrapped_node in key), None)
 
             if pair:
                 use = next((x for x in uses if x.wrapped_node in pair), None)

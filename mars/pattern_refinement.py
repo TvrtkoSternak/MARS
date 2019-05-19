@@ -44,7 +44,7 @@ class PatternRefiner:
         in place and will be the same after this method, any of them can be used to
         save in the database.
     """
-    def __init__(self, context, optimiser=None, min_pattern=1, max_pattern=float('inf')):
+    def __init__(self, context, edit_script_generator, optimiser=None, min_no_patterns=1, max_pattern_distance=float('inf')):
         """
         Initialises PatternRefiner object.
 
@@ -70,16 +70,23 @@ class PatternRefiner:
         """
         self.context = context
         self.optimiser = optimiser
-        self.min_pattern = min_pattern
-        self.max_pattern = max_pattern
+        self.min_no_patterns = min_no_patterns
+        self.max_pattern_distance = max_pattern_distance
+        self.edit_script_generator = edit_script_generator
 
     def refine(self):
         """
         Method that starts the refinement process.
         """
-        pass
+        patterns = self.context.load()
+        first_pattern, second_pattern, distance = self.find_nearest_patterns(patterns)
+        first_pattern.original.unparse(0)
+        print()
+        second_pattern.original.unparse(0)
+        print()
+        print(distance)
 
-    def find_nearest_patterns(self):
+    def find_nearest_patterns(self, patterns):
         """
         Finds the most similar patterns in the database.
 
@@ -88,7 +95,22 @@ class PatternRefiner:
         Pattern, Pattern
             Tuple of two most similar patterns in the database
         """
-        pass
+        pattern_pairs = dict()
+
+        for i in range(0, len(patterns) - 1, 1):
+            for j in range(i + 1, len(patterns), 1):
+                pattern_pairs[(patterns[i], patterns[j])] = self.calculate_distance(patterns[i], patterns[j])
+
+        min_pair = min(pattern_pairs, key=pattern_pairs.get)
+
+        return min_pair[0], min_pair[1], pattern_pairs.get(min_pair, 0)
+
+    def calculate_distance(self, first_pattern, second_pattern):
+        original_edit_script = self.edit_script_generator(first_pattern.original, second_pattern.original)
+        modified_edit_script = self.edit_script_generator(first_pattern.modified, second_pattern.modified)
+
+        return original_edit_script.size(first_pattern.original) + modified_edit_script.size(first_pattern.modified)
+
 
     def add_wildcards(self, first_pattern, second_pattern):
         """

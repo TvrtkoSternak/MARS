@@ -1,3 +1,4 @@
+import copy
 from abc import ABC, abstractmethod
 import ast
 
@@ -142,14 +143,21 @@ class EditScript:
         index_of_prev_change = -1
         offset = 0
         offset_add = 0
+        size = 0
         for change in self.changes:
             if index_of_prev_change == change.index:
-                list_of_nodes, tmp_offset = change.make_change(list_of_nodes, offset)
+                list_of_nodes, tmp_offset, no_nodes_affected = change.make_change(list_of_nodes, offset)
             else:
-                list_of_nodes, tmp_offset = change.make_change(list_of_nodes, offset + offset_add)
+                list_of_nodes, tmp_offset, no_nodes_affected = change.make_change(list_of_nodes, offset + offset_add)
+            size += no_nodes_affected
             offset += offset_add
             offset_add = tmp_offset
             index_of_prev_change = change.index
+        return size
+
+    def size(self, pattern):
+        nodes = copy.deepcopy(pattern.walk())
+        return self.execute(nodes)
 
 
 class ChangeOperation(ABC):
@@ -238,7 +246,7 @@ class Insert(ChangeOperation):
             If the specified index is out of range
         """
         original_list_of_nodes[self.index:self.index] = self.change.walk()
-        return original_list_of_nodes, self.change.num_children() + 1
+        return original_list_of_nodes, self.change.num_children() + 1, self.change.num_children() + 1
 
     def __str__(self):
         """
@@ -304,7 +312,7 @@ class Delete(ChangeOperation):
         end_index = original_list_of_nodes[self.index + offset].num_children() + self.index + 1
         num_deleted = original_list_of_nodes[self.index + offset].num_children() + 1
         del original_list_of_nodes[self.index + offset:end_index + offset]
-        return original_list_of_nodes, -num_deleted
+        return original_list_of_nodes, -num_deleted, num_deleted
 
     def __str__(self):
         """
@@ -376,7 +384,7 @@ class Update(ChangeOperation):
         len_deleted = original_list_of_nodes[self.index + offset].num_children() + 1
         del original_list_of_nodes[self.index + offset:end_index + offset]
         original_list_of_nodes[self.index + offset:self.index + offset] = self.change.walk()
-        return original_list_of_nodes, self.change.num_children() + 1 - len_deleted
+        return original_list_of_nodes, self.change.num_children() + 1 - len_deleted, self.change.num_children() + 1 + len_deleted
 
     def __str__(self):
         """

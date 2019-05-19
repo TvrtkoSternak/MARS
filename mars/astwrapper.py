@@ -943,3 +943,78 @@ class Endnode:
 
     def get_all_children(self):
         return list()
+
+
+class Wildcard:
+
+    def __init__(self, wrapped_node):
+        self.wrapped_node = wrapped_node
+        self.index = 0
+
+    def print_me(self):
+        print("Wildcard {", self.index, "}")
+
+    def unparse(self, num_tabs):
+        print("Wildcard (", self.index, ")", sep='', end='')
+
+    def walk(self, postorder = False):
+        return [self]
+
+    def reconstruct(self, tree):
+        return self
+
+    def is_leaf(self):
+        return True
+
+    def similarity(self, node):
+        if not isinstance(node, self.__class__):
+            return 0
+        else:
+            return 1
+
+    def is_mutable(self, node):
+        return True
+
+    def num_children(self):
+        return 0
+
+    def get_all_children(self):
+        return list()
+
+
+class Use:
+
+    def __init__(self, wrapped_node):
+        self.wrapped_node = wrapped_node
+        self.index = 0
+
+    def print_me(self):
+        print("Use {", self.index, "}")
+
+    def unparse(self, num_tabs):
+        print("Use (", self.index, ")", sep='', end='')
+
+    def walk(self, postorder=False):
+        return [self]
+
+    def reconstruct(self, tree):
+        return self
+
+    def is_leaf(self):
+        return True
+
+    def similarity(self, node):
+        if not isinstance(node, self.__class__):
+            return 0
+        else:
+            return 1
+
+    def is_mutable(self, node):
+        return True
+
+    def num_children(self):
+        return 0
+
+    def get_all_children(self):
+        return list()
+

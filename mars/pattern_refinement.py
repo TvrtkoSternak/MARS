@@ -111,7 +111,6 @@ class PatternRefiner:
 
         return original_edit_script.size(first_pattern.original) + modified_edit_script.size(first_pattern.modified)
 
-
     def add_wildcards(self, first_pattern, second_pattern):
         """
         Compares the EditScripts of two chosen Patterns and changes nodes determined

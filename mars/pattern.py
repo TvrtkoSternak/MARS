@@ -75,7 +75,7 @@ class EditScript:
         changes : list of ChangeOperation
             List that contains change operations(default is empty list)
         """
-        self.changes = sorted(changes, key=lambda x: x.index, reverse=False)
+        self.changes = changes
 
     def __iter__(self):
         """
@@ -150,9 +150,6 @@ class EditScript:
             offset += offset_add
             offset_add = tmp_offset
             index_of_prev_change = change.index
-            print('#########################', change)
-            for index, node in enumerate(list_of_nodes):
-                print(index, node)
 
 
 class ChangeOperation(ABC):
@@ -304,11 +301,8 @@ class Delete(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        print("del", self.index, offset)
-        print("del", original_list_of_nodes[self.index + offset])
         end_index = original_list_of_nodes[self.index + offset].num_children() + self.index + 1
         num_deleted = original_list_of_nodes[self.index + offset].num_children() + 1
-        print(num_deleted)
         del original_list_of_nodes[self.index + offset:end_index + offset]
         return original_list_of_nodes, -num_deleted
 

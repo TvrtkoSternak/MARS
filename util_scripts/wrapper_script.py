@@ -23,5 +23,5 @@ org = org.walk()
 
 edit_script.execute(org)
 
-org[0].reconstruct(org).unparse(0)
+org.pop(0).reconstruct(org).unparse(0)
 

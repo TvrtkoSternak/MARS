@@ -151,7 +151,7 @@ class PatternRefiner:
         edit_script_wildcards.execute(list_first_pattern_copy)
         return list_first_pattern_copy.pop(0).reconstruct(list_first_pattern_copy)
 
-    def add_uses(self, first_pattern_mod, second_pattern_mod, first_pattern_similarity_list, second_pattern_similarity_list):
+    def add_uses(self, first_pattern_mod, second_pattern_mod):
         """
         Compares the EditScripts of two chosen Patterns and changes nodes
         determined by the algorithm in both Patterns to use nodes.
@@ -187,7 +187,7 @@ class PatternRefiner:
         edit_script_uses.execute(list_first_pattern_copy)
         return list_first_pattern_copy.pop(0).reconstruct(list_first_pattern_copy)
 
-    def connect_wildcards_and_uses(self, first_pattern, second_pattern):
+    def connect_wildcards_and_uses(self, first_pattern, second_pattern, first_pattern_similarity_list, second_pattern_similarity_lis):
         """
         Compares the ASTs of two chosen Patterns and determines which are the
         corresponding wildcard-use and connects them. The pattern inputs are changed

@@ -1,7 +1,7 @@
 import copy
 from abc import ABC, abstractmethod
 
-from mars.astwrapper import Wildcard
+from mars.astwrapper import Wildcard, Use
 from mars.pattern import Insert, Update, EditScript, Delete
 
 
@@ -85,7 +85,9 @@ class PatternRefiner:
         patterns = self.context.load()
         first_pattern, second_pattern, distance = self.find_nearest_patterns(patterns)
         org_wildcards_pattern = self.add_wildcards(first_pattern.original, second_pattern.original)
-        org_wildcards_pattern.unparse(0)
+        mod_uses_pattern = self.add_uses(first_pattern.modified, second_pattern.modified)
+        org_connected, mod_connected = self.connect_wildcards_and_uses(org_wildcards_pattern, mod_uses_pattern,
+                                                                        first_pattern.node_pairs, second_pattern.node_pairs)
 
     def find_nearest_patterns(self, patterns):
         """
@@ -149,7 +151,7 @@ class PatternRefiner:
         edit_script_wildcards.execute(list_first_pattern_copy)
         return list_first_pattern_copy.pop(0).reconstruct(list_first_pattern_copy)
 
-    def add_uses(self, first_pattern_mod, second_pattern_mod):
+    def add_uses(self, first_pattern_mod, second_pattern_mod, first_pattern_similarity_list, second_pattern_similarity_list):
         """
         Compares the EditScripts of two chosen Patterns and changes nodes
         determined by the algorithm in both Patterns to use nodes.
@@ -161,7 +163,29 @@ class PatternRefiner:
         second_pattern : Pattern
             Pattern that is chosen for refinement
         """
-        pass
+        edit_script = self.edit_script_generator.generate(first_pattern_mod, second_pattern_mod)
+        uses = dict()
+
+        list_first_pattern = first_pattern_mod.walk()
+
+        offset = 0
+        for operation in edit_script:
+            if isinstance(operation, Insert):
+                uses[operation.index] = Insert(operation.index + offset, Use(operation.change))
+            else:
+                uses[operation.index] = Update(operation.index, Use(list_first_pattern[operation.index]))
+                if isinstance(operation, Delete):
+                    offset += 1
+
+        edit_operations = list()
+
+        for value in uses.values():
+            edit_operations.append(value)
+
+        edit_script_uses = EditScript(edit_operations)
+        list_first_pattern_copy = copy.deepcopy(list_first_pattern)
+        edit_script_uses.execute(list_first_pattern_copy)
+        return list_first_pattern_copy.pop(0).reconstruct(list_first_pattern_copy)
 
     def connect_wildcards_and_uses(self, first_pattern, second_pattern):
         """

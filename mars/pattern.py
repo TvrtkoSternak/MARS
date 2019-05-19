@@ -138,6 +138,22 @@ class EditScript:
         self.changes.append(change)
         self.changes.sort(key=lambda x: x.index, reverse=False)
 
+    def execute(self, list_of_nodes):
+        index_of_prev_change = -1
+        offset = 0
+        offset_add = 0
+        for change in self.changes:
+            if index_of_prev_change == change.index:
+                list_of_nodes, tmp_offset = change.make_change(list_of_nodes, offset)
+            else:
+                list_of_nodes, tmp_offset = change.make_change(list_of_nodes, offset + offset_add)
+            offset += offset_add
+            offset_add = tmp_offset
+            index_of_prev_change = change.index
+            print('#########################', change)
+            for index, node in enumerate(list_of_nodes):
+                print(index, node)
+
 
 class ChangeOperation(ABC):
     """
@@ -224,7 +240,7 @@ class Insert(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        original_list_of_nodes[self.index + offset:self.index + offset] = self.change.walk()
+        original_list_of_nodes[self.index:self.index] = self.change.walk()
         return original_list_of_nodes, self.change.num_children() + 1
 
     def __str__(self):
@@ -288,6 +304,8 @@ class Delete(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
+        print("del", self.index, offset)
+        print("del", original_list_of_nodes[self.index + offset])
         end_index = original_list_of_nodes[self.index + offset].num_children() + self.index + 1
         num_deleted = original_list_of_nodes[self.index + offset].num_children() + 1
         print(num_deleted)

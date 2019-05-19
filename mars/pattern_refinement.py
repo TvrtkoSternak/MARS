@@ -106,8 +106,8 @@ class PatternRefiner:
         return min_pair[0], min_pair[1], pattern_pairs.get(min_pair, 0)
 
     def calculate_distance(self, first_pattern, second_pattern):
-        original_edit_script = self.edit_script_generator(first_pattern.original, second_pattern.original)
-        modified_edit_script = self.edit_script_generator(first_pattern.modified, second_pattern.modified)
+        original_edit_script = self.edit_script_generator.generate(first_pattern.original, second_pattern.original)
+        modified_edit_script = self.edit_script_generator.generate(first_pattern.modified, second_pattern.modified)
 
         return original_edit_script.size(first_pattern.original) + modified_edit_script.size(first_pattern.modified)
 

@@ -12,7 +12,6 @@ for directory, children, files in os.walk("../dataset"):
         print(directory)
 
         if "testing_small" in str(directory):
-            print("oho")
             for i in range(1, int(len(os.listdir(directory))/2)+1):
                 try:
                     file_org = directory + "/original_" + i.__str__() + ".py"

@@ -185,7 +185,8 @@ class AstWrapper(ast.NodeTransformer):
         return Constant(node.n, "NUMBER")
 
     def visit_Str(self, node):
-        return Constant(node.s, "STRING")
+        value = ["\"", node.s, "\""]
+        return Constant("".join(value), "STRING")
 
     def visit_Compare(self, node):
         return Compare(self.visit(node.ops[0]), self.visit(node.left), self.visit(node.comparators[0]))

@@ -1,4 +1,8 @@
+import copy
 from abc import ABC, abstractmethod
+
+from mars.astwrapper import Wildcard
+from mars.pattern import Insert, Update, EditScript, Delete
 
 
 class PatternRefiner:
@@ -80,11 +84,8 @@ class PatternRefiner:
         """
         patterns = self.context.load()
         first_pattern, second_pattern, distance = self.find_nearest_patterns(patterns)
-        first_pattern.original.unparse(0)
-        print()
-        second_pattern.original.unparse(0)
-        print()
-        print(distance)
+        org_wildcards_pattern = self.add_wildcards(first_pattern.original, second_pattern.original)
+        org_wildcards_pattern.unparse(0)
 
     def find_nearest_patterns(self, patterns):
         """
@@ -111,7 +112,7 @@ class PatternRefiner:
 
         return original_edit_script.size(first_pattern.original) + modified_edit_script.size(first_pattern.modified)
 
-    def add_wildcards(self, first_pattern, second_pattern):
+    def add_wildcards(self, first_pattern_org, second_pattern_org):
         """
         Compares the EditScripts of two chosen Patterns and changes nodes determined
         by the algorithm in both Patterns to wildcard nodes. Takes two Pattern objects
@@ -124,9 +125,33 @@ class PatternRefiner:
         second_pattern : Pattern
             Pattern that is chosen for refinement
         """
-        pass
+        edit_script = self.edit_script_generator.generate(first_pattern_org, second_pattern_org)
+        wildcards = dict()
 
-    def add_uses(self, first_pattern, second_pattern):
+        list_first_pattern = first_pattern_org.walk()
+
+        offset = 0
+        for operation in edit_script:
+            print(operation)
+            if isinstance(operation, Insert):
+                wildcards[operation.index] = Insert(operation.index - offset, Wildcard(operation.change))
+            else:
+                wildcards[operation.index] = Update(operation.index, Wildcard(list_first_pattern[operation.index]))
+                if isinstance(operation, Delete):
+                    offset += 1
+
+        edit_operations = list()
+
+        for value in wildcards.values():
+            edit_operations.append(value)
+
+        edit_script_wildcards = EditScript(edit_operations)
+        list_first_pattern_copy = copy.deepcopy(list_first_pattern)
+        edit_script_wildcards.execute(list_first_pattern_copy)
+        print(list_first_pattern_copy)
+        return list_first_pattern_copy.pop(0).reconstruct(list_first_pattern_copy)
+
+    def add_uses(self, first_pattern_mod, second_pattern_mod):
         """
         Compares the EditScripts of two chosen Patterns and changes nodes
         determined by the algorithm in both Patterns to use nodes.

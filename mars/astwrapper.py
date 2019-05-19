@@ -155,7 +155,7 @@ class FunctionName:
         print("FunctionName {", self.value, "}")
 
     def unparse(self, num_tabs):
-        print("{0}(".format(self.value), end='')
+        print("{0}".format(self.value), end='')
 
     def walk(self, postorder = False):
         return [self]
@@ -199,6 +199,8 @@ class Function:
 
     def unparse(self, num_tabs):
         self.value.unparse(num_tabs)
+        print(self.value)
+        print("(", end='')
         if self.args:
             if len(self.args) != 1:
                 index = 0
@@ -206,7 +208,7 @@ class Function:
                     self.args[index].unparse(num_tabs)
                     print(", ", end='')
                     index += 1
-                self.args[-1].unparse(num_tabs)
+            self.args[-1].unparse(num_tabs)
         print(")", end='')
 
     def walk(self, postorder = False):
@@ -955,7 +957,7 @@ class Wildcard:
         print("Wildcard {", self.index, "}")
 
     def unparse(self, num_tabs):
-        print("Wildcard (", self.index, ")", sep='', end='')
+        print("Wildcard(", self.index, ")", sep='', end='')
 
     def walk(self, postorder = False):
         return [self]
@@ -992,7 +994,7 @@ class Use:
         print("Use {", self.index, "}")
 
     def unparse(self, num_tabs):
-        print("Use (", self.index, ")", sep='', end='')
+        print("Use(", self.index, ")", sep='', end='')
 
     def walk(self, postorder=False):
         return [self]

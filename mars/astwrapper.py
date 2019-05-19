@@ -199,8 +199,14 @@ class Function:
 
     def unparse(self, num_tabs):
         self.value.unparse(num_tabs)
-        for arg in self.args:
-            arg.unparse(num_tabs)
+        if self.args:
+            if len(self.args) != 1:
+                index = 0
+                while index < len(self.args) - 1:
+                    self.args[index].unparse(num_tabs)
+                    print(", ", end='')
+                    index += 1
+                self.args[-1].unparse(num_tabs)
         print(")", end='')
 
     def walk(self, postorder = False):

@@ -1,7 +1,7 @@
 import copy
 from abc import ABC, abstractmethod
 
-from mars.astwrapper import Wildcard, Use
+from mars.astwrapper import Wildcard, Use, Function
 from mars.pattern import Insert, Update, EditScript, Delete
 
 
@@ -89,8 +89,16 @@ class PatternRefiner:
         self.connect_wildcards_and_uses(org_wildcards_pattern, mod_uses_pattern,
                                         first_pattern.node_pairs, second_pattern.node_pairs)
 
-        org_wildcards_pattern.pop(0).reconstruct(org_wildcards_pattern).unparse(0)
-        mod_uses_pattern.pop(0).reconstruct(mod_uses_pattern).unparse(0)
+        reconstructed_org = org_wildcards_pattern.pop(0).reconstruct(org_wildcards_pattern)
+        reconstructed_mod = mod_uses_pattern.pop(0).reconstruct(mod_uses_pattern)
+
+        list_reconstructed_org = reconstructed_org.walk()
+        list_reconstructed_mod = reconstructed_mod.walk()
+
+        self.optimiser.optimise(list_reconstructed_org, list_reconstructed_mod)
+
+        list_reconstructed_org.pop(0).reconstruct(list_reconstructed_org).unparse(0)
+        list_reconstructed_mod.pop(0).reconstruct(list_reconstructed_mod).unparse(0)
 
     def find_nearest_patterns(self, patterns):
         """
@@ -317,7 +325,7 @@ class EditScriptOptimiserDecorator(IOptimiser):
         base_optimiser : IOptimiser
             Optimiser that is chained to this optimiser
         """
-        pass
+        self.base_optimiser = base_optimiser
 
     @abstractmethod
     def optimise(self, first_pattern, second_pattern):
@@ -335,7 +343,7 @@ class EditScriptOptimiserDecorator(IOptimiser):
         pass
 
 
-class ChangeIsolator(EditScriptOptimiserDecorator):
+class WildcardUseCompressor(EditScriptOptimiserDecorator):
     """
     This class is a concrete implementation of IOptimiser interface.
 
@@ -358,7 +366,7 @@ class ChangeIsolator(EditScriptOptimiserDecorator):
         After its optimisation, calls the optimise() method of the next optimiser in chain.
     """
 
-    def optimise(self, first_pattern, second_pattern):
+    def optimise(self, pattern_org, pattern_mod):
         """
         This method takes two Patterns and optimises their ChangeScripts in place.
         This concrete implementation aims to isolate the relevant changes in edit
@@ -373,16 +381,9 @@ class ChangeIsolator(EditScriptOptimiserDecorator):
             second_pattern : Pattern
             Pattern that is chosen for refinement
         """
-        pass
-
-    def __isolate(self):
-        """
-        This method is used for isolating important changes in ChangeScript objects.
-        """
-        pass
 
 
-class MatchInserter(EditScriptOptimiserDecorator):
+class FunctionPropagator(EditScriptOptimiserDecorator):
     """
     This class is a concrete implementation of IOptimiser interface.
 
@@ -404,7 +405,7 @@ class MatchInserter(EditScriptOptimiserDecorator):
         After its optimisation, call the optimize method of the next optimiser in chain.
     """
 
-    def optimise(self, first_pattern, second_pattern):
+    def optimise(self, pattern_org, pattern_mod):
         """
         This method takes two Patterns and optimises their ChangeScript objects in place.
         This concrete implementation aims to recognise and locate matches between pattern
@@ -418,11 +419,37 @@ class MatchInserter(EditScriptOptimiserDecorator):
             second_pattern : Pattern
             Pattern that is chosen for refinement
         """
-        
-        pass
+        self.base_optimiser.optimise(pattern_org, pattern_mod)
 
-    def __insert(self):
-        """
-        This method is used for inserting matches into the ChangeScript objects.
-        """
-        pass
+        pattern_org_functions = [(index, node.value, [arg for arg in node.args]) for index, node in enumerate(pattern_org) if isinstance(node, Function)]
+        pattern_mod_functions = [(index, node.value, [arg for arg in node.args]) for index, node in enumerate(pattern_mod) if isinstance(node, Function)]
+
+        edit_operations_org = list()
+        edit_operations_mod = list()
+
+        for function_org in pattern_org_functions:
+            for function_mod in pattern_mod_functions:
+                if self.check_compatability(function_org[1], function_mod[1]) and self.arg_check(function_org[2], function_mod[2]):
+                    wildcard = Wildcard(None, Update(0, None))
+                    use = Use(None, Update(0, None))
+                    wildcard.index = function_org[1].index
+                    use.index = function_mod[1].index
+                    edit_operations_org.append(Update(function_org[0], wildcard))
+                    edit_operations_mod.append(Update(function_mod[0], use))
+
+        edit_org = EditScript(edit_operations_org)
+        edit_mod = EditScript(edit_operations_mod)
+
+        edit_org.execute(pattern_org)
+        edit_mod.execute(pattern_mod)
+
+    def check_compatability(self, node_org, node_mod):
+        return isinstance(node_org, Wildcard) and isinstance(node_mod, Use) and node_org.index == node_mod.index
+
+    def arg_check(self, arg_org, arg_mod):
+        if len(arg_org) == len(arg_mod):
+            for arg1, arg2 in zip(arg_org, arg_mod):
+                if not self.check_compatability(arg1, arg2):
+                    return False
+
+        return True

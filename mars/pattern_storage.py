@@ -1,11 +1,9 @@
 import pickle
 
-filename = "../resources/patterns.p"
-
 
 class StorageContext:
 
-    def __init__(self, file):
+    def __init__(self, file = "../resources/patterns.p"):
         self.filename = file
 
     def save(self, pattern):

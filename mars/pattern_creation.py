@@ -31,7 +31,7 @@ class PatternCreator:
     public void save_pattern(self, created_pattern)
         Saves a pattern to a database in context attribute.
     """
-    def __init__(self, context, differencer, ast_wrapper):
+    def __init__(self, differencer, ast_wrapper):
         """
         Initialises PatternCreator object.
 
@@ -44,7 +44,6 @@ class PatternCreator:
         script_generator : EditScriptGenerator
             Object used to generate EditScript from original and modified code
         """
-        self.context = context
         self.differencer = differencer
         self.ast_wrapper = ast_wrapper
 
@@ -73,17 +72,6 @@ class PatternCreator:
         modified_ast = self.ast_wrapper.visit(ast.parse(text_modified))
 
         return Pattern(original_ast, modified_ast, self.differencer.connect_nodes(original_ast, modified_ast))
-
-    def save_pattern(self, pattern):
-        """
-        Saves a pattern to a database in context attribute.
-
-        Parameters
-        ----------
-        created_pattern : Pattern
-            Pattern that is going to be saved in the pattern database
-        """
-        self.context.save(pattern)
 
 
 class EditScriptGenerator:

@@ -257,7 +257,4 @@ class AstWrapper(ast.NodeTransformer):
         return if_node
 
     def visit_Assign(self, node):
-        print(node._fields)
-        print(node.targets)
-        print(node.value)
         return Assign(self.visit(node.targets[0]), "=", self.visit(node.value))

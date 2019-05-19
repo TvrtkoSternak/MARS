@@ -1,2 +1,3 @@
 if check_truth == True:
-    print("I want the truth!!")
+    some_operation("ayyy", lmao)
+do_dome()

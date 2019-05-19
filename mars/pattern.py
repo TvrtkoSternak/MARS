@@ -75,7 +75,7 @@ class EditScript:
         changes : list of ChangeOperation
             List that contains change operations(default is empty list)
         """
-        self.changes = sorted(changes, key=lambda x: x.index, reverse=True)
+        self.changes = sorted(changes, key=lambda x: x.index, reverse=False)
 
     def __iter__(self):
         """
@@ -136,7 +136,7 @@ class EditScript:
             ChangeOperation to be added in changes
         """
         self.changes.append(change)
-        self.changes.sort(key=lambda x: x.index, reverse=True)
+        self.changes.sort(key=lambda x: x.index, reverse=False)
 
 
 class ChangeOperation(ABC):
@@ -236,8 +236,7 @@ class Insert(ChangeOperation):
         string
             Human-readable interpretation of Insert
         """
-        return "Insert operation @index " + str(self.index) + " of AST: " + ast.dump(self.change)
-
+        return "Insert operation @index " + str(self.index)
 
 class Delete(ChangeOperation):
     """
@@ -372,4 +371,4 @@ class Update(ChangeOperation):
         string
             Human-readable interpretation of Update
         """
-        return "Update operation @index " + str(self.index) + " change AST: " + ast.dump(self.change)
+        return "Update operation @index " + str(self.index)

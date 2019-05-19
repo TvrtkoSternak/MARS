@@ -1,2 +1,5 @@
-if some_attr is True:
+if some_attr == True:
+    if fuck:
+        lol()
+    this = that
     some_operations()

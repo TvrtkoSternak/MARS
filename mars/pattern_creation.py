@@ -149,25 +149,26 @@ class EditScriptGenerator:
         edit_script = list()
 
         index = 1
-
+        deleted_nodes_offset = 0
         while index < list_first_ast.__len__():
             node = list_first_ast[index]
             pair, similarity = self.find_node_pair(node, similarity_list)
             if not isinstance(node, (Startnode, Endnode)):
                 if similarity < self.sim_treshold:
-                    edit_script.append(Delete(index))
+                    edit_script.append(Delete(index - deleted_nodes_offset))
                     similarity_list = self.filter_node_pairs(node, similarity_list)
                     index += node.num_children()
+                    deleted_nodes_offset += node.num_children() + 1
                 elif not node.is_mutable(pair[1]):
-                    edit_script.append(Delete(index))
+                    edit_script.append(Delete(index - deleted_nodes_offset))
                     similarity_list = self.filter_node_pairs(node, similarity_list)
                     index += node.num_children()
+                    deleted_nodes_offset += node.num_children() + 1
                 elif node.is_leaf() and node.similarity(pair[1]) < 1.0:
-                    edit_script.append(Update(index, pair[1]))
+                    edit_script.append(Update(index - deleted_nodes_offset, pair[1]))
             index += 1
 
         index = 1
-
         while index < list_second_ast.__len__():
             node = list_second_ast[index]
             pair, similarity = self.find_node_pair(node, similarity_list)
@@ -178,6 +179,7 @@ class EditScriptGenerator:
                 elif not pair[0].is_mutable(pair[1]):
                     edit_script.append(Insert(index, node))
                     index += node.num_children()
+
             index += 1
 
         return EditScript(edit_script)

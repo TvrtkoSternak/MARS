@@ -948,8 +948,9 @@ class Endnode:
 
 class Wildcard:
 
-    def __init__(self, wrapped_node):
+    def __init__(self, wrapped_node, type):
         self.wrapped_node = wrapped_node
+        self.type = type
         self.index = 0
 
     def print_me(self):
@@ -985,8 +986,9 @@ class Wildcard:
 
 class Use:
 
-    def __init__(self, wrapped_node):
+    def __init__(self, wrapped_node, type):
         self.wrapped_node = wrapped_node
+        self.type = type
         self.index = 0
 
     def print_me(self):

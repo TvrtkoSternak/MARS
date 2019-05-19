@@ -86,8 +86,11 @@ class PatternRefiner:
         first_pattern, second_pattern, distance = self.find_nearest_patterns(patterns)
         org_wildcards_pattern = self.add_wildcards(first_pattern.original, second_pattern.original)
         mod_uses_pattern = self.add_uses(first_pattern.modified, second_pattern.modified)
-        org_connected, mod_connected = self.connect_wildcards_and_uses(org_wildcards_pattern, mod_uses_pattern,
-                                                                        first_pattern.node_pairs, second_pattern.node_pairs)
+        self.connect_wildcards_and_uses(org_wildcards_pattern, mod_uses_pattern,
+                                        first_pattern.node_pairs, second_pattern.node_pairs)
+
+        org_wildcards_pattern.pop(0).reconstruct(org_wildcards_pattern).unparse(0)
+        mod_uses_pattern.pop(0).reconstruct(mod_uses_pattern).unparse(0)
 
     def find_nearest_patterns(self, patterns):
         """
@@ -135,9 +138,9 @@ class PatternRefiner:
         offset = 0
         for operation in edit_script:
             if isinstance(operation, Insert):
-                wildcards[operation.index] = Insert(operation.index + offset, Wildcard(operation.change))
+                wildcards[operation.index] = Insert(operation.index + offset, Wildcard(operation.change, operation.__class__))
             else:
-                wildcards[operation.index] = Update(operation.index, Wildcard(list_first_pattern[operation.index]))
+                wildcards[operation.index] = Update(operation.index, Wildcard(list_first_pattern[operation.index], operation.__class__))
                 if isinstance(operation, Delete):
                     offset += 1
 
@@ -149,7 +152,7 @@ class PatternRefiner:
         edit_script_wildcards = EditScript(edit_operations)
         list_first_pattern_copy = copy.deepcopy(list_first_pattern)
         edit_script_wildcards.execute(list_first_pattern_copy)
-        return list_first_pattern_copy.pop(0).reconstruct(list_first_pattern_copy)
+        return list_first_pattern_copy
 
     def add_uses(self, first_pattern_mod, second_pattern_mod):
         """
@@ -171,9 +174,9 @@ class PatternRefiner:
         offset = 0
         for operation in edit_script:
             if isinstance(operation, Insert):
-                uses[operation.index] = Insert(operation.index + offset, Use(operation.change))
+                uses[operation.index] = Insert(operation.index + offset, Use(operation.change, operation.__class__))
             else:
-                uses[operation.index] = Update(operation.index, Use(list_first_pattern[operation.index]))
+                uses[operation.index] = Update(operation.index, Use(list_first_pattern[operation.index], operation.__class__))
                 if isinstance(operation, Delete):
                     offset += 1
 
@@ -185,9 +188,9 @@ class PatternRefiner:
         edit_script_uses = EditScript(edit_operations)
         list_first_pattern_copy = copy.deepcopy(list_first_pattern)
         edit_script_uses.execute(list_first_pattern_copy)
-        return list_first_pattern_copy.pop(0).reconstruct(list_first_pattern_copy)
+        return list_first_pattern_copy
 
-    def connect_wildcards_and_uses(self, first_pattern, second_pattern, first_pattern_similarity_list, second_pattern_similarity_lis):
+    def connect_wildcards_and_uses(self, pattern_org, pattern_mod, first_pattern_similarity_list, second_pattern_similarity_list):
         """
         Compares the ASTs of two chosen Patterns and determines which are the
         corresponding wildcard-use and connects them. The pattern inputs are changed
@@ -201,7 +204,22 @@ class PatternRefiner:
         second_pattern : Pattern
             Pattern that is chosen for refinement
         """
-        pass
+        wildcards = [x for x in pattern_org if isinstance(x, Wildcard)]
+        uses = [x for x in pattern_mod if isinstance(x, Use)]
+
+        i = 1
+        for wildcard in wildcards:
+            if isinstance(wildcard.type, Insert):
+                pair = [key for key, value in first_pattern_similarity_list.items() if wildcard.wrapped_node in key]
+            else:
+                pair = [key for key, value in second_pattern_similarity_list.items() if wildcard.wrapped_node in key]
+
+            if pair:
+                use = next((x for x in uses if x.wrapped_node in pair), None)
+                if use:
+                    wildcard.index = i
+                    use.index = i
+                    i += 1
 
 
 class IOptimiser(ABC):

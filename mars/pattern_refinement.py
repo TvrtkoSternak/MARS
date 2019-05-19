@@ -381,7 +381,29 @@ class WildcardUseCompressor(EditScriptOptimiserDecorator):
             second_pattern : Pattern
             Pattern that is chosen for refinement
         """
+        self.base_optimiser.optimise(pattern_org, pattern_mod)
+        matching_blocks_index_list = list()
 
+        for i in range(0, len(pattern_org) - 1, 1):
+            for j in range(0, len(pattern_mod) - 1, 1):
+                if self.check_compatability(pattern_org[i], pattern_mod[j]) and self.check_compatability(pattern_org[i+1], pattern_mod[j+1]):
+                    matching_blocks_index_list.append((i, j))
+
+        edit_operations_org = list()
+        edit_operations_mod = list()
+
+        for index_org, index_mod in matching_blocks_index_list:
+            edit_operations_org.append(Delete(index_org + 1))
+            edit_operations_mod.append(Delete(index_mod + 1))
+
+        edit_org = EditScript(edit_operations_org)
+        edit_mod = EditScript(edit_operations_mod)
+
+        edit_org.execute(pattern_org)
+        edit_mod.execute(pattern_mod)
+
+    def check_compatability(self, node_org, node_mod):
+        return isinstance(node_org, Wildcard) and isinstance(node_mod, Use) and node_org.index == node_mod.index
 
 class FunctionPropagator(EditScriptOptimiserDecorator):
     """

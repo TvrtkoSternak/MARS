@@ -154,7 +154,7 @@ class ChangeOperation(ABC):
     """
 
     @abstractmethod
-    def make_change(self, original_list_of_nodes):
+    def make_change(self, original_list_of_nodes, offset):
         pass
 
     @abstractmethod
@@ -206,7 +206,7 @@ class Insert(ChangeOperation):
         self.index = index
         self.change = change
 
-    def make_change(self, original_list_of_nodes):
+    def make_change(self, original_list_of_nodes, offset):
         """
         Applies the insert operation to the received AST.
 
@@ -224,8 +224,8 @@ class Insert(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        original_list_of_nodes[self.index:self.index] = self.change.walk()
-        return original_list_of_nodes
+        original_list_of_nodes[self.index + offset:self.index + offset] = self.change.walk()
+        return original_list_of_nodes, self.change.num_children() + 1
 
     def __str__(self):
         """
@@ -237,6 +237,7 @@ class Insert(ChangeOperation):
             Human-readable interpretation of Insert
         """
         return "Insert operation @index " + str(self.index)
+
 
 class Delete(ChangeOperation):
     """
@@ -269,7 +270,7 @@ class Delete(ChangeOperation):
 
         self.index = index
 
-    def make_change(self, original_list_of_nodes):
+    def make_change(self, original_list_of_nodes, offset):
         """
         Applies the delete operation to the received AST.
 
@@ -287,9 +288,11 @@ class Delete(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        end_index = original_list_of_nodes[self.index].num_children() + self.index + 1
-        del original_list_of_nodes[self.index:end_index]
-        return original_list_of_nodes
+        end_index = original_list_of_nodes[self.index + offset].num_children() + self.index + 1
+        num_deleted = original_list_of_nodes[self.index + offset].num_children() + 1
+        print(num_deleted)
+        del original_list_of_nodes[self.index + offset:end_index + offset]
+        return original_list_of_nodes, -num_deleted
 
     def __str__(self):
         """
@@ -339,7 +342,7 @@ class Update(ChangeOperation):
         self.index = index
         self.change = change
 
-    def make_change(self, original_list_of_nodes):
+    def make_change(self, original_list_of_nodes, offset):
         """
         Applies the update operation to the received AST.
 
@@ -357,10 +360,11 @@ class Update(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        end_index = original_list_of_nodes[self.index].num_children() + self.index + 1
-        del original_list_of_nodes[self.index:end_index]
-        original_list_of_nodes[self.index:self.index] = self.change.walk()
-        return original_list_of_nodes
+        end_index = original_list_of_nodes[self.index + offset].num_children() + self.index + 1
+        len_deleted = original_list_of_nodes[self.index + offset].num_children() + 1
+        del original_list_of_nodes[self.index + offset:end_index + offset]
+        original_list_of_nodes[self.index + offset:self.index + offset] = self.change.walk()
+        return original_list_of_nodes, self.change.num_children() + 1 - len_deleted
 
     def __str__(self):
         """

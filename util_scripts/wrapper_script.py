@@ -20,7 +20,7 @@ generator = EditScriptGenerator(tree_diff, 0.3)
 edit_script = generator.generate(org, mod)
 
 org = org.walk()
-
+offset = 0
 for change in edit_script:
     print(change)
     try:
@@ -28,7 +28,12 @@ for change in edit_script:
         print()
     except:
         pass
-    org = change.make_change(org)
+    org, offset_add = change.make_change(org, offset)
+    offset += offset_add
+    org = org[0].reconstruct(org)
+    org.unparse(0)
+    org = org.walk()
+    print()
 
 org[0].reconstruct(org).unparse(0)
 

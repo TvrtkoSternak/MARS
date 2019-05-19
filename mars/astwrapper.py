@@ -199,7 +199,6 @@ class Function:
 
     def unparse(self, num_tabs):
         self.value.unparse(num_tabs)
-        print(self.value)
         print("(", end='')
         if self.args:
             if len(self.args) != 1:

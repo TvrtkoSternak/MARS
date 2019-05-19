@@ -132,9 +132,8 @@ class PatternRefiner:
 
         offset = 0
         for operation in edit_script:
-            print(operation)
             if isinstance(operation, Insert):
-                wildcards[operation.index] = Insert(operation.index - offset, Wildcard(operation.change))
+                wildcards[operation.index] = Insert(operation.index + offset, Wildcard(operation.change))
             else:
                 wildcards[operation.index] = Update(operation.index, Wildcard(list_first_pattern[operation.index]))
                 if isinstance(operation, Delete):
@@ -148,7 +147,6 @@ class PatternRefiner:
         edit_script_wildcards = EditScript(edit_operations)
         list_first_pattern_copy = copy.deepcopy(list_first_pattern)
         edit_script_wildcards.execute(list_first_pattern_copy)
-        print(list_first_pattern_copy)
         return list_first_pattern_copy.pop(0).reconstruct(list_first_pattern_copy)
 
     def add_uses(self, first_pattern_mod, second_pattern_mod):

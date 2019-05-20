@@ -85,7 +85,7 @@ class PatternRefiner:
         Method that starts the refinement process.
         """
         patterns = self.context.load()
-        refined_patterns = list()
+
         while True:
             if len(patterns) <= max(self.min_no_patterns, 2):
                 break
@@ -122,9 +122,9 @@ class PatternRefiner:
                                                                   patterns_wrapped=True)
 
             patterns.remove(first_pattern)
-            refined_patterns.append(created_pattern)
+            patterns.remove(second_pattern)
+            patterns.append(created_pattern)
 
-        patterns.extend(refined_patterns)
         self.context.rewrite(patterns)
 
     def find_nearest_patterns(self, patterns):

@@ -238,7 +238,7 @@ class TreeDifferencer:
 
         node_pairs = self.init_leaf_pairs(post_org, post_mod, self.f)
 
-        for i in range(1000):
+        for i in range(10):
             self.bottom_up(post_org, post_mod, node_pairs, self.f)
             self.top_down(in_org, in_mod, node_pairs, self.f)
 

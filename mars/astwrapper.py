@@ -1114,10 +1114,10 @@ class Wildcard:
         return True
 
     def similarity(self, node):
-        if not isinstance(node, self.__class__):
-            return 0
-        else:
-            return 1
+        if isinstance(node, Use):
+            if node.index == self.index:
+                return 1.0
+        return 0.5
 
     def is_mutable(self, node):
         return True
@@ -1155,10 +1155,10 @@ class Use:
         return True
 
     def similarity(self, node):
-        if not isinstance(node, self.__class__):
-            return 0
-        else:
-            return 1
+        if isinstance(node, Wildcard):
+            if node.index == self.index:
+                return 1.0
+        return 0.5
 
     def is_mutable(self, node):
         return True

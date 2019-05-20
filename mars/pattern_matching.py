@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from .pattern import Pattern
-from .astutils import AstUtils
+from .astutils import AstUtils, AstWrapper
 import ast
 
 
@@ -137,7 +137,6 @@ class Recommender(Reader):
         """
         super().__init__()
         self.parser = parser
-        # self.uploaded_ast = AstUtils.walk_all_nodes(ast.parse(source))
         self.present_node = None
 
     def get_recommendations(self, source):
@@ -149,7 +148,8 @@ class Recommender(Reader):
         File
             File with found recommendations
         """
-        for node in AstUtils.walk_all_nodes(ast.parse(source)):
+        wrapper = AstWrapper()
+        for node in wrapper.visit(self.parser.parse(source)):
             self.present_node = node
             self.notify()
 

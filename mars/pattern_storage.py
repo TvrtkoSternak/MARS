@@ -1,3 +1,4 @@
+import os
 import pickle
 
 
@@ -9,6 +10,14 @@ class StorageContext:
     def save(self, pattern):
         with open(self.filename, 'ab') as storage:
             pickle.dump(pattern, storage)
+
+    def rewrite(self, patterns):
+        if os.path.exists(self.filename):
+            os.remove(self.filename)
+        
+        with open(self.filename, 'ab') as storage:
+            for pattern in patterns:
+                pickle.dump(pattern, storage)
 
     def load(self):
         patterns = []

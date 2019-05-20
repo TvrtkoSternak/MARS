@@ -119,7 +119,6 @@ class ReadablePatternParser(PatternParser):
             output
         """
         edit_operations = list()
-        print(pattern_matcher.wildcard_blocks)
         list_pattern_matcher_copy = copy.deepcopy(pattern_matcher.pattern.modified.walk())
         for index, node in enumerate(list_pattern_matcher_copy):
             if isinstance(node, Use):

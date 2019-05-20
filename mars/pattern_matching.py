@@ -492,7 +492,6 @@ class PatternListener(IListener, IPatternMatcher):
                 self.counter -= 1
                 if self_node.index in self.wildcard_blocks:
                     self.wildcard_blocks[self_node.index].extend(node.walk())
-                    print(self.wildcard_blocks)
                 else:
                     new_list = list()
                     new_list.extend(node.walk())
@@ -500,7 +499,6 @@ class PatternListener(IListener, IPatternMatcher):
                 self.timeout = node.num_children()
                 return True
             else:
-                print(self.original_detailed[self.counter])
                 return node.equals(self.original_detailed[self.counter])
 
     def subscribe(self, reader):

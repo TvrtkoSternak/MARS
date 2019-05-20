@@ -486,11 +486,9 @@ class PatternListener(IListener, IPatternMatcher):
             self_node = self.original_detailed[self.counter]
 
             if isinstance(self_node, Wildcard) and node.equals(self.original_detailed[self.counter + 1]):
-                #print(node)
                 self.counter += 1
                 return True
             elif isinstance(self_node, Wildcard):
-                #print(node)
                 self.counter -= 1
                 if self_node.index in self.wildcard_blocks:
                     self.wildcard_blocks[self_node.index].extend(node.walk())
@@ -499,11 +497,9 @@ class PatternListener(IListener, IPatternMatcher):
                     new_list = list()
                     new_list.extend(node.walk())
                     self.wildcard_blocks[self_node.index] = new_list
-                    #print(self.wildcard_blocks)
                 self.timeout = node.num_children()
                 return True
             else:
-                print(node)
                 print(self.original_detailed[self.counter])
                 return node.equals(self.original_detailed[self.counter])
 

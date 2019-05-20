@@ -20,7 +20,7 @@ with open("../resources/demo.py") as original:
 
     list_original_code = original_code.walk()
 
-    for index, node in enumerate(list_original_code):
-        print(index, ":", node)
+    # for index, node in enumerate(list_original_code):
+    #     print(index, ":", node)
 
     recommender.get_recommendations(original_code.walk())

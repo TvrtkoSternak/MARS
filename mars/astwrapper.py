@@ -38,6 +38,8 @@ class Variable:
         return list()
 
     def equals(self, other):
+        if isinstance(other, Wildcard):
+            return True
         if isinstance(other, self.__class__):
             return other.value == self.value
         return False
@@ -82,6 +84,8 @@ class Constant:
         return list()
 
     def equals(self, other):
+        if isinstance(other, Wildcard):
+            return True
         if isinstance(other, self.__class__):
             return other.value == self.value \
                    and other.type_of == self.type_of
@@ -158,6 +162,8 @@ class Assign:
         return children
 
     def equals(self, other):
+        if isinstance(other, Wildcard):
+            return True
         if isinstance(other, self.__class__):
             return other.operation == self.operation \
                    and other.value.equals(self.value) \
@@ -201,6 +207,9 @@ class FunctionName:
         return list()
 
     def equals(self, other):
+        if isinstance(other, Wildcard):
+            print("hi")
+            return True
         if isinstance(other, self.__class__):
             return other.value == self.value
         return False
@@ -305,11 +314,17 @@ class Function:
         return children
 
     def equals(self, other):
+        if isinstance(other, Wildcard):
+            return True
         if not isinstance(other, self.__class__):
             return False
         if not other.value.equals(self.value):
             return False
         if len(other.args) != len(self.args):
+            if any(isinstance(x, Wildcard) for x in other.children):
+                return True
+            if any(isinstance(x, Wildcard) for x in self.children):
+                return True
             return False
         for other_arg, self_arg in zip(other.args, self.args):
             if not other_arg.equals(self_arg):
@@ -372,6 +387,8 @@ class Condition:
         return children
 
     def equals(self, other):
+        if isinstance(other, Wildcard):
+            return True
         if isinstance(other, self.__class__):
             return other.value.equals(self.value)
         return False
@@ -453,6 +470,8 @@ class ElIf:
         return children
 
     def equals(self, other):
+        if isinstance(other, Wildcard):
+            return True
         if isinstance(other, self.__class__):
             return other.condition.equals(self.condition) \
                    and other.body.equals(self.body) \
@@ -516,6 +535,8 @@ class Else:
         return children
 
     def equals(self, other):
+        if isinstance(other, Wildcard):
+            return True
         if isinstance(other, self.__class__):
             return other.body.equals(self.body)
         return False
@@ -597,6 +618,8 @@ class If:
         return children
 
     def equals(self, other):
+        if isinstance(other, Wildcard):
+            return True
         if isinstance(other, self.__class__):
             return other.condition.equals(self.condition) \
                    and other.body.equals(self.body) \
@@ -687,9 +710,15 @@ class Body:
         return children
 
     def equals(self, other):
+        if isinstance(other, Wildcard):
+            return True
         if not isinstance(other, self.__class__):
             return False
         if len(other.children) != len(self.children):
+            if any(isinstance(x, Wildcard) for x in other.children):
+                return True
+            if any(isinstance(x, Wildcard) for x in self.children):
+                return True
             return False
         for other_children, self_children in zip(other.children, self.children):
             if not other_children.equals(self_children):
@@ -774,6 +803,8 @@ class BoolOperation:
         return children
 
     def equals(self, other):
+        if isinstance(other, Wildcard):
+            return True
         if isinstance(other, self.__class__):
             return other.operation.equals(self.operation) \
                    and other.second.equals(self.second) \
@@ -847,6 +878,8 @@ class UnaryOperation:
         return children
 
     def equals(self, other):
+        if isinstance(other, Wildcard):
+            return True
         if isinstance(other, self.__class__):
             return other.operation.equals(self.operation) \
                    and other.first.equals(self.first)
@@ -932,6 +965,8 @@ class Compare:
         return children
 
     def equals(self, other):
+        if isinstance(other, Wildcard):
+            return True
         if isinstance(other, self.__class__):
             return other.operation.equals(self.operation) \
                    and other.second.equals(self.second) \
@@ -971,6 +1006,8 @@ class EmptyNode:
         return list()
 
     def equals(self, other):
+        if isinstance(other, Wildcard):
+            return True
         if isinstance(other, self.__class__):
             return True
         return False
@@ -1008,6 +1045,8 @@ class Startnode:
         return list()
 
     def equals(self, other):
+        if isinstance(other, Wildcard):
+            return True
         if isinstance(other, self.__class__):
             return True
         return False
@@ -1045,6 +1084,8 @@ class Endnode:
         return list()
 
     def equals(self, other):
+        if isinstance(other, Wildcard):
+            return True
         if isinstance(other, self.__class__):
             return True
         return False

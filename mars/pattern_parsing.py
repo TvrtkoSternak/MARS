@@ -120,14 +120,14 @@ class ReadablePatternParser(PatternParser):
         """
         edit_operations = list()
         print(pattern_matcher.wildcard_blocks)
-        for index, node in enumerate(pattern_matcher.pattern.modified.walk()):
+        list_pattern_matcher_copy = copy.deepcopy(pattern_matcher.pattern.modified.walk())
+        for index, node in enumerate(list_pattern_matcher_copy):
             if isinstance(node, Use):
-                edit_operations.append(Update(index, pattern_matcher.wildcard_blocks[node.index]))
+                edit_operations.append(Update(index, pattern_matcher.wildcard_blocks[node.index].pop(0).reconstruct(pattern_matcher.wildcard_blocks[node.index])))
 
         edit_script = EditScript(edit_operations)
-        list_modified_pattern_copy = copy.deepcopy(pattern_matcher.pattern.modified.walk())
-        edit_script.execute(list_modified_pattern_copy)
-        list_modified_pattern_copy.pop(0).reconstruct(list_modified_pattern_copy).unparse(0)
+        edit_script.execute(list_pattern_matcher_copy)
+        list_pattern_matcher_copy.pop(0).reconstruct(list_pattern_matcher_copy).unparse(0)
 
 
 class StoreRecommendationsPatternParser(PatternParser):

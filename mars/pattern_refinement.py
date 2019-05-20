@@ -184,6 +184,7 @@ class PatternRefiner:
         second_pattern : Pattern
             Pattern that is chosen for refinement
         """
+        print("parsed")
         edit_script = self.edit_script_generator.generate(first_pattern_mod, second_pattern_mod)
         uses = dict()
 

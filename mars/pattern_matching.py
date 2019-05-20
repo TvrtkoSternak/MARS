@@ -440,6 +440,7 @@ class PatternListener(IListener, IPatternMatcher):
         super().__init__(pattern)
         self.wildcard_blocks = dict()
         self.reader = None
+        self.timeout = 0
 
     def update(self):
         """
@@ -477,20 +478,34 @@ class PatternListener(IListener, IPatternMatcher):
         bool
             True if the nodes match, false otherwise
         """
-        self_node = self.original_detailed[self.counter]
-
-        if isinstance(self_node, Wildcard):
-            if node.equals(self.original_detailed[self.counter + 1]):
-                self.counter += 1
-            else:
-                if self_node.index in self.wildcard_blocks:
-                    self.wildcard_blocks[self_node.index] = self.wildcard_blocks[self_node.index].append(node)
-                else:
-                    self.wildcard_blocks[self_node.index] = [node]
-                self.counter -= 1
+        if self.timeout > 0:
+            self.timeout -= 1
+            self.counter -= 1
             return True
         else:
-            return node.equals(self.original_detailed[self.counter])
+            self_node = self.original_detailed[self.counter]
+
+            if isinstance(self_node, Wildcard) and node.equals(self.original_detailed[self.counter + 1]):
+                #print(node)
+                self.counter += 1
+                return True
+            elif isinstance(self_node, Wildcard):
+                #print(node)
+                self.counter -= 1
+                if self_node.index in self.wildcard_blocks:
+                    self.wildcard_blocks[self_node.index].extend(node.walk())
+                    print(self.wildcard_blocks)
+                else:
+                    new_list = list()
+                    new_list.extend(node.walk())
+                    self.wildcard_blocks[self_node.index] = new_list
+                    #print(self.wildcard_blocks)
+                self.timeout = node.num_children()
+                return True
+            else:
+                print(node)
+                print(self.original_detailed[self.counter])
+                return node.equals(self.original_detailed[self.counter])
 
     def subscribe(self, reader):
         """

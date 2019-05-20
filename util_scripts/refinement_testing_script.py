@@ -8,3 +8,13 @@ edit_script_generator = EditScriptGenerator(differencer, 0.3)
 refiner = PatternRefiner(storage_context, edit_script_generator, WildcardUseCompressor(FunctionPropagator(EditScriptOptimiser())))
 
 refiner.refine()
+
+patterns = storage_context.load()
+
+for pattern in patterns:
+    print("----------------------------")
+    print("original:")
+    pattern.original.unparse(0)
+    print("modified")
+    pattern.modified.unparse(0)
+    print("-----------------------------")

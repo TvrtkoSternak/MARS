@@ -1,7 +1,11 @@
+import copy
 from abc import ABC, abstractmethod
 import xml.etree.ElementTree as ET
 
 import astunparse
+
+from mars.astwrapper import Use
+from mars.pattern import Update, EditScript
 
 
 class PatternParser(ABC):
@@ -114,7 +118,15 @@ class ReadablePatternParser(PatternParser):
             IPatternMatcher object that will be parsed and written to standard
             output
         """
-        pass
+        edit_operations = list()
+        for index, node in enumerate(pattern_matcher.pattern.modified.walk()):
+            if isinstance(node, Use):
+                edit_operations.append(Update(index, pattern_matcher.wildcard_blocks[node.index]))
+
+        edit_script = EditScript(edit_operations)
+        list_modified_pattern_copy = copy.deepcopy(pattern_matcher.pattern.modified.walk())
+        edit_script.execute(list_modified_pattern_copy)
+        list_modified_pattern_copy.pop(0).reconstruct(list_modified_pattern_copy).unparse(0)
 
 
 class StoreRecommendationsPatternParser(PatternParser):

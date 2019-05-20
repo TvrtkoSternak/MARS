@@ -120,9 +120,13 @@ class ReadablePatternParser(PatternParser):
         """
         edit_operations = list()
         list_pattern_matcher_copy = copy.deepcopy(pattern_matcher.pattern.modified.walk())
+
         for index, node in enumerate(list_pattern_matcher_copy):
             if isinstance(node, Use):
-                edit_operations.append(Update(index, pattern_matcher.wildcard_blocks[node.index].pop(0).reconstruct(pattern_matcher.wildcard_blocks[node.index])))
+                wildcard_block = list()
+                while pattern_matcher.wildcard_blocks[node.index]:
+                    wildcard_block.append(pattern_matcher.wildcard_blocks[node.index].pop(0).reconstruct(pattern_matcher.wildcard_blocks[node.index]))
+                edit_operations.append(Update(index, wildcard_block))
 
         edit_script = EditScript(edit_operations)
         edit_script.execute(list_pattern_matcher_copy)

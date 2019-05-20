@@ -245,8 +245,9 @@ class Insert(ChangeOperation):
         IndexError
             If the specified index is out of range
         """
-        original_list_of_nodes[self.index:self.index] = self.change.walk()
-        return original_list_of_nodes, self.change.num_children() + 1, self.change.num_children() + 1
+        unpacked_change = self.unpack_change(self.change)
+        original_list_of_nodes[self.index:self.index] = unpacked_change
+        return original_list_of_nodes, len(unpacked_change), len(unpacked_change)
 
     def __str__(self):
         """
@@ -258,6 +259,16 @@ class Insert(ChangeOperation):
             Human-readable interpretation of Insert
         """
         return "Insert operation @index " + str(self.index)
+
+    def unpack_change(self, change):
+        if isinstance(change, list):
+            unpacked_changes = list()
+            while change:
+                node = change.pop(0)
+                unpacked_changes.extend(node.walk())
+            return unpacked_changes
+        else:
+            return change.walk()
 
 
 class Delete(ChangeOperation):
@@ -383,8 +394,19 @@ class Update(ChangeOperation):
         end_index = original_list_of_nodes[self.index + offset].num_children() + self.index + 1
         len_deleted = original_list_of_nodes[self.index + offset].num_children() + 1
         del original_list_of_nodes[self.index + offset:end_index + offset]
-        original_list_of_nodes[self.index + offset:self.index + offset] = self.change.walk()
-        return original_list_of_nodes, self.change.num_children() + 1 - len_deleted, self.change.num_children() + 1 + len_deleted
+        unpacked_change = self.unpack_change(self.change)
+        original_list_of_nodes[self.index + offset:self.index + offset] = unpacked_change
+        return original_list_of_nodes, len(unpacked_change) - len_deleted, len(unpacked_change) + len_deleted
+
+    def unpack_change(self, change):
+        if isinstance(change, list):
+            unpacked_changes = list()
+            while change:
+                node = change.pop(0)
+                unpacked_changes.extend(node.walk())
+            return unpacked_changes
+        else:
+            return change.walk()
 
     def __str__(self):
         """

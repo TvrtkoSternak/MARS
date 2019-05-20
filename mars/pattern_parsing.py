@@ -119,6 +119,7 @@ class ReadablePatternParser(PatternParser):
             output
         """
         edit_operations = list()
+        print(pattern_matcher.wildcard_blocks)
         for index, node in enumerate(pattern_matcher.pattern.modified.walk()):
             if isinstance(node, Use):
                 edit_operations.append(Update(index, pattern_matcher.wildcard_blocks[node.index]))

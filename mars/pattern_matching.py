@@ -151,7 +151,7 @@ class Recommender(Reader):
             File with found recommendations
         """
         wrapper = AstWrapper()
-        for node in wrapper.visit(self.parser.parse(source)):
+        for node in source:
             self.present_node = node
             self.notify()
 
@@ -457,7 +457,7 @@ class PatternListener(IListener, IPatternMatcher):
         if not self.check_match(node):
             self.unsubscribe()
         else:
-            if hasattr(node.node, 'lineno'):
+            if hasattr(node, 'lineno'):
                 self.last_lineno = node.node.lineno
             if self.counter == self.original_detailed.__len__()-1:
                 self.reader.parse(self)

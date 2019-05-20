@@ -50,7 +50,7 @@ class PatternRefiner:
         in place and will be the same after this method, any of them can be used to
         save in the database.
     """
-    def __init__(self, context, edit_script_generator, optimiser=None, min_no_patterns=1, max_pattern_distance=float('inf')):
+    def __init__(self, context, edit_script_generator, optimiser=None, min_no_patterns=2, max_pattern_distance=float('inf')):
         """
         Initialises PatternRefiner object.
 
@@ -86,28 +86,33 @@ class PatternRefiner:
         Method that starts the refinement process.
         """
         patterns = self.context.load()
-        first_pattern, second_pattern, distance = self.find_nearest_patterns(patterns)
-        org_wildcards_pattern = self.add_wildcards(first_pattern.original, second_pattern.original)
-        mod_uses_pattern = self.add_uses(first_pattern.modified, second_pattern.modified)
-        self.connect_wildcards_and_uses(org_wildcards_pattern, mod_uses_pattern,
-                                        first_pattern.node_pairs, second_pattern.node_pairs)
+        refined_patterns = list()
+        while True:
+            first_pattern, second_pattern, distance = self.find_nearest_patterns(patterns)
+            if len(patterns) <= self.min_no_patterns or distance >= self.max_pattern_distance:
+                break
+            org_wildcards_pattern = self.add_wildcards(first_pattern.original, second_pattern.original)
+            mod_uses_pattern = self.add_uses(first_pattern.modified, second_pattern.modified)
+            self.connect_wildcards_and_uses(org_wildcards_pattern, mod_uses_pattern,
+                                            first_pattern.node_pairs, second_pattern.node_pairs)
 
-        reconstructed_org = org_wildcards_pattern.pop(0).reconstruct(org_wildcards_pattern)
-        reconstructed_mod = mod_uses_pattern.pop(0).reconstruct(mod_uses_pattern)
+            reconstructed_org = org_wildcards_pattern.pop(0).reconstruct(org_wildcards_pattern)
+            reconstructed_mod = mod_uses_pattern.pop(0).reconstruct(mod_uses_pattern)
 
-        list_reconstructed_org = reconstructed_org.walk()
-        list_reconstructed_mod = reconstructed_mod.walk()
+            list_reconstructed_org = reconstructed_org.walk()
+            list_reconstructed_mod = reconstructed_mod.walk()
 
-        self.optimiser.optimise(list_reconstructed_org, list_reconstructed_mod)
+            self.optimiser.optimise(list_reconstructed_org, list_reconstructed_mod)
 
-        created_pattern = self.pattern_creator.create_pattern(list_reconstructed_org.pop(0).reconstruct(list_reconstructed_org),
-                                                              list_reconstructed_mod.pop(0).reconstruct(list_reconstructed_mod),
-                                                              patterns_wrapped=True)
+            created_pattern = self.pattern_creator.create_pattern(list_reconstructed_org.pop(0).reconstruct(list_reconstructed_org),
+                                                                  list_reconstructed_mod.pop(0).reconstruct(list_reconstructed_mod),
+                                                                  patterns_wrapped=True)
 
-        patterns.remove(first_pattern)
-        patterns.remove(second_pattern)
-        patterns.append(created_pattern)
+            patterns.remove(first_pattern)
+            patterns.remove(second_pattern)
+            refined_patterns.append(created_pattern)
 
+        patterns.extend(refined_patterns)
         self.context.rewrite(patterns)
 
     def find_nearest_patterns(self, patterns):
@@ -184,7 +189,6 @@ class PatternRefiner:
         second_pattern : Pattern
             Pattern that is chosen for refinement
         """
-        print("parsed")
         edit_script = self.edit_script_generator.generate(first_pattern_mod, second_pattern_mod)
         uses = dict()
 

@@ -96,13 +96,22 @@ class PatternRefiner:
             if distance >= self.max_pattern_distance:
                 break
 
-            org_wildcards_pattern = self.add_wildcards(first_pattern.original, second_pattern.original)
-            mod_uses_pattern = self.add_uses(first_pattern.modified, second_pattern.modified)
-            self.connect_wildcards_and_uses(org_wildcards_pattern, mod_uses_pattern,
+            wildcards = self.add_wildcards(first_pattern.original, second_pattern.original)
+            uses = self.add_uses(first_pattern.modified, second_pattern.modified)
+            wildcards, uses = self.connect_wildcards_and_uses(wildcards, uses,
                                             first_pattern.node_pairs, second_pattern.node_pairs)
 
-            reconstructed_org = org_wildcards_pattern.pop(0).reconstruct(org_wildcards_pattern)
-            reconstructed_mod = mod_uses_pattern.pop(0).reconstruct(mod_uses_pattern)
+            edit_script_wild = EditScript(wildcards)
+            edit_script_use = EditScript(uses)
+
+            list_org = first_pattern.original.walk()
+            list_mod = first_pattern.modified.walk()
+
+            edit_script_wild.execute(list_org)
+            edit_script_use.execute(list_mod)
+
+            reconstructed_org = list_org.pop(0).reconstruct(list_org)
+            reconstructed_mod = list_mod.pop(0).reconstruct(list_mod)
 
             list_reconstructed_org = reconstructed_org.walk()
             list_reconstructed_mod = reconstructed_mod.walk()
@@ -116,8 +125,7 @@ class PatternRefiner:
             patterns.remove(first_pattern)
             patterns.remove(second_pattern)
             refined_patterns.append(created_pattern)
-            print(created_pattern)
-        refined_patterns[0].original.unparse(0)
+
         patterns.extend(refined_patterns)
         self.context.rewrite(patterns)
 
@@ -178,10 +186,12 @@ class PatternRefiner:
         for value in wildcards.values():
             edit_operations.append(value)
 
-        edit_script_wildcards = EditScript(edit_operations)
-        list_first_pattern_copy = copy.deepcopy(list_first_pattern)
-        edit_script_wildcards.execute(list_first_pattern_copy)
-        return list_first_pattern_copy
+        return edit_operations
+
+        # edit_script_wildcards = EditScript(edit_operations)
+        # list_first_pattern_copy = copy.deepcopy(list_first_pattern)
+        # edit_script_wildcards.execute(list_first_pattern_copy)
+        # return list_first_pattern_copy
 
     def add_uses(self, first_pattern_mod, second_pattern_mod):
         """
@@ -214,12 +224,14 @@ class PatternRefiner:
         for value in uses.values():
             edit_operations.append(value)
 
-        edit_script_uses = EditScript(edit_operations)
-        list_first_pattern_copy = copy.deepcopy(list_first_pattern)
-        edit_script_uses.execute(list_first_pattern_copy)
-        return list_first_pattern_copy
+        return edit_operations
 
-    def connect_wildcards_and_uses(self, pattern_org, pattern_mod, first_pattern_similarity_list, second_pattern_similarity_list):
+        # edit_script_uses = EditScript(edit_operations)
+        # list_first_pattern_copy = copy.deepcopy(list_first_pattern)
+        # edit_script_uses.execute(list_first_pattern_copy)
+        # return list_first_pattern_copy
+
+    def connect_wildcards_and_uses(self, wildcards, uses, first_pattern_similarity_list, second_pattern_similarity_list):
         """
         Compares the ASTs of two chosen Patterns and determines which are the
         corresponding wildcard-use and connects them. The pattern inputs are changed
@@ -233,28 +245,24 @@ class PatternRefiner:
         second_pattern : Pattern
             Pattern that is chosen for refinement
         """
-        wildcards = [x for x in pattern_org if isinstance(x, Wildcard)]
-        uses = [x for x in pattern_mod if isinstance(x, Use)]
-
         i = 1
         for wildcard in wildcards:
-            if isinstance(wildcard.type, Insert):
-                pair = next((key for key, value in second_pattern_similarity_list.items() if wildcard.wrapped_node in key), None)
+            if isinstance(wildcard.change.type, Insert):
+                pair = next((key for key, value in second_pattern_similarity_list.items() if wildcard.change.wrapped_node in key), None)
             else:
-                pair = next((key for key, value in first_pattern_similarity_list.items() if wildcard.wrapped_node in key), None)
+                pair = next((key for key, value in first_pattern_similarity_list.items() if wildcard.change.wrapped_node in key), None)
 
             if pair:
-                use = next((x for x in uses if x.wrapped_node in pair), None)
+                use = next((x for x in uses if x.change.wrapped_node in pair), None)
                 if use:
-                    wildcard.index = i
-                    use.index = i
+                    wildcard.change.index = i
+                    use.change.index = i
                     i += 1
 
-        unmatched_wildcards = [Update(index, x.wrapped_node) for index, x in enumerate(pattern_org) if isinstance(x, Wildcard) and x.index == 0]
-        unmatched_uses = [Update(index, x.wrapped_node) for index, x in enumerate(pattern_mod) if isinstance(x, Use) and x.index == 0]
+        wildcards = [x for x in wildcards if x.change.index != 0]
+        uses = [x for x in uses if x.change.index != 0]
 
-        EditScript(unmatched_wildcards).execute(pattern_org)
-        EditScript(unmatched_uses).execute(pattern_mod)
+        return wildcards, uses
 
 
 class IOptimiser(ABC):

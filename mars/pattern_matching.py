@@ -366,7 +366,7 @@ class PatternFactoryListener(IPatternFactory, IPatternMatcher, IListener):
         bool
             True if the nodes match, false otherwise
         """
-        return node.__eq__(self.original_detailed[self.counter])
+        return node.equals(self.original_detailed[self.counter])
 
     def subscribe(self, reader):
         """
@@ -480,7 +480,7 @@ class PatternListener(IListener, IPatternMatcher):
         self_node = self.original_detailed[self.counter]
 
         if isinstance(self_node, Wildcard):
-            if node.__eq__(self.original_detailed[self.counter + 1]):
+            if node.equals(self.original_detailed[self.counter + 1]):
                 self.counter += 1
             else:
                 if self_node.index in self.wildcard_blocks:
@@ -490,7 +490,7 @@ class PatternListener(IListener, IPatternMatcher):
                 self.counter -= 1
             return True
         else:
-            return node.__eq__(self.original_detailed[self.counter])
+            return node.equals(self.original_detailed[self.counter])
 
     def subscribe(self, reader):
         """

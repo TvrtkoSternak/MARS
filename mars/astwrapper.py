@@ -37,7 +37,7 @@ class Variable:
     def get_all_children(self):
         return list()
 
-    def __eq__(self, other):
+    def equals(self, other):
         if isinstance(other, self.__class__):
             return other.value == self.value
         return False
@@ -81,7 +81,7 @@ class Constant:
     def get_all_children(self):
         return list()
 
-    def __eq__(self, other):
+    def equals(self, other):
         if isinstance(other, self.__class__):
             return other.value == self.value \
                    and other.type_of == self.type_of
@@ -157,11 +157,11 @@ class Assign:
         children.extend(self.value.get_all_children())
         return children
 
-    def __eq__(self, other):
+    def equals(self, other):
         if isinstance(other, self.__class__):
             return other.operation == self.operation \
-                   and other.value.__eq__(self.value) \
-                   and other.variable.__eq__(self.variable)
+                   and other.value.equals(self.value) \
+                   and other.variable.equals(self.variable)
         return False
 
 
@@ -200,7 +200,7 @@ class FunctionName:
     def get_all_children(self):
         return list()
 
-    def __eq__(self, other):
+    def equals(self, other):
         if isinstance(other, self.__class__):
             return other.value == self.value
         return False
@@ -304,15 +304,15 @@ class Function:
         children.extend(self.value.get_all_children())
         return children
 
-    def __eq__(self, other):
+    def equals(self, other):
         if not isinstance(other, self.__class__):
             return False
-        if not other.value.__eq__(self.value):
+        if not other.value.equals(self.value):
             return False
         if len(other.args) != len(self.args):
             return False
         for other_arg, self_arg in zip(other.args, self.args):
-            if not other_arg.__eq__(self_arg):
+            if not other_arg.equals(self_arg):
                 return False
         return True
 
@@ -371,9 +371,9 @@ class Condition:
         children.extend(self.value.get_all_children())
         return children
 
-    def __eq__(self, other):
+    def equals(self, other):
         if isinstance(other, self.__class__):
-            return other.value.__eq__(self.value)
+            return other.value.equals(self.value)
         return False
 
 
@@ -452,11 +452,11 @@ class ElIf:
         children.extend(self.next_if.get_all_children())
         return children
 
-    def __eq__(self, other):
+    def equals(self, other):
         if isinstance(other, self.__class__):
-            return other.condition.__eq__(self.condition) \
-                   and other.body.__eq__(self.body) \
-                   and other.next_if.__eq__(self.next_if)
+            return other.condition.equals(self.condition) \
+                   and other.body.equals(self.body) \
+                   and other.next_if.equals(self.next_if)
         return False
 
 
@@ -515,9 +515,9 @@ class Else:
         children.extend(self.body.get_all_children())
         return children
 
-    def __eq__(self, other):
+    def equals(self, other):
         if isinstance(other, self.__class__):
-            return other.body.__eq__(self.body)
+            return other.body.equals(self.body)
         return False
 
 
@@ -596,11 +596,11 @@ class If:
         children.extend(self.next_if.get_all_children())
         return children
 
-    def __eq__(self, other):
+    def equals(self, other):
         if isinstance(other, self.__class__):
-            return other.condition.__eq__(self.condition) \
-                   and other.body.__eq__(self.body) \
-                   and other.next_if.__eq__(self.next_if)
+            return other.condition.equals(self.condition) \
+                   and other.body.equals(self.body) \
+                   and other.next_if.equals(self.next_if)
         return False
 
 
@@ -686,13 +686,13 @@ class Body:
             children.extend(child.get_all_children())
         return children
 
-    def __eq__(self, other):
+    def equals(self, other):
         if not isinstance(other, self.__class__):
             return False
         if len(other.children) != len(self.children):
             return False
         for other_children, self_children in zip(other.children, self.children):
-            if not other_children.__eq__(self_children):
+            if not other_children.equals(self_children):
                 return False
         return True
 
@@ -773,11 +773,11 @@ class BoolOperation:
         children.extend(self.operation.get_all_children())
         return children
 
-    def __eq__(self, other):
+    def equals(self, other):
         if isinstance(other, self.__class__):
-            return other.operation.__eq__(self.operation) \
-                   and other.second.__eq__(self.second) \
-                   and other.first.__eq__(self.first)
+            return other.operation.equals(self.operation) \
+                   and other.second.equals(self.second) \
+                   and other.first.equals(self.first)
         return False
 
 
@@ -846,10 +846,10 @@ class UnaryOperation:
         children.extend(self.operation.get_all_children())
         return children
 
-    def __eq__(self, other):
+    def equals(self, other):
         if isinstance(other, self.__class__):
-            return other.operation.__eq__(self.operation) \
-                   and other.first.__eq__(self.first)
+            return other.operation.equals(self.operation) \
+                   and other.first.equals(self.first)
         return False
 
 
@@ -931,11 +931,11 @@ class Compare:
         children.extend(self.operation.get_all_children())
         return children
 
-    def __eq__(self, other):
+    def equals(self, other):
         if isinstance(other, self.__class__):
-            return other.operation.__eq__(self.operation) \
-                   and other.second.__eq__(self.second) \
-                   and other.first.__eq__(self.first)
+            return other.operation.equals(self.operation) \
+                   and other.second.equals(self.second) \
+                   and other.first.equals(self.first)
         return False
 
 
@@ -970,7 +970,7 @@ class EmptyNode:
     def get_all_children(self):
         return list()
 
-    def __eq__(self, other):
+    def equals(self, other):
         if isinstance(other, self.__class__):
             return True
         return False
@@ -1007,7 +1007,7 @@ class Startnode:
     def get_all_children(self):
         return list()
 
-    def __eq__(self, other):
+    def equals(self, other):
         if isinstance(other, self.__class__):
             return True
         return False
@@ -1044,7 +1044,7 @@ class Endnode:
     def get_all_children(self):
         return list()
 
-    def __eq__(self, other):
+    def equals(self, other):
         if isinstance(other, self.__class__):
             return True
         return False
@@ -1087,7 +1087,7 @@ class Wildcard:
     def get_all_children(self):
         return list()
 
-    def __eq__(self, other):
+    def equals(self, other):
         return True
 
 
@@ -1128,6 +1128,6 @@ class Use:
     def get_all_children(self):
         return list()
 
-    def __eq__(self, other):
+    def equals(self, other):
         return True
 

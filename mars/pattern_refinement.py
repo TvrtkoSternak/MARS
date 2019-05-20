@@ -1,4 +1,3 @@
-import copy
 from abc import ABC, abstractmethod
 
 from mars.astutils import AstWrapper
@@ -123,7 +122,6 @@ class PatternRefiner:
                                                                   patterns_wrapped=True)
 
             patterns.remove(first_pattern)
-            patterns.remove(second_pattern)
             refined_patterns.append(created_pattern)
 
         patterns.extend(refined_patterns)

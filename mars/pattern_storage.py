@@ -14,7 +14,7 @@ class StorageContext:
     def rewrite(self, patterns):
         if os.path.exists(self.filename):
             os.remove(self.filename)
-        
+
         with open(self.filename, 'ab') as storage:
             for pattern in patterns:
                 pickle.dump(pattern, storage)

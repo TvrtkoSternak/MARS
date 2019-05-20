@@ -1,8 +1,10 @@
 import copy
 from abc import ABC, abstractmethod
 
+from mars.astutils import AstWrapper
 from mars.astwrapper import Wildcard, Use, Function
 from mars.pattern import Insert, Update, EditScript, Delete
+from mars.pattern_creation import PatternCreator
 
 
 class PatternRefiner:
@@ -77,6 +79,7 @@ class PatternRefiner:
         self.min_no_patterns = min_no_patterns
         self.max_pattern_distance = max_pattern_distance
         self.edit_script_generator = edit_script_generator
+        self.pattern_creator = PatternCreator(self.edit_script_generator.tree_differencer, AstWrapper())
 
     def refine(self):
         """
@@ -99,6 +102,15 @@ class PatternRefiner:
 
         list_reconstructed_org.pop(0).reconstruct(list_reconstructed_org).unparse(0)
         list_reconstructed_mod.pop(0).reconstruct(list_reconstructed_mod).unparse(0)
+
+        created_pattern = self.pattern_creator.create_pattern(list_reconstructed_org.pop(0).reconstruct(list_reconstructed_org),
+                                                              list_reconstructed_mod.pop(0).reconstruct(list_reconstructed_mod))
+
+        patterns.remove(first_pattern)
+        patterns.remove(second_pattern)
+        patterns.append(created_pattern)
+
+        self.context.rewrite(patterns)
 
     def find_nearest_patterns(self, patterns):
         """

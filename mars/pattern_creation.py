@@ -47,7 +47,7 @@ class PatternCreator:
         self.differencer = differencer
         self.ast_wrapper = ast_wrapper
 
-    def create_pattern(self, original_file, modified_file):
+    def create_pattern(self, original, modified, patterns_wrapped = False):
         """
         Creates a pattern from original and modified code files.
 
@@ -63,13 +63,17 @@ class PatternCreator:
         Pattern
             Pattern object created from original and modified code
         """
-        with open(original_file) as original:
-            text_original = original.read()
-        with open(modified_file) as modified:
-            text_modified = modified.read()
+        if not patterns_wrapped:
+            with open(original) as original_file:
+                text_original = original_file.read()
+            with open(modified) as modified_file:
+                text_modified = modified_file.read()
 
-        original_ast = self.ast_wrapper.visit(ast.parse(text_original))
-        modified_ast = self.ast_wrapper.visit(ast.parse(text_modified))
+            original_ast = self.ast_wrapper.visit(ast.parse(text_original))
+            modified_ast = self.ast_wrapper.visit(ast.parse(text_modified))
+        else:
+            original_ast = original
+            modified_ast = modified
 
         return Pattern(original_ast, modified_ast, self.differencer.connect_nodes(original_ast, modified_ast))
 

@@ -460,7 +460,7 @@ class PatternListener(IListener, IPatternMatcher):
         else:
             if hasattr(node, 'lineno'):
                 self.last_lineno = node.node.lineno
-            if self.counter == self.original_detailed.__len__()-1:
+            if self.counter == self.original_detailed.__len__()-2:
                 self.reader.parse(self)
                 self.unsubscribe()
 

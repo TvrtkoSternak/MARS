@@ -19,6 +19,10 @@ class StorageContext:
             for pattern in patterns:
                 pickle.dump(pattern, storage)
 
+    def delete(self):
+        if os.path.exists(self.filename):
+            os.remove(self.filename)
+
     def load(self):
         patterns = []
         with open(self.filename, 'rb') as storage:

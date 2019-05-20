@@ -6,6 +6,7 @@ from mars.pattern_storage import StorageContext
 
 pattern_creator = PatternCreator(TreeDifferencer(0.3), AstWrapper())
 storage_context = StorageContext()
+storage_context.delete()
 
 for directory, children, files in os.walk("../dataset"):
     if directory.split('/')[-1] not in 'dataset':

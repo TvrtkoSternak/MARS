@@ -88,9 +88,14 @@ class PatternRefiner:
         patterns = self.context.load()
         refined_patterns = list()
         while True:
-            first_pattern, second_pattern, distance = self.find_nearest_patterns(patterns)
-            if len(patterns) <= self.min_no_patterns or distance >= self.max_pattern_distance:
+            if len(patterns) <= max(self.min_no_patterns, 2):
                 break
+
+            first_pattern, second_pattern, distance = self.find_nearest_patterns(patterns)
+
+            if distance >= self.max_pattern_distance:
+                break
+
             org_wildcards_pattern = self.add_wildcards(first_pattern.original, second_pattern.original)
             mod_uses_pattern = self.add_uses(first_pattern.modified, second_pattern.modified)
             self.connect_wildcards_and_uses(org_wildcards_pattern, mod_uses_pattern,
@@ -112,7 +117,7 @@ class PatternRefiner:
             patterns.remove(second_pattern)
             refined_patterns.append(created_pattern)
             print(created_pattern)
-
+        refined_patterns[0].original.unparse(0)
         patterns.extend(refined_patterns)
         self.context.rewrite(patterns)
 
@@ -245,8 +250,8 @@ class PatternRefiner:
                     use.index = i
                     i += 1
 
-        unmatched_wildcards = [Update(index, x.wrapped_node) for index, x in enumerate(wildcards) if x.index == 0]
-        unmatched_uses = [Update(index, x.wrapped_node) for index, x in enumerate(uses) if x.index == 0]
+        unmatched_wildcards = [Update(index, x.wrapped_node) for index, x in enumerate(pattern_org) if isinstance(x, Wildcard) and x.index == 0]
+        unmatched_uses = [Update(index, x.wrapped_node) for index, x in enumerate(pattern_mod) if isinstance(x, Use) and x.index == 0]
 
         EditScript(unmatched_wildcards).execute(pattern_org)
         EditScript(unmatched_uses).execute(pattern_mod)

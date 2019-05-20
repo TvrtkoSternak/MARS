@@ -111,6 +111,7 @@ class PatternRefiner:
             patterns.remove(first_pattern)
             patterns.remove(second_pattern)
             refined_patterns.append(created_pattern)
+            print(created_pattern)
 
         patterns.extend(refined_patterns)
         self.context.rewrite(patterns)
@@ -243,6 +244,12 @@ class PatternRefiner:
                     wildcard.index = i
                     use.index = i
                     i += 1
+
+        unmatched_wildcards = [Update(index, x.wrapped_node) for index, x in enumerate(wildcards) if x.index == 0]
+        unmatched_uses = [Update(index, x.wrapped_node) for index, x in enumerate(uses) if x.index == 0]
+
+        EditScript(unmatched_wildcards).execute(pattern_org)
+        EditScript(unmatched_uses).execute(pattern_mod)
 
 
 class IOptimiser(ABC):

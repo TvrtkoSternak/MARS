@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+
+from mars.astwrapper import Wildcard
 from .pattern import Pattern
 from .astutils import AstUtils, AstWrapper
 import ast
@@ -266,7 +268,7 @@ class IPatternMatcher(ABC):
         Check if the input node matches the IPatternMatcher node that is next in the pattern.
     """
 
-    def __init__(self, pattern, start_lineno):
+    def __init__(self, pattern):
         """
         Initialises IPatternMatcher with pattern to match
         Parameters
@@ -275,10 +277,8 @@ class IPatternMatcher(ABC):
             Pattern  object  that  is  being  checked  against  incoming  patterns  for matches
         """
         self.pattern = pattern
-        self.start_lineno = start_lineno
-        self.last_lineno = start_lineno
-        self.original_detailed = AstUtils.walk_all_nodes(self.pattern.original)
-        self.counter = 1
+        self.original_detailed = self.pattern.original.walk()
+        self.counter = 2
 
     @abstractmethod
     def check_match(self, node):
@@ -349,7 +349,7 @@ class PatternFactoryListener(IPatternFactory, IPatternMatcher, IListener):
         IPatternMatcher
             IPatternMatcher that contains a Pattern that the concrete factory is responsible for creating
         """
-        pattern_listener = PatternListener(self.pattern, self.reader.get_present_node().node.lineno)
+        pattern_listener = PatternListener(self.pattern)
         pattern_listener.subscribe(self.reader)
 
     def check_match(self, node):
@@ -429,6 +429,18 @@ class PatternListener(IListener, IPatternMatcher):
         Removes itself from the list of listeners in the associated Reader object.
     """
 
+    def __init__(self, pattern):
+        """
+        Initialises IPatternMatcher with pattern to match
+        Parameters
+        ----------
+        pattern : Pattern
+            Pattern  object  that  is  being  checked  against  incoming  patterns  for matches
+        """
+        super().__init__(pattern)
+        self.wildcard_blocks = dict()
+        self.reader = None
+
     def update(self):
         """
         Method called by the Reader class. When this method is called PatternListener object retrieves the current node
@@ -465,7 +477,20 @@ class PatternListener(IListener, IPatternMatcher):
         bool
             True if the nodes match, false otherwise
         """
-        return node.__eq__(self.original_detailed[self.counter])
+        self_node = self.original_detailed[self.counter]
+
+        if isinstance(self_node, Wildcard):
+            if node.__eq__(self.original_detailed[self.counter + 1]):
+                self.counter += 1
+            else:
+                if self_node.index in self.wildcard_blocks:
+                    self.wildcard_blocks[self_node.index] = self.wildcard_blocks[self_node.index].append(node)
+                else:
+                    self.wildcard_blocks[self_node.index] = [node]
+                self.counter -= 1
+            return True
+        else:
+            return node.__eq__(self.original_detailed[self.counter])
 
     def subscribe(self, reader):
         """

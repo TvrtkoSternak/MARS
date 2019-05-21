@@ -361,10 +361,15 @@ class Condition:
         return False
 
     def similarity(self, node, node_pairs):
-        if not isinstance(node, self.__class__):
+        if not isinstance(node, self.__class__) \
+                and not isinstance(node, Compare)\
+                and not isinstance(node, BoolOperation)\
+                and not isinstance(node, UnaryOperation):
             return 0
-        else:
+        elif isinstance(node, Condition):
             return node_pairs.get((self.value, node.value), 0)
+        else:
+            return 0.3
 
     def get_children(self, node):
         children = list()
@@ -765,8 +770,11 @@ class BoolOperation:
     def similarity(self, node, node_pairs):
         if not isinstance(node, self.__class__) \
                 and not isinstance(node, UnaryOperation) \
-                and not isinstance(node, Compare):
+                and not isinstance(node, Compare)\
+                and not isinstance(node, Condition):
             return 0
+        elif isinstance(node, Condition):
+            return 0.3
         elif isinstance(node, UnaryOperation):
             first_sim = node_pairs.get((self.first, node.first), 0)
             return first_sim**2
@@ -847,8 +855,11 @@ class UnaryOperation:
     def similarity(self, node, node_pairs):
         if not isinstance(node, self.__class__) \
                 and not isinstance(node, BoolOperation)\
-                and not isinstance(node, Compare):
+                and not isinstance(node, Compare)\
+                and not isinstance(node, Condition):
             return 0
+        elif isinstance(node, Condition):
+            return 0.3
         else:
             first_sim = node_pairs.get((self.first, node.first), 0)
             op_sim = node_pairs.get((self.operation, node.operation), 0)
@@ -927,8 +938,11 @@ class Compare:
     def similarity(self, node, node_pairs):
         if not isinstance(node, self.__class__) \
                 and not isinstance(node, BoolOperation) \
-                and not isinstance(node, UnaryOperation):
+                and not isinstance(node, UnaryOperation)\
+                and not isinstance(node, Condition):
             return 0
+        elif isinstance(node, Condition):
+            return 0.3
         elif isinstance(node, UnaryOperation):
             first_sim = node_pairs.get((self.first, node.first), 0)
             return first_sim**2

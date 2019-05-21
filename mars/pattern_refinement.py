@@ -100,6 +100,8 @@ class PatternRefiner:
             wildcards, uses = self.connect_wildcards_and_uses(wildcards, uses,
                                             first_pattern.node_pairs, second_pattern.node_pairs)
 
+            print(len(wildcards))
+            print(len(uses))
             edit_script_wild = EditScript(wildcards)
             edit_script_use = EditScript(uses)
 
@@ -108,6 +110,12 @@ class PatternRefiner:
 
             edit_script_wild.execute(list_org)
             edit_script_use.execute(list_mod)
+
+            for index, node in enumerate(list_org):
+                print(index,":", node)
+
+            for index, node in enumerate(list_mod):
+                print(index,":", node)
 
             reconstructed_org = list_org.pop(0).reconstruct(list_org)
             reconstructed_mod = list_mod.pop(0).reconstruct(list_mod)
@@ -263,8 +271,8 @@ class PatternRefiner:
                     use.change.index = i
                     i += 1
 
-        wildcards = [x for x in wildcards if x.change.index != 0]
-        uses = [x for x in uses if x.change.index != 0]
+        #wildcards = [x for x in wildcards if x.change.index != 0]
+        #uses = [x for x in uses if x.change.index != 0]
 
         return wildcards, uses
 

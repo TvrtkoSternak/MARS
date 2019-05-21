@@ -1,3 +1,2 @@
-y = 2
-if type(y) is int:
+if type(x) is type(int):
     print('x is integer')

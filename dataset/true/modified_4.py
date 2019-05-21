@@ -1,3 +1,2 @@
-if some_var:
-    work()
-    work_more(some_var)
+if not some_condition:
+    print("condition is FALSE!")

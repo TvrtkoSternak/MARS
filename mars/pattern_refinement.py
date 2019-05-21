@@ -127,6 +127,7 @@ class PatternRefiner:
 
             patterns.remove(first_pattern)
             patterns.remove(second_pattern)
+            print("added")
             refined_patterns.append(created_pattern)
 
         self.context.rewrite(refined_patterns)

@@ -1,3 +1,4 @@
-if some_var:
-    work()
-    work_more(some_var)
+if x is None:
+    abort()
+    abort_with_x(x)
+    print("Aborted!")

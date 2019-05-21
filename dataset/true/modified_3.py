@@ -1,2 +1,2 @@
-if x:
-    do()
+if not y:
+    report_false()

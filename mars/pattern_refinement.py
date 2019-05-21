@@ -87,7 +87,7 @@ class PatternRefiner:
         patterns = self.context.load()
 
         while True:
-            if len(patterns) <= max(self.min_no_patterns, 2):
+            if len(patterns) <= max(self.min_no_patterns, 1):
                 break
 
             first_pattern, second_pattern, distance = self.find_nearest_patterns(patterns)
@@ -124,6 +124,12 @@ class PatternRefiner:
             patterns.remove(first_pattern)
             patterns.remove(second_pattern)
             patterns.append(created_pattern)
+
+            for index, node in enumerate(created_pattern.original.walk()):
+                print(index,":", node)
+
+            for index, node in enumerate(created_pattern.modified.walk()):
+                print(index,":", node)
 
         self.context.rewrite(patterns)
 

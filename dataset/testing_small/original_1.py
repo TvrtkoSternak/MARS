@@ -1,12 +1,3 @@
-if attr == attr() or a < b:
-    do_something()
-    if attr:
-        ayyy
-    elif attr:
-        ayyy
-    else:
-        fuck_me()
-elif attr:
-    do_something()
-else:
-    attr = 4
+if attr == True:
+    print('False!')
+    do_some_calculations_to_remedy()

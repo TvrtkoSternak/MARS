@@ -1,3 +1,2 @@
-if not attr:
-    print('False!')
-    do_some_calculations_to_remedy()
+if check_truth:
+    fuckkkk("I want the truth!!")

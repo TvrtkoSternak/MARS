@@ -8,7 +8,7 @@ os.system('python3 storage_initializing_script.py')
 storage_context = StorageContext()
 differencer = TreeDifferencer(0.3)
 edit_script_generator = EditScriptGenerator(differencer, 0.3)
-refiner = PatternRefiner(storage_context, edit_script_generator, WildcardUseCompressor(FunctionPropagator(EditScriptOptimiser())), min_no_patterns=5)
+refiner = PatternRefiner(storage_context, edit_script_generator, WildcardUseCompressor(FunctionPropagator(EditScriptOptimiser())), min_no_patterns=2)
 
 refiner.refine()
 

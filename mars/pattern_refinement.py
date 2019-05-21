@@ -97,6 +97,7 @@ class PatternRefiner:
 
             wildcards = self.add_wildcards(first_pattern.original, second_pattern.original)
             uses = self.add_uses(first_pattern.modified, second_pattern.modified)
+
             wildcards, uses = self.connect_wildcards_and_uses(wildcards, uses,
                                             first_pattern.node_pairs, second_pattern.node_pairs)
 
@@ -106,8 +107,7 @@ class PatternRefiner:
             list_org = first_pattern.original.walk()
             list_mod = first_pattern.modified.walk()
 
-            reconstructed_org = list_org.pop(0).reconstruct(list_org)
-            list_org = reconstructed_org.walk()
+            list_org = self.diagnostic_print(list_org, second_pattern.original.walk())
 
             edit_script_wild.execute(list_org)
             edit_script_use.execute(list_mod)
@@ -125,7 +125,28 @@ class PatternRefiner:
             patterns.remove(second_pattern)
             patterns.append(created_pattern)
 
+            print("#CODE created_pattern {")
+            created_pattern.original.unparse(0)
+            print("}")
+            print("------------------example end-----------------------")
+
         self.context.rewrite(patterns)
+
+    def diagnostic_print(self, list_org, s_list_org):
+        print("------------------example start---------------------")
+        s_reconstructed_org = s_list_org.pop(0).reconstruct(s_list_org)
+
+        reconstructed_org = list_org.pop(0).reconstruct(list_org)
+
+        print("#CODE first_original {")
+        reconstructed_org.unparse(0)
+        print("}")
+
+        print("#CODE second_original {")
+        s_reconstructed_org.unparse(0)
+        print("}")
+
+        return reconstructed_org.walk()
 
     def find_nearest_patterns(self, patterns):
         """

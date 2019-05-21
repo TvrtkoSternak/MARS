@@ -109,16 +109,16 @@ class PatternRefiner:
             edit_script_wild.execute(list_org)
             edit_script_use.execute(list_mod)
 
-            reconstructed_org = list_org.pop(0).reconstruct(list_org)
-            reconstructed_mod = list_mod.pop(0).reconstruct(list_mod)
+            # reconstructed_org = list_org.pop(0).reconstruct(list_org)
+            # reconstructed_mod = list_mod.pop(0).reconstruct(list_mod)
+            #
+            # list_reconstructed_org = reconstructed_org.walk()
+            # list_reconstructed_mod = reconstructed_mod.walk()
 
-            list_reconstructed_org = reconstructed_org.walk()
-            list_reconstructed_mod = reconstructed_mod.walk()
+            self.optimiser.optimise(list_org, list_mod)
 
-            self.optimiser.optimise(list_reconstructed_org, list_reconstructed_mod)
-
-            created_pattern = self.pattern_creator.create_pattern(list_reconstructed_org.pop(0).reconstruct(list_reconstructed_org),
-                                                                  list_reconstructed_mod.pop(0).reconstruct(list_reconstructed_mod),
+            created_pattern = self.pattern_creator.create_pattern(list_org.pop(0).reconstruct(list_org),
+                                                                  list_mod.pop(0).reconstruct(list_mod),
                                                                   patterns_wrapped=True)
 
             patterns.remove(first_pattern)

@@ -97,7 +97,6 @@ class PatternRefiner:
             print(distance)
 
             if distance >= self.max_pattern_distance:
-                patterns.extend(refined_patterns)
                 break
 
             wildcards = self.add_wildcards(first_pattern.original, second_pattern.original)
@@ -130,11 +129,7 @@ class PatternRefiner:
             patterns.remove(second_pattern)
             refined_patterns.append(created_pattern)
 
-            if len(patterns) <= max(self.min_no_patterns, 1):
-                patterns.extend(refined_patterns)
-                refined_patterns = list()
-
-        self.context.rewrite(patterns)
+        self.context.rewrite(refined_patterns)
 
     def find_nearest_patterns(self, patterns):
         """
@@ -221,7 +216,7 @@ class PatternRefiner:
                 else:
                     uses[operation.index] = Insert(operation.index, Use(operation.change, operation))
             elif isinstance(operation, Delete):
-                uses[operation.index] = Insert(operation.index, Use(list_first_pattern[operation.index], operation))
+                uses[operation.index] = Update(operation.index, Use(list_first_pattern[operation.index], operation))
             else:
                 uses[operation.index] = Update(operation.index, Use(list_first_pattern[operation.index], operation))
 

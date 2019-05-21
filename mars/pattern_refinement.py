@@ -100,8 +100,6 @@ class PatternRefiner:
             wildcards, uses = self.connect_wildcards_and_uses(wildcards, uses,
                                             first_pattern.node_pairs, second_pattern.node_pairs)
 
-            print(len(wildcards))
-            print(len(uses))
             edit_script_wild = EditScript(wildcards)
             edit_script_use = EditScript(uses)
 
@@ -110,12 +108,6 @@ class PatternRefiner:
 
             edit_script_wild.execute(list_org)
             edit_script_use.execute(list_mod)
-
-            for index, node in enumerate(list_org):
-                print(index,":", node)
-
-            for index, node in enumerate(list_mod):
-                print(index,":", node)
 
             reconstructed_org = list_org.pop(0).reconstruct(list_org)
             reconstructed_mod = list_mod.pop(0).reconstruct(list_mod)
@@ -132,12 +124,6 @@ class PatternRefiner:
             patterns.remove(first_pattern)
             patterns.remove(second_pattern)
             patterns.append(created_pattern)
-
-            for index, node in enumerate(created_pattern.original.walk()):
-                print(index,":", node)
-
-            for index, node in enumerate(created_pattern.modified.walk()):
-                print(index,":", node)
 
         self.context.rewrite(patterns)
 
@@ -187,9 +173,12 @@ class PatternRefiner:
         offset = 0
         for operation in edit_script:
             if isinstance(operation, Insert):
-                wildcards[operation.index] = Insert(operation.index + offset, Wildcard(operation.change, operation))
+                wildcards[operation.index] = Update(operation.index, Wildcard(operation.change, operation))
+                print(operation.__class__)
+                print(operation.change)
             else:
                 wildcards[operation.index] = Update(operation.index, Wildcard(list_first_pattern[operation.index], operation))
+                print(operation.__class__)
                 if isinstance(operation, Delete):
                     offset += 1
 
@@ -225,7 +214,7 @@ class PatternRefiner:
         offset = 0
         for operation in edit_script:
             if isinstance(operation, Insert):
-                uses[operation.index] = Insert(operation.index + offset, Use(operation.change, operation))
+                uses[operation.index] = Update(operation.index, Use(operation.change, operation))
             else:
                 uses[operation.index] = Update(operation.index, Use(list_first_pattern[operation.index], operation))
                 if isinstance(operation, Delete):
@@ -271,8 +260,8 @@ class PatternRefiner:
                     use.change.index = i
                     i += 1
 
-        #wildcards = [x for x in wildcards if x.change.index != 0]
-        #uses = [x for x in uses if x.change.index != 0]
+        wildcards = [x for x in wildcards if x.change.index != 0]
+        uses = [x for x in uses if x.change.index != 0]
 
         return wildcards, uses
 

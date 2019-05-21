@@ -1,6 +1,9 @@
-if not kiflica == None:
+if not kiflica == False:
     op()
     opaca()
 
-if not pengula == None:
+if not pengula == False:
     jebacina()
+
+if x == True:
+    some_shieet()

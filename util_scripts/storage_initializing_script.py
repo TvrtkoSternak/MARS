@@ -10,9 +10,8 @@ storage_context.delete()
 
 for directory, children, files in os.walk("../dataset"):
     if directory.split('/')[-1] not in 'dataset':
-        print(directory)
 
-        if "some_shit" in str(directory):
+        if "true" in str(directory):
             for i in range(1, int(len(os.listdir(directory))/2)+1):
                 try:
                     file_org = directory + "/original_" + i.__str__() + ".py"

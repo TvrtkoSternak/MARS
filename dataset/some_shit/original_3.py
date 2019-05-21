@@ -1,2 +1,2 @@
-if x == True:
+if z == True:
     do()

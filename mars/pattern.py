@@ -2,6 +2,8 @@ import copy
 from abc import ABC, abstractmethod
 import ast
 
+from mars.astwrapper import Wildcard, Use
+
 
 class Pattern:
     """
@@ -247,7 +249,10 @@ class Insert(ChangeOperation):
         """
         unpacked_change = self.unpack_change(self.change)
         original_list_of_nodes[self.index:self.index] = unpacked_change
-        return original_list_of_nodes, len(unpacked_change), len(unpacked_change)
+        penalty = 0
+        if any(isinstance(x, (Wildcard, Use)) for x in unpacked_change):
+            penalty = 0
+        return original_list_of_nodes, len(unpacked_change), len(unpacked_change) + penalty
 
     def __str__(self):
         """
@@ -322,8 +327,11 @@ class Delete(ChangeOperation):
         """
         end_index = original_list_of_nodes[self.index + offset].num_children() + self.index + 1
         num_deleted = original_list_of_nodes[self.index + offset].num_children() + 1
+        penalty = 0
+        if any(isinstance(x, (Wildcard, Use)) for x in original_list_of_nodes[self.index + offset:end_index + offset]):
+            penalty = 0
         del original_list_of_nodes[self.index + offset:end_index + offset]
-        return original_list_of_nodes, -num_deleted, num_deleted
+        return original_list_of_nodes, -num_deleted, num_deleted + penalty
 
     def __str__(self):
         """
@@ -396,7 +404,10 @@ class Update(ChangeOperation):
         del original_list_of_nodes[self.index + offset:end_index + offset]
         unpacked_change = self.unpack_change(self.change)
         original_list_of_nodes[self.index + offset:self.index + offset] = unpacked_change
-        return original_list_of_nodes, len(unpacked_change) - len_deleted, len(unpacked_change) + len_deleted
+        penalty = 0
+        if any(isinstance(x, (Wildcard, Use)) for x in unpacked_change):
+            penalty = 0
+        return original_list_of_nodes, len(unpacked_change) - len_deleted, len(unpacked_change) + len_deleted + penalty
 
     def unpack_change(self, change):
         if isinstance(change, list):

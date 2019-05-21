@@ -86,13 +86,18 @@ class PatternRefiner:
         """
         patterns = self.context.load()
 
+        refined_patterns = list()
+
         while True:
             if len(patterns) <= max(self.min_no_patterns, 1):
                 break
 
             first_pattern, second_pattern, distance = self.find_nearest_patterns(patterns)
 
+            print(distance)
+
             if distance >= self.max_pattern_distance:
+                patterns.extend(refined_patterns)
                 break
 
             wildcards = self.add_wildcards(first_pattern.original, second_pattern.original)
@@ -123,7 +128,11 @@ class PatternRefiner:
 
             patterns.remove(first_pattern)
             patterns.remove(second_pattern)
-            patterns.append(created_pattern)
+            refined_patterns.append(created_pattern)
+
+            if len(patterns) <= max(self.min_no_patterns, 1):
+                patterns.extend(refined_patterns)
+                refined_patterns = list()
 
             print("#CODE created_pattern {")
             created_pattern.original.unparse(0)

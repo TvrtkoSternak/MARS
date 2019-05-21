@@ -19,6 +19,8 @@ for pattern in patterns:
     print("----------------------------")
     print("original:")
     pattern.original.unparse(0)
+    print()
     print("modified")
     pattern.modified.unparse(0)
+    print()
     print("-----------------------------")

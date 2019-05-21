@@ -103,51 +103,17 @@ class PatternRefiner:
             edit_script_wild = EditScript(wildcards)
             edit_script_use = EditScript(uses)
 
-            print("WILDCARDS")
-            for w in wildcards:
-                print(w, w.change, w.change.wrapped_node)
-
             list_org = first_pattern.original.walk()
             list_mod = first_pattern.modified.walk()
-
-            s_list_org = second_pattern.original.walk()
-            s_reconstructed_org = s_list_org.pop(0).reconstruct(s_list_org)
 
             reconstructed_org = list_org.pop(0).reconstruct(list_org)
             list_org = reconstructed_org.walk()
 
-            print("#CODE {")
-            reconstructed_org.unparse(0)
-            print("}")
-
-            print("#CODE {")
-            s_reconstructed_org.unparse(0)
-            print("}")
-            for index, node in enumerate(list_org):
-                print(index, node)
-
-
-
-            print("changeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
-
             edit_script_wild.execute(list_org)
             edit_script_use.execute(list_mod)
 
-            # reconstructed_org = list_org.pop(0).reconstruct(list_org)
-            # reconstructed_mod = list_mod.pop(0).reconstruct(list_mod)
-            #
-            # list_reconstructed_org = reconstructed_org.walk()
-            # list_reconstructed_mod = reconstructed_mod.walk()
+            list_org, list_mod = self.optimiser.optimise(list_org, list_mod)
 
-            for index, node in enumerate(list_org):
-                print(index, node)
-
-            self.optimiser.optimise(list_org, list_mod)
-
-            print("optimiseeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
-
-            for index, node in enumerate(list_org):
-                print(index, node)
             reconstructed_org = list_org.pop(0).reconstruct(list_org)
             reconstructed_mod = list_mod.pop(0).reconstruct(list_mod)
 
@@ -158,10 +124,7 @@ class PatternRefiner:
             patterns.remove(first_pattern)
             patterns.remove(second_pattern)
             patterns.append(created_pattern)
-            print("Created:")
-            print("#CODE {")
-            created_pattern.original.unparse(0)
-            print("}")
+
         self.context.rewrite(patterns)
 
     def find_nearest_patterns(self, patterns):
@@ -213,15 +176,10 @@ class PatternRefiner:
                     wildcards[operation.index] = Update(operation.index, Wildcard(operation.change, operation))
                 else:
                     wildcards[operation.index] = Insert(operation.index, Wildcard(operation.change, operation))
-                print(operation.__class__)
-                print(operation.change)
             elif isinstance(operation, Delete):
-                print("->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Deleting")
-                list_first_pattern[operation.index].unparse(0)
                 wildcards[operation.index] = Update(operation.index, Wildcard(list_first_pattern[operation.index], operation))
             else:
                 wildcards[operation.index] = Update(operation.index, Wildcard(list_first_pattern[operation.index], operation))
-                print(operation.__class__)
 
         edit_operations = list()
 
@@ -254,7 +212,6 @@ class PatternRefiner:
                 else:
                     uses[operation.index] = Insert(operation.index, Use(operation.change, operation))
             elif isinstance(operation, Delete):
-                list_first_pattern[operation.index].unparse(0)
                 uses[operation.index] = Insert(operation.index, Use(list_first_pattern[operation.index], operation))
             else:
                 uses[operation.index] = Update(operation.index, Use(list_first_pattern[operation.index], operation))
@@ -289,7 +246,6 @@ class PatternRefiner:
                 pair = next((key for key, value in first_pattern_similarity_list.items() if wildcard_update.change.wrapped_node in key), None)
 
             if pair:
-                print("Found pair: ", wildcard_update)
                 use_update = next((x for x in use_updates if x.change.wrapped_node in pair), None)
                 if use_update:
                     wildcard_update.change.index = i
@@ -353,7 +309,7 @@ class EditScriptOptimiser(IOptimiser):
         """
         pass
 
-    def optimise(self, first_pattern, second_pattern):
+    def optimise(self, pattern_org, pattern_mod):
         """
         This method is a dummy method, does not change the patterns at all.
 
@@ -364,7 +320,7 @@ class EditScriptOptimiser(IOptimiser):
         second_pattern : Pattern
             Pattern that is chosen for refinement
         """
-        pass
+        return pattern_org, pattern_mod
 
 
 class EditScriptOptimiserDecorator(IOptimiser):
@@ -456,10 +412,7 @@ class WildcardUseCompressor(EditScriptOptimiserDecorator):
         reconstruct_walk_org = pattern_org.pop(0).reconstruct(pattern_org).walk()
         reconstruct_walk_mod = pattern_mod.pop(0).reconstruct(pattern_mod).walk()
 
-        self.base_optimiser.optimise(reconstruct_walk_org, reconstruct_walk_mod)
-
-        pattern_org = reconstruct_walk_org.pop(0).reconstruct(reconstruct_walk_org).walk()
-        pattern_mod = reconstruct_walk_mod.pop(0).reconstruct(reconstruct_walk_mod).walk()
+        pattern_org, pattern_mod = self.base_optimiser.optimise(reconstruct_walk_org, reconstruct_walk_mod)
         
         matching_blocks_index_list = list()
 
@@ -480,6 +433,8 @@ class WildcardUseCompressor(EditScriptOptimiserDecorator):
 
         edit_org.execute(pattern_org)
         edit_mod.execute(pattern_mod)
+
+        return pattern_org, pattern_mod
 
     def check_compatability(self, node_org, node_mod):
         return isinstance(node_org, Wildcard) and isinstance(node_mod, Use) and node_org.index == node_mod.index
@@ -523,10 +478,7 @@ class FunctionPropagator(EditScriptOptimiserDecorator):
         reconstruct_walk_org = pattern_org.pop(0).reconstruct(pattern_org).walk()
         reconstruct_walk_mod = pattern_mod.pop(0).reconstruct(pattern_mod).walk()
 
-        self.base_optimiser.optimise(reconstruct_walk_org, reconstruct_walk_mod)
-
-        pattern_org = reconstruct_walk_org.pop(0).reconstruct(reconstruct_walk_org).walk()
-        pattern_mod = reconstruct_walk_mod.pop(0).reconstruct(reconstruct_walk_mod).walk()
+        pattern_org, pattern_mod = self.base_optimiser.optimise(reconstruct_walk_org, reconstruct_walk_mod)
 
         pattern_org_functions = [(index, node.value, [arg for arg in node.args]) for index, node in enumerate(pattern_org) if isinstance(node, Function)]
         pattern_mod_functions = [(index, node.value, [arg for arg in node.args]) for index, node in enumerate(pattern_mod) if isinstance(node, Function)]
@@ -536,8 +488,6 @@ class FunctionPropagator(EditScriptOptimiserDecorator):
 
         for function_org in pattern_org_functions:
             for function_mod in pattern_mod_functions:
-                print("ubjet1: ", self.check_compatability(function_org[1], function_mod[1]))
-                print("uvjet2: ", self.arg_check(function_org[2], function_mod[2]))
                 if self.check_compatability(function_org[1], function_mod[1]) and self.arg_check(function_org[2], function_mod[2]):
                     wildcard = Wildcard(None, Update(0, None))
                     use = Use(None, Update(0, None))
@@ -546,19 +496,15 @@ class FunctionPropagator(EditScriptOptimiserDecorator):
                     edit_operations_org.append(Update(function_org[0], wildcard))
                     edit_operations_mod.append(Update(function_mod[0], use))
 
-        print("PROPAGATORRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
-        for op in edit_operations_org:
-            print(op)
         edit_org = EditScript(edit_operations_org)
         edit_mod = EditScript(edit_operations_mod)
 
         edit_org.execute(pattern_org)
         edit_mod.execute(pattern_mod)
 
-    def check_compatability(self, node_org, node_mod):
-        print("wild: ", isinstance(node_org, Wildcard))
-        print("use: ", isinstance(node_mod, Use))
+        return pattern_org, pattern_mod
 
+    def check_compatability(self, node_org, node_mod):
         return isinstance(node_org, Wildcard) and isinstance(node_mod, Use) and node_org.index == node_mod.index
 
     def arg_check(self, arg_org, arg_mod):

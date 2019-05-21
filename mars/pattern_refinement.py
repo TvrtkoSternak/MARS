@@ -117,8 +117,11 @@ class PatternRefiner:
 
             self.optimiser.optimise(list_org, list_mod)
 
-            created_pattern = self.pattern_creator.create_pattern(list_org.pop(0).reconstruct(list_org),
-                                                                  list_mod.pop(0).reconstruct(list_mod),
+            reconstructed_org = list_org.pop(0).reconstruct(list_org)
+            reconstructed_mod = list_mod.pop(0).reconstruct(list_mod)
+
+            created_pattern = self.pattern_creator.create_pattern(reconstructed_org,
+                                                                  reconstructed_mod,
                                                                   patterns_wrapped=True)
 
             patterns.remove(first_pattern)

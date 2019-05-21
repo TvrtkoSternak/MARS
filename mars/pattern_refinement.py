@@ -170,7 +170,6 @@ class PatternRefiner:
 
         list_first_pattern = first_pattern_org.walk()
 
-        offset = 0
         for operation in edit_script:
             if isinstance(operation, Insert):
                 wildcards[operation.index] = Update(operation.index, Wildcard(operation.change, operation))
@@ -179,8 +178,6 @@ class PatternRefiner:
             else:
                 wildcards[operation.index] = Update(operation.index, Wildcard(list_first_pattern[operation.index], operation))
                 print(operation.__class__)
-                if isinstance(operation, Delete):
-                    offset += 1
 
         edit_operations = list()
 
@@ -188,11 +185,6 @@ class PatternRefiner:
             edit_operations.append(value)
 
         return edit_operations
-
-        # edit_script_wildcards = EditScript(edit_operations)
-        # list_first_pattern_copy = copy.deepcopy(list_first_pattern)
-        # edit_script_wildcards.execute(list_first_pattern_copy)
-        # return list_first_pattern_copy
 
     def add_uses(self, first_pattern_mod, second_pattern_mod):
         """
@@ -211,14 +203,11 @@ class PatternRefiner:
 
         list_first_pattern = first_pattern_mod.walk()
 
-        offset = 0
         for operation in edit_script:
             if isinstance(operation, Insert):
                 uses[operation.index] = Update(operation.index, Use(operation.change, operation))
             else:
                 uses[operation.index] = Update(operation.index, Use(list_first_pattern[operation.index], operation))
-                if isinstance(operation, Delete):
-                    offset += 1
 
         edit_operations = list()
 
@@ -227,12 +216,8 @@ class PatternRefiner:
 
         return edit_operations
 
-        # edit_script_uses = EditScript(edit_operations)
-        # list_first_pattern_copy = copy.deepcopy(list_first_pattern)
-        # edit_script_uses.execute(list_first_pattern_copy)
-        # return list_first_pattern_copy
 
-    def connect_wildcards_and_uses(self, wildcards, uses, first_pattern_similarity_list, second_pattern_similarity_list):
+    def connect_wildcards_and_uses(self, wildcard_updates, use_updates, first_pattern_similarity_list, second_pattern_similarity_list):
         """
         Compares the ASTs of two chosen Patterns and determines which are the
         corresponding wildcard-use and connects them. The pattern inputs are changed
@@ -247,21 +232,21 @@ class PatternRefiner:
             Pattern that is chosen for refinement
         """
         i = 1
-        for wildcard in wildcards:
-            if isinstance(wildcard.change.type, Insert):
-                pair = next((key for key, value in second_pattern_similarity_list.items() if wildcard.change.wrapped_node in key), None)
+        for wildcard_update in wildcard_updates:
+            if isinstance(wildcard_update.change.type, Insert):
+                pair = next((key for key, value in second_pattern_similarity_list.items() if wildcard_update.change.wrapped_node in key), None)
             else:
-                pair = next((key for key, value in first_pattern_similarity_list.items() if wildcard.change.wrapped_node in key), None)
+                pair = next((key for key, value in first_pattern_similarity_list.items() if wildcard_update.change.wrapped_node in key), None)
 
             if pair:
-                use = next((x for x in uses if x.change.wrapped_node in pair), None)
-                if use:
-                    wildcard.change.index = i
-                    use.change.index = i
+                use_update = next((x for x in use_updates if x.change.wrapped_node in pair), None)
+                if use_update:
+                    wildcard_update.change.index = i
+                    use_update.change.index = i
                     i += 1
 
-        wildcards = [x for x in wildcards if x.change.index != 0]
-        uses = [x for x in uses if x.change.index != 0]
+        wildcards = [x for x in wildcard_updates if x.change.index != 0]
+        uses = [x for x in use_updates if x.change.index != 0]
 
         return wildcards, uses
 

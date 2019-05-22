@@ -1,0 +1,233 @@
+Diagnostics  2019-05-22 15:02
+----------------------------------------
+Pattern # 1
+Original #1 {
+if var == True:
+	print("You cant handle!!")
+}
+
+Original #2 {
+if some_var == True:
+	dont_print()
+}
+
+Original Created {
+if Wildcard(1) == True:
+	Wildcard(2)
+}
+
+Modified #1 {
+if var:
+	print("You cant handle!!")
+}
+
+Modified #2 {
+if some_var:
+	dont_print()
+}
+
+Modified Created {
+if Use(1):
+	Use(2)
+}
+
+----------------------------------------
+Pattern # 2
+Original #1 {
+if y == False:
+	report_false()
+}
+
+Original #2 {
+if some_condition == False:
+	print("condition is FALSE!")
+}
+
+Original Created {
+if Wildcard(1) == False:
+	Wildcard(2)
+}
+
+Modified #1 {
+if  not y:
+	report_false()
+}
+
+Modified #2 {
+if  not some_condition:
+	print("condition is FALSE!")
+}
+
+Modified Created {
+if  not Use(1):
+	Use(2)
+}
+
+----------------------------------------
+Pattern # 3
+Original #1 {
+if  not len(my_list):
+	sum(my_list)
+}
+
+Original #2 {
+if  not len(list_of):
+	append_to_list(list_of, "first")
+}
+
+Original Created {
+if  not len(Wildcard(1)):
+	Wildcard(2)
+}
+
+Modified #1 {
+if  not my_list:
+	sum(my_list)
+}
+
+Modified #2 {
+if  not list_of:
+	append_to_list(list_of, "first")
+}
+
+Modified Created {
+if  not Use(1):
+	Use(2)
+}
+
+----------------------------------------
+Pattern # 4
+Original #1 {
+if  not complex_calculation() is None:
+	we_made_it_man()
+}
+
+Original #2 {
+if  not cant_be_none is None:
+	print("Told ya")
+}
+
+Original Created {
+if  not Wildcard(1) is None:
+	Wildcard(2)
+}
+
+Modified #1 {
+if complex_calculation() is not None:
+	we_made_it_man()
+}
+
+Modified #2 {
+if cant_be_none is not None:
+	print("Told ya")
+}
+
+Modified Created {
+if Use(1) is not None:
+	Use(2)
+}
+
+----------------------------------------
+Pattern # 5
+Original #1 {
+if type(no_of_nodes) is type(int):
+	say("ah ah ah")
+	say(count, "is the number")
+	say_again("the number is", count)
+}
+
+Original #2 {
+if type(some_float_prob) is type(float):
+	calculate_with_float(some_float_prob)
+	squared(some_float_prob)
+}
+
+Original Created {
+if type(Wildcard(1)) is type(Wildcard(2)):
+	Wildcard(3)
+}
+
+Modified #1 {
+if isinstance(no_of_nodes, int):
+	say("ah ah ah")
+	say(count, "is the number")
+	say_again("the number is", count)
+}
+
+Modified #2 {
+if isinstance(some_float_prob, float):
+	calculate_with_float(some_float_prob)
+	squared(some_float_prob)
+}
+
+Modified Created {
+if isinstance(Use(1), Use(2)):
+	Use(3)
+}
+
+----------------------------------------
+Pattern # 6
+Original #1 {
+if  not definetly_true == False:
+	op()
+	opaca()
+}
+
+Original #2 {
+if  not some_calculations == False:
+	do_some_stuff()
+}
+
+Original Created {
+if  not Wildcard(1) == False:
+Wildcard(2)}
+
+Modified #1 {
+if definetly_true:
+	op()
+	opaca()
+}
+
+Modified #2 {
+if some_calculations:
+	do_some_stuff()
+}
+
+Modified Created {
+if Use(1):
+Use(2)}
+
+----------------------------------------
+Pattern # 7
+Original #1 {
+if x == None:
+	abort()
+	abort_with_x(x)
+	print("Aborted!")
+}
+
+Original #2 {
+if function() == None:
+	return_value = remedy_none()
+}
+
+Original Created {
+if Wildcard(1) == None:
+Wildcard(2)}
+
+Modified #1 {
+if x is None:
+	abort()
+	abort_with_x(x)
+	print("Aborted!")
+}
+
+Modified #2 {
+if function() is None:
+	return_value = remedy_none()
+}
+
+Modified Created {
+if Use(1) is None:
+Use(2)}
+

@@ -2,7 +2,7 @@ import copy
 from abc import ABC, abstractmethod
 
 from mars.astutils import AstWrapper
-from mars.astwrapper import Wildcard, Use, Function
+from mars.astwrapper import Wildcard, Use, Function, Variable
 from mars.pattern import Insert, Update, EditScript, Delete
 from mars.pattern_creation import PatternCreator
 from mars.utils import Diagnostics
@@ -259,7 +259,7 @@ class PatternRefiner:
                     use_update.change.index = i
                     i += 1
 
-        wildcards = [x for x in wildcard_updates if x.change.index != 0]
+        wildcards = [x for x in wildcard_updates if x.change.index != 0 or isinstance(x.change.wrapped_node, Variable)]
         uses = [x for x in use_updates if x.change.index != 0]
 
         return wildcards, uses

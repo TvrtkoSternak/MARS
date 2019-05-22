@@ -261,7 +261,6 @@ class AstWrapper(ast.NodeTransformer):
         return Assign(self.visit(node.targets[0]), "=", self.visit(node.value))
 
     def visit_AugAssign(self, node):
-        print(node.op)
         return Assign(self.visit(node.target), self.visit(node.op).value + "=", self.visit(node.value))
 
     def visit_Add(self, node):
@@ -284,7 +283,6 @@ class AstWrapper(ast.NodeTransformer):
         return While(self.visit(node.test), Body(expressions))
 
     def visit_For(self, node):
-        print(node._fields)
         expressions = list()
         for expression in node.body:
             expressions.append(self.visit(expression))

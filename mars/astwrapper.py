@@ -1210,7 +1210,7 @@ class For(Node):
         return ''.join([
             "for ",
             self.target.to_source_code(num_tabs),
-            "in ",
+            " in ",
             self.iter.to_source_code(num_tabs),
             ":\n",
             self.body.to_source_code(num_tabs + 1)

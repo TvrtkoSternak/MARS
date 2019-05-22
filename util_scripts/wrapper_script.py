@@ -4,7 +4,7 @@ from mars.astutils import AstWrapper
 from mars.pattern_creation import TreeDifferencer
 from mars.pattern_creation import EditScriptGenerator
 
-with open("../dataset/original_1.py") as original, open("../dataset/modified_1.py") as modified:
+with open("../dataset/original_16.py") as original, open("../dataset/modified_16.py") as modified:
     original_code = ast.parse(original.read())
     modified_code = ast.parse(modified.read())
 

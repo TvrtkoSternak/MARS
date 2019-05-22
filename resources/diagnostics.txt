@@ -1,4 +1,4 @@
-Diagnostics  2019-05-22 15:02
+Diagnostics  2019-05-22 16:09
 ----------------------------------------
 Pattern # 1
 Original #1 {
@@ -130,6 +130,41 @@ if Use(1) is not None:
 ----------------------------------------
 Pattern # 5
 Original #1 {
+while i < 100:
+	do_something()
+	i += 1
+}
+
+Original #2 {
+while j < 500:
+	print(j)
+	j += 1
+}
+
+Original Created {
+while Wildcard(1) < Wildcard(2):
+	Wildcard(3)
+	Wildcard(0) += 1
+}
+
+Modified #1 {
+for iin range(100):
+	do_something()
+}
+
+Modified #2 {
+for jin range(500):
+	print(j)
+}
+
+Modified Created {
+for Use(1)in range(Use(2)):
+	Use(3)
+}
+
+----------------------------------------
+Pattern # 6
+Original #1 {
 if type(no_of_nodes) is type(int):
 	say("ah ah ah")
 	say(count, "is the number")
@@ -166,7 +201,7 @@ if isinstance(Use(1), Use(2)):
 }
 
 ----------------------------------------
-Pattern # 6
+Pattern # 7
 Original #1 {
 if  not definetly_true == False:
 	op()
@@ -198,7 +233,45 @@ if Use(1):
 Use(2)}
 
 ----------------------------------------
-Pattern # 7
+Pattern # 8
+Original #1 {
+negative_step = 744
+while negative_step > 0:
+	do_some_something_negative()
+	negative_step -= 1
+}
+
+Original #2 {
+step_back = 850
+while step_back > 100:
+	recalculations(step_back)
+	step_back -= 10
+}
+
+Original Created {
+Wildcard(1) = 744
+while Wildcard(0) > 0:
+	do_some_something_negative()
+	Wildcard(0) -= Wildcard(2)
+}
+
+Modified #1 {
+for negative_stepin range(744, 0, -1):
+	do_some_something_negative()
+}
+
+Modified #2 {
+for step_backin range(850, 100, -10):
+	recalculations(step_back)
+}
+
+Modified Created {
+for Use(1)in range(744, 0, -Use(2)):
+	do_some_something_negative()
+}
+
+----------------------------------------
+Pattern # 9
 Original #1 {
 if x == None:
 	abort()

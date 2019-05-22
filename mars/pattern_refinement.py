@@ -259,7 +259,16 @@ class PatternRefiner:
                     use_update.change.index = i
                     i += 1
 
-        wildcards = [x for x in wildcard_updates if x.change.index != 0 or isinstance(x.change.wrapped_node, Variable)]
+        wildcards = [x for x in wildcard_updates if x.change.index != 0]
+        unmatched_wildcards = [x for x in wildcard_updates if x.change.index == 0 and isinstance(x.change.wrapped_node, Variable)]
+
+        # for unmatched_wildcard in unmatched_wildcards:
+        #     for wildcard in wildcards:
+        #         if wildcard.change.wrapped_node.__eq__(unmatched_wildcard.change.wrapped_node):
+        #             unmatched_wildcard.change.index = wildcard.change.index
+
+        wildcards.extend(unmatched_wildcards)
+
         uses = [x for x in use_updates if x.change.index != 0]
 
         return wildcards, uses

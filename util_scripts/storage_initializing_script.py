@@ -20,4 +20,5 @@ for directory, children, files in os.walk("../dataset"):
                     storage_context.save(pattern)
                 except Exception as e:
                     print(i)
+                    print(e)
 

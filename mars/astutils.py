@@ -288,3 +288,6 @@ class AstWrapper(ast.NodeTransformer):
             expressions.append(self.visit(expression))
 
         return For(self.visit(node.target), self.visit(node.iter), Body(expressions))
+
+    def visit_USub(self, node):
+        return Constant("-", "UNARYOP")

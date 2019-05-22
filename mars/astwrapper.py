@@ -1247,7 +1247,7 @@ class For(Node):
             target_sim = node_pairs.get((self.target, node.target), 0)
             iter_sim = node_pairs.get((self.iter, node.iter), 0)
             body_sim = node_pairs.get((self.body, node.body), 0)
-            return (2 * iter + body_sim + target_sim) / 4
+            return (2 * iter_sim + body_sim + target_sim) / 4
 
     def is_mutable(self, node):
         if isinstance(node, self.__class__):

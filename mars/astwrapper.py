@@ -1109,6 +1109,152 @@ class Compare:
         return False
 
 
+class While(Node):
+
+    def __init__(self, test, body):
+        self.test = test
+        self.body = body
+
+    def unparse(self, num_tabs):
+        print("while ", end='')
+        self.test.unparse(num_tabs)
+        print(":")
+        self.body.unparse(num_tabs + 1)
+
+    def to_source_code(self, num_tabs):
+        return ''.join([
+            "while ",
+            self.test.to_source_code(num_tabs),
+            ":\n",
+            self.body.to_source_code(num_tabs + 1)
+        ])
+
+    def walk(self, postorder=False):
+        tree = list()
+        if not postorder:
+            tree.append(self)
+        tree.extend(self.test.walk(postorder=postorder))
+        tree.extend(self.body.walk(postorder=postorder))
+        if postorder:
+            tree.append(self)
+        return tree
+
+    def reconstruct(self, tree):
+        self.test = tree.pop(0).reconstruct(tree)
+        self.body = tree.pop(0).reconstruct(tree)
+        return self
+
+    def is_leaf(self):
+        return False
+
+    def similarity(self, node):
+        pass
+
+    def is_mutable(self, node):
+        if isinstance(node, self.__class__):
+            return True
+        else:
+            return False
+
+    def get_all_children(self):
+        children = list()
+        children.append(self.test)
+        children.extend(self.test.get_all_children())
+        children.append(self.body)
+        children.extend(self.body.get_all_children())
+        return children
+
+    def get_children(self, node):
+        children = list()
+        children.append(node.test)
+        children.append(node.body)
+        return children
+
+    def equals(self, other):
+        pass
+
+    def print_me(self):
+        print("While")
+
+
+class For(Node):
+
+    def __init__(self, target, iter, body):
+        self.target = target
+        self.iter = iter
+        self.body = body
+
+    def unparse(self, num_tabs):
+        print("for ", end='')
+        self.target.unparse(num_tabs)
+        print(" in ", end='')
+        self.iter.unparse(num_tabs)
+        print(":")
+        self.body.unparse(num_tabs + 1)
+
+    def to_source_code(self, num_tabs):
+        return ''.join([
+            "for ",
+            self.target.to_source_code(num_tabs),
+            "in ",
+            self.iter.to_source_code(num_tabs),
+            ":\n",
+            self.body.to_source_code(num_tabs + 1)
+        ])
+
+    def walk(self, postorder=False):
+        tree = list()
+        if not postorder:
+            tree.append(self)
+        tree.extend(self.target.walk(postorder=postorder))
+        tree.extend(self.iter.walk(postorder=postorder))
+        tree.extend(self.body.walk(postorder=postorder))
+        if postorder:
+            tree.append(self)
+        return tree
+
+    def reconstruct(self, tree):
+        self.target = tree.pop(0).reconstruct(tree)
+        self.iter = tree.pop(0).reconstruct(tree)
+        self.body = tree.pop(0).reconstruct(tree)
+        return self
+
+    def is_leaf(self):
+        return False
+
+    def similarity(self, node):
+        pass
+
+    def is_mutable(self, node):
+        if isinstance(node, self.__class__):
+            return True
+        else:
+            return False
+
+    def get_all_children(self):
+        children = list()
+        children.append(self.target)
+        children.extend(self.target.get_all_children())
+        children.append(self.iter)
+        children.extend(self.iter.get_all_children())
+        children.append(self.body)
+        children.extend(self.body.get_all_children())
+        return children
+
+    def get_children(self, node):
+        children = list()
+        children.append(node.target)
+        children.append(node.iter)
+        children.append(node.body)
+        return children
+
+    def equals(self, other):
+        pass
+
+    def print_me(self):
+        print("For")
+
+
 class EmptyNode(Leaf):
     def print_me(self):
         pass
@@ -1237,4 +1383,5 @@ class Use(Leaf):
 
     def equals(self, other):
         return True
+
 

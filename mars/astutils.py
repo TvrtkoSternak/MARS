@@ -2,7 +2,7 @@ import _ast
 import ast
 
 from mars.astwrapper import Body, Function, Constant, If, Variable, EmptyNode, Condition, BoolOperation, Compare, \
-    UnaryOperation, Assign, ElIf, Else, FunctionName
+    UnaryOperation, Assign, ElIf, Else, FunctionName, While, For
 
 
 class AstUtils:
@@ -259,3 +259,34 @@ class AstWrapper(ast.NodeTransformer):
 
     def visit_Assign(self, node):
         return Assign(self.visit(node.targets[0]), "=", self.visit(node.value))
+
+    def visit_AugAssign(self, node):
+        print(node.op)
+        return Assign(self.visit(node.target), self.visit(node.op).value + "=", self.visit(node.value))
+
+    def visit_Add(self, node):
+        return Constant("+", "OPERATOR")
+
+    def visit_Sub(self, node):
+        return Constant("-", "OPERATOR")
+
+    def visit_Mult(self, node):
+        return Constant("*", "OPERATOR")
+
+    def visit_Div(self, node):
+        return Constant("/", "OPERATOR")
+
+    def visit_While(self, node):
+        expressions = list()
+        for expression in node.body:
+            expressions.append(self.visit(expression))
+
+        return While(self.visit(node.test), Body(expressions))
+
+    def visit_For(self, node):
+        print(node._fields)
+        expressions = list()
+        for expression in node.body:
+            expressions.append(self.visit(expression))
+
+        return For(self.visit(node.target), self.visit(node.iter), Body(expressions))

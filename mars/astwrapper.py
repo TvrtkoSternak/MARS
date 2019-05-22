@@ -1,8 +1,100 @@
+from abc import abstractmethod
 from difflib import SequenceMatcher
 from math import sqrt
 
 
-class Variable:
+class Node:
+
+    @abstractmethod
+    def print_me(self):
+        pass
+
+    @abstractmethod
+    def unparse(self, num_tabs):
+        pass
+
+    @abstractmethod
+    def to_source_code(self, num_tabs):
+        pass
+
+    @abstractmethod
+    def walk(self, postorder = False):
+        pass
+
+    @abstractmethod
+    def reconstruct(self, tree):
+        pass
+
+    @abstractmethod
+    def is_leaf(self):
+        pass
+
+    @abstractmethod
+    def similarity(self, node):
+        pass
+
+    @abstractmethod
+    def is_mutable(self, node):
+        pass
+
+    def num_children(self):
+        return len(self.get_all_children())
+
+    @abstractmethod
+    def get_all_children(self):
+        pass
+
+    @abstractmethod
+    def get_children(self, node):
+        pass
+
+    @abstractmethod
+    def equals(self, other):
+        pass
+
+
+class Leaf(Node):
+
+    @abstractmethod
+    def print_me(self):
+        pass
+
+    @abstractmethod
+    def unparse(self, num_tabs):
+        pass
+
+    @abstractmethod
+    def to_source_code(self, num_tabs):
+        pass
+
+    def walk(self, postorder = False):
+        return [self]
+
+    def reconstruct(self, tree):
+        return self
+
+    def is_leaf(self):
+        return True
+
+    @abstractmethod
+    def similarity(self, node):
+        pass
+
+    def is_mutable(self, node):
+        return True
+
+    def get_all_children(self):
+        return list()
+
+    def get_children(self, node):
+        return list()
+
+    @abstractmethod
+    def equals(self, other):
+        pass
+
+
+class Variable(Leaf):
     def __init__(self, value):
         self.value = value
 
@@ -15,30 +107,12 @@ class Variable:
     def to_source_code(self, num_tabs):
         return str(self.value)
 
-    def walk(self, postorder = False):
-        return [self]
-
-    def reconstruct(self, tree):
-        return self
-
-    def is_leaf(self):
-        return True
-
     def similarity(self, node):
         if not isinstance(node, self.__class__):
             return 0
         else:
             s = SequenceMatcher(None, self.value, node.value)
             return (2*s.ratio() + 1)/3
-
-    def is_mutable(self, node):
-        return True
-
-    def num_children(self):
-        return 0
-
-    def get_all_children(self):
-        return list()
 
     def equals(self, other):
         if isinstance(other, Wildcard):
@@ -48,7 +122,7 @@ class Variable:
         return False
 
 
-class Constant:
+class Constant(Leaf):
     def __init__(self, value, type_of):
         self.value = value
         self.type_of = type_of
@@ -62,15 +136,6 @@ class Constant:
     def to_source_code(self, num_tabs):
         return str(self.value)
 
-    def walk(self, postorder = False):
-        return [self]
-
-    def reconstruct(self, tree):
-        return self
-
-    def is_leaf(self):
-        return True
-
     def similarity(self, node):
         if not isinstance(node, self.__class__):
             return 0
@@ -79,15 +144,6 @@ class Constant:
         else:
             s = SequenceMatcher(None, str(self.value), str(node.value))
             return s.ratio()
-
-    def is_mutable(self, node):
-        return True
-
-    def num_children(self):
-        return 0
-
-    def get_all_children(self):
-        return list()
 
     def equals(self, other):
         if isinstance(other, Wildcard):
@@ -184,7 +240,7 @@ class Assign:
         return False
 
 
-class FunctionName:
+class FunctionName(Leaf):
     def __init__(self, value):
         self.value = value
 
@@ -197,15 +253,6 @@ class FunctionName:
     def to_source_code(self, num_tabs):
         return str(self.value)
 
-    def walk(self, postorder = False):
-        return [self]
-
-    def reconstruct(self, tree):
-        return self
-
-    def is_leaf(self):
-        return True
-
     def similarity(self, node):
         if not isinstance(node, self.__class__):
             return 0
@@ -213,18 +260,8 @@ class FunctionName:
             s = SequenceMatcher(None, self.value, node.value)
             return s.ratio()
 
-    def is_mutable(self, node):
-        return True
-
-    def num_children(self):
-        return 0
-
-    def get_all_children(self):
-        return list()
-
     def equals(self, other):
         if isinstance(other, Wildcard):
-            print("hi")
             return True
         if isinstance(other, self.__class__):
             return other.value == self.value
@@ -1072,7 +1109,7 @@ class Compare:
         return False
 
 
-class EmptyNode:
+class EmptyNode(Leaf):
     def print_me(self):
         pass
 
@@ -1082,29 +1119,11 @@ class EmptyNode:
     def to_source_code(self, num_tabs):
         return ""
 
-    def walk(self, postorder = False):
-        return [self]
-
-    def reconstruct(self, tree):
-        return self
-
-    def is_leaf(self):
-        return True
-
     def similarity(self, node):
         if not isinstance(node, self.__class__):
             return 0
         else:
             return 1
-
-    def is_mutable(self, node):
-        return True
-
-    def num_children(self):
-        return 0
-
-    def get_all_children(self):
-        return list()
 
     def equals(self, other):
         if isinstance(other, Wildcard):
@@ -1114,7 +1133,7 @@ class EmptyNode:
         return False
 
 
-class Startnode:
+class Startnode(Leaf):
     def print_me(self):
         print("Start Node")
 
@@ -1124,15 +1143,6 @@ class Startnode:
     def to_source_code(self, num_tabs):
         return ""
 
-    def walk(self, postorder = False):
-        return [self]
-
-    def reconstruct(self, tree):
-        return self
-
-    def is_leaf(self):
-        return True
-
     def similarity(self, node):
         if not isinstance(node, self.__class__):
             return 0
@@ -1142,12 +1152,6 @@ class Startnode:
     def is_mutable(self, node):
         return False
 
-    def num_children(self):
-        return 0
-
-    def get_all_children(self):
-        return list()
-
     def equals(self, other):
         if isinstance(other, Wildcard):
             return True
@@ -1156,7 +1160,7 @@ class Startnode:
         return False
 
 
-class Endnode:
+class Endnode(Leaf):
     def print_me(self):
         print("End Node")
 
@@ -1166,15 +1170,6 @@ class Endnode:
     def to_source_code(self, num_tabs):
         return ""
 
-    def walk(self, postorder = False):
-        return [self]
-
-    def reconstruct(self, tree):
-        return self
-
-    def is_leaf(self):
-        return True
-
     def similarity(self, node):
         if not isinstance(node, self.__class__):
             return 0
@@ -1184,12 +1179,6 @@ class Endnode:
     def is_mutable(self, node):
         return False
 
-    def num_children(self):
-        return 0
-
-    def get_all_children(self):
-        return list()
-
     def equals(self, other):
         if isinstance(other, Wildcard):
             return True
@@ -1198,7 +1187,7 @@ class Endnode:
         return False
 
 
-class Wildcard:
+class Wildcard(Leaf):
 
     def __init__(self, wrapped_node, type):
         self.wrapped_node = wrapped_node
@@ -1214,35 +1203,17 @@ class Wildcard:
     def to_source_code(self, num_tabs):
         return "Wildcard(" + str(self.index) + ")"
 
-    def walk(self, postorder = False):
-        return [self]
-
-    def reconstruct(self, tree):
-        return self
-
-    def is_leaf(self):
-        return True
-
     def similarity(self, node):
         if isinstance(node, Use):
             if node.index == self.index:
                 return 1.0
         return 0.5
 
-    def is_mutable(self, node):
-        return True
-
-    def num_children(self):
-        return 0
-
-    def get_all_children(self):
-        return list()
-
     def equals(self, other):
         return True
 
 
-class Use:
+class Use(Leaf):
 
     def __init__(self, wrapped_node, type):
         self.wrapped_node = wrapped_node
@@ -1258,29 +1229,11 @@ class Use:
     def to_source_code(self, num_tabs):
         return "Use(" + str(self.index) + ")"
 
-    def walk(self, postorder=False):
-        return [self]
-
-    def reconstruct(self, tree):
-        return self
-
-    def is_leaf(self):
-        return True
-
     def similarity(self, node):
         if isinstance(node, Wildcard):
             if node.index == self.index:
                 return 1.0
         return 0.5
-
-    def is_mutable(self, node):
-        return True
-
-    def num_children(self):
-        return 0
-
-    def get_all_children(self):
-        return list()
 
     def equals(self, other):
         return True

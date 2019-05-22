@@ -12,6 +12,9 @@ class Variable:
     def unparse(self, num_tabs):
         print(self.value, end = '')
 
+    def to_source_code(self, num_tabs):
+        return str(self.value)
+
     def walk(self, postorder = False):
         return [self]
 
@@ -55,6 +58,9 @@ class Constant:
 
     def unparse(self, num_tabs):
         print(self.value, end='')
+
+    def to_source_code(self, num_tabs):
+        return str(self.value)
 
     def walk(self, postorder = False):
         return [self]
@@ -109,6 +115,13 @@ class Assign:
         self.variable.unparse(num_tabs)
         print('', self.operation, '', end='')
         self.value.unparse(num_tabs)
+
+    def to_source_code(self, num_tabs):
+        return ' '.join([
+            self.variable.to_source_code(num_tabs),
+            str(self.operation),
+            self.value.to_source_code(num_tabs)
+        ])
 
     def walk(self, postorder = False):
         tree = list()
@@ -181,6 +194,9 @@ class FunctionName:
     def unparse(self, num_tabs):
         print("{0}".format(self.value), end='')
 
+    def to_source_code(self, num_tabs):
+        return str(self.value)
+
     def walk(self, postorder = False):
         return [self]
 
@@ -241,6 +257,21 @@ class Function:
                     index += 1
             self.args[-1].unparse(num_tabs)
         print(")", end='')
+
+    def to_source_code(self, num_tabs):
+        str_list = list()
+        str_list.append(self.value.to_source_code(num_tabs))
+        str_list.append('(')
+        if self.args:
+            if len(self.args) != 1:
+                index = 0
+                while index < len(self.args) - 1:
+                    str_list.append(self.args[index].to_source_code(num_tabs))
+                    str_list.append(", ")
+                    index += 1
+            str_list.append(self.args[-1].to_source_code(num_tabs))
+        str_list.append(")")
+        return ''.join(str_list)
 
     def walk(self, postorder = False):
         tree = list()
@@ -344,6 +375,9 @@ class Condition:
     def unparse(self, num_tabs):
         self.value.unparse(num_tabs)
 
+    def to_source_code(self, num_tabs):
+        return self.value.to_source_code(num_tabs)
+
     def walk(self, postorder = False):
         tree = list()
         if not postorder:
@@ -418,6 +452,15 @@ class ElIf:
         print(":")
         self.body.unparse(num_tabs + 1)
         self.next_if.unparse(num_tabs)
+
+    def to_source_code(self, num_tabs):
+        return ''.join([
+            "\t"*num_tabs + "elif ",
+            self.condition.to_source_code(num_tabs),
+            ":\n",
+            self.body.to_source_code(num_tabs + 1),
+            self.next_if.to_source_code(num_tabs)
+        ])
 
     def walk(self, postorder = False):
         tree = list()
@@ -497,6 +540,9 @@ class Else:
         print("\t"*num_tabs, "else:", sep='')
         self.body.unparse(num_tabs + 1)
 
+    def to_source_code(self, num_tabs):
+        return self.body.to_source_code(num_tabs)
+
     def walk(self, postorder = False):
         tree = list()
         if not postorder:
@@ -566,6 +612,15 @@ class If:
         print(":")
         self.body.unparse(num_tabs + 1)
         self.next_if.unparse(num_tabs)
+
+    def to_source_code(self, num_tabs):
+        return ''.join([
+            "if ",
+            self.condition.to_source_code(num_tabs),
+            ":\n",
+            self.body.to_source_code(num_tabs + 1),
+            self.next_if.to_source_code(num_tabs)
+        ])
 
     def walk(self, postorder = False):
         tree = list()
@@ -650,6 +705,15 @@ class Body:
             child.unparse(num_tabs)
             if not hasattr(child, 'body'):
                 print()
+
+    def to_source_code(self, num_tabs):
+        str_list = []
+        for child in self.children:
+            str_list.append("\t"*num_tabs)
+            str_list.append(child.to_source_code(num_tabs))
+            if not hasattr(child, 'body'):
+                str_list.append("\n")
+        return ''.join(str_list)
 
     def walk(self, postorder = False):
         tree = list()
@@ -747,6 +811,13 @@ class BoolOperation:
         self.operation.unparse(num_tabs)
         self.second.unparse(num_tabs)
 
+    def to_source_code(self, num_tabs):
+        return ''.join([
+            self.first.to_source_code(num_tabs),
+            self.operation.to_source_code(num_tabs),
+            self.second.to_source_code(num_tabs)
+        ])
+
     def walk(self, postorder = False):
         tree = list()
         if not postorder:
@@ -834,6 +905,12 @@ class UnaryOperation:
         self.operation.unparse(num_tabs)
         self.first.unparse(num_tabs)
 
+    def to_source_code(self, num_tabs):
+        return ''.join([
+            self.operation.to_source_code(num_tabs),
+            self.first.to_source_code(num_tabs)
+        ])
+
     def walk(self, postorder = False):
         tree = list()
         if not postorder:
@@ -915,6 +992,13 @@ class Compare:
         self.operation.unparse(num_tabs)
         self.second.unparse(num_tabs)
 
+    def to_source_code(self, num_tabs):
+        return ''.join([
+            self.first.to_source_code(num_tabs),
+            self.operation.to_source_code(num_tabs),
+            self.second.to_source_code(num_tabs)
+        ])
+
     def walk(self, postorder = False):
         tree = list()
         if not postorder:
@@ -995,6 +1079,9 @@ class EmptyNode:
     def unparse(self, num_tabs):
         pass
 
+    def to_source_code(self, num_tabs):
+        return ""
+
     def walk(self, postorder = False):
         return [self]
 
@@ -1034,6 +1121,9 @@ class Startnode:
     def unparse(self, num_tabs):
         pass
 
+    def to_source_code(self, num_tabs):
+        return ""
+
     def walk(self, postorder = False):
         return [self]
 
@@ -1072,6 +1162,9 @@ class Endnode:
 
     def unparse(self, num_tabs):
         pass
+
+    def to_source_code(self, num_tabs):
+        return ""
 
     def walk(self, postorder = False):
         return [self]
@@ -1118,6 +1211,9 @@ class Wildcard:
     def unparse(self, num_tabs):
         print("Wildcard(", self.index, ")", sep='', end='')
 
+    def to_source_code(self, num_tabs):
+        return "Wildcard(" + str(self.index) + ")"
+
     def walk(self, postorder = False):
         return [self]
 
@@ -1158,6 +1254,9 @@ class Use:
 
     def unparse(self, num_tabs):
         print("Use(", self.index, ")", sep='', end='')
+
+    def to_source_code(self, num_tabs):
+        return "Use(" + str(self.index) + ")"
 
     def walk(self, postorder=False):
         return [self]

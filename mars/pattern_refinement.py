@@ -1,9 +1,11 @@
+import copy
 from abc import ABC, abstractmethod
 
 from mars.astutils import AstWrapper
 from mars.astwrapper import Wildcard, Use, Function
 from mars.pattern import Insert, Update, EditScript, Delete
 from mars.pattern_creation import PatternCreator
+from mars.utils import Diagnostics
 
 
 class PatternRefiner:
@@ -94,6 +96,7 @@ class PatternRefiner:
 
             first_pattern, second_pattern, distance = self.find_nearest_patterns(patterns)
 
+            first_pattern_copy = copy.deepcopy(first_pattern)
             print(distance)
 
             if distance >= self.max_pattern_distance:
@@ -111,8 +114,6 @@ class PatternRefiner:
             list_org = first_pattern.original.walk()
             list_mod = first_pattern.modified.walk()
 
-            list_org = self.diagnostic_print(list_org, second_pattern.original.walk())
-
             edit_script_wild.execute(list_org)
             edit_script_use.execute(list_mod)
 
@@ -127,27 +128,11 @@ class PatternRefiner:
 
             patterns.remove(first_pattern)
             patterns.remove(second_pattern)
-            print("added")
             refined_patterns.append(created_pattern)
 
+            Diagnostics.get_instance().log(first_pattern_copy, second_pattern, created_pattern)
+
         self.context.rewrite(refined_patterns)
-
-
-    def diagnostic_print(self, list_org, s_list_org):
-        print("------------------example start---------------------")
-        s_reconstructed_org = s_list_org.pop(0).reconstruct(s_list_org)
-
-        reconstructed_org = list_org.pop(0).reconstruct(list_org)
-
-        print("#CODE first_original {")
-        reconstructed_org.unparse(0)
-        print("}")
-
-        print("#CODE second_original {")
-        s_reconstructed_org.unparse(0)
-        print("}")
-
-        return reconstructed_org.walk()
 
     def find_nearest_patterns(self, patterns):
         """

@@ -1147,8 +1147,17 @@ class While(Node):
     def is_leaf(self):
         return False
 
-    def similarity(self, node):
-        pass
+    def similarity(self, node, node_pairs):
+        if not isinstance(node, self.__class__) \
+                and not isinstance(node, For):
+            return 0
+        elif isinstance(node, For):
+            body_sim = node_pairs.get((self.body, node.body), 0)
+            return (body_sim + 0.5) / 2
+        else:
+            test_sim = node_pairs.get((self.test, node.test), 0)
+            body_sim = node_pairs.get((self.body, node.body), 0)
+            return (2 * test_sim + body_sim ) / 3
 
     def is_mutable(self, node):
         if isinstance(node, self.__class__):
@@ -1171,7 +1180,12 @@ class While(Node):
         return children
 
     def equals(self, other):
-        pass
+        if isinstance(other, Wildcard):
+            return True
+        if isinstance(other, self.__class__):
+            return other.test.equals(self.test) \
+                   and other.body.equals(self.body)
+        return False
 
     def print_me(self):
         print("While")
@@ -1222,8 +1236,18 @@ class For(Node):
     def is_leaf(self):
         return False
 
-    def similarity(self, node):
-        pass
+    def similarity(self, node, node_pairs):
+        if not isinstance(node, self.__class__) \
+                and not isinstance(node, While):
+            return 0
+        elif isinstance(node, While):
+            body_sim = node_pairs.get((self.body, node.body), 0)
+            return (body_sim + 0.5) / 2
+        else:
+            target_sim = node_pairs.get((self.target, node.target), 0)
+            iter_sim = node_pairs.get((self.iter, node.iter), 0)
+            body_sim = node_pairs.get((self.body, node.body), 0)
+            return (2 * iter + body_sim + target_sim) / 4
 
     def is_mutable(self, node):
         if isinstance(node, self.__class__):
@@ -1249,7 +1273,13 @@ class For(Node):
         return children
 
     def equals(self, other):
-        pass
+        if isinstance(other, Wildcard):
+            return True
+        if isinstance(other, self.__class__):
+            return other.target.equals(self.target) \
+                   and other.body.equals(self.body) \
+                   and other.iter.equals(self.iter)
+        return False
 
     def print_me(self):
         print("For")

@@ -242,6 +242,8 @@ class TreeDifferencer:
             self.bottom_up(post_org, post_mod, node_pairs, self.f)
             self.top_down(in_org, in_mod, node_pairs, self.f)
 
+        self.add_leftover_leaves(post_org, post_mod, node_pairs)
+
         sorted_x = sorted(node_pairs.items(), key=lambda kv: kv[1], reverse=True)
         sorted_node_pairs = collections.OrderedDict(sorted_x)
 
@@ -288,6 +290,16 @@ class TreeDifferencer:
                                     del node_pairs[(child_x, child_y)]
                                 else:
                                     node_pairs[(child_x, child_y)] = mean
+
+    def add_leftover_leaves(self, first_ast, second_ast, node_pairs):
+        leaves_first = [x for x in first_ast if x.is_leaf()]
+        leaves_second = [x for x in second_ast if x.is_leaf()]
+        for x in leaves_first:
+            for y in leaves_second:
+                similarity = x.similarity(y)
+                if similarity == 1.0:
+                    if (x, y) not in node_pairs:
+                        node_pairs[(x, y)] = similarity
 
     def harmonic_mean(self, x, y):
         return (2*x*y) / (x+y)

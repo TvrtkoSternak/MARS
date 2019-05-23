@@ -440,6 +440,8 @@ class PatternListener(IListener, IPatternMatcher):
         self.wildcard_blocks = dict()
         self.reader = None
         self.timeout = 0
+        self.matched_wildcards = list()
+        self.tmp_wildcard = list()
 
     def update(self):
         """
@@ -486,11 +488,28 @@ class PatternListener(IListener, IPatternMatcher):
 
             if isinstance(self_node, Wildcard) and node.equals(self.original_detailed[self.counter + 1]):
                 self.counter += 1
+                if self_node.index in self.matched_wildcards:
+                    if len(self.tmp_wildcard) == len(self.wildcard_blocks[self_node.index]):
+                        for matched_node, new_matched_node in zip(self.wildcard_blocks[self_node.index], self.tmp_wildcard):
+                            if not matched_node.equals(new_matched_node):
+                                self.tmp_wildcard = list()
+                                return False
+
+                        self.tmp_wildcard = list()
+                        return True
+
+                    self.tmp_wildcard = list()
+                    return False
+                else:
+                    self.matched_wildcards.append(self_node.index)
                 return True
             elif isinstance(self_node, Wildcard):
                 self.counter -= 1
                 if self_node.index in self.wildcard_blocks:
-                    self.wildcard_blocks[self_node.index].extend(node.walk())
+                    if self_node.index not in self.matched_wildcards:
+                        self.wildcard_blocks[self_node.index].extend(node.walk())
+                    else:
+                        self.tmp_wildcard.extend(node.walk())
                 else:
                     new_list = list()
                     new_list.extend(node.walk())

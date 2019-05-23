@@ -494,10 +494,8 @@ class PatternListener(IListener, IPatternMatcher):
                             if not matched_node.equals(new_matched_node):
                                 self.tmp_wildcard = list()
                                 return False
-
                         self.tmp_wildcard = list()
                         return True
-
                     self.tmp_wildcard = list()
                     return False
                 else:

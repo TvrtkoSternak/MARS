@@ -261,22 +261,22 @@ class AstWrapper(ast.NodeTransformer):
         return if_node
 
     def visit_Assign(self, node):
-        return Assign(self.visit(node.targets[0]), "=", self.visit(node.value))
+        return Assign(self.visit(node.targets[0]), Constant(" = ", "ASSIGN"), self.visit(node.value))
 
     def visit_AugAssign(self, node):
-        return Assign(self.visit(node.target), self.visit(node.op).value + "=", self.visit(node.value))
+        return Assign(self.visit(node.target), Constant(self.visit(node.op).value + "= ", "ASSIGN_OP"), self.visit(node.value))
 
     def visit_Add(self, node):
-        return Constant("+", "OPERATOR")
+        return Constant(" +", "OPERATOR")
 
     def visit_Sub(self, node):
-        return Constant("-", "OPERATOR")
+        return Constant(" -", "OPERATOR")
 
     def visit_Mult(self, node):
-        return Constant("*", "OPERATOR")
+        return Constant(" *", "OPERATOR")
 
     def visit_Div(self, node):
-        return Constant("/", "OPERATOR")
+        return Constant(" /", "OPERATOR")
 
     def visit_While(self, node):
         expressions = list()

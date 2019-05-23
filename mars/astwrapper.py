@@ -163,19 +163,19 @@ class Assign:
     def print_me(self):
         print("Assign: {")
         self.variable.print_me()
-        print(self.operation)
+        self.operation.print_me()
         self.value.print_me()
         print("}")
 
     def unparse(self, num_tabs):
         self.variable.unparse(num_tabs)
-        print('', self.operation, '', end='')
+        self.operation.unparse(num_tabs)
         self.value.unparse(num_tabs)
 
     def to_source_code(self, num_tabs):
         return ' '.join([
             self.variable.to_source_code(num_tabs),
-            str(self.operation),
+            self.operation.to_source_code(num_tabs),
             self.value.to_source_code(num_tabs)
         ])
 
@@ -184,6 +184,7 @@ class Assign:
         if not postorder:
             tree.append(self)
         tree.extend(self.variable.walk(postorder=postorder))
+        tree.extend(self.operation.walk(postorder=postorder))
         tree.extend(self.value.walk(postorder=postorder))
         if postorder:
             tree.append(self)
@@ -191,6 +192,7 @@ class Assign:
 
     def reconstruct(self, tree):
         self.variable = tree.pop(0).reconstruct(tree)
+        self.operation = tree.pop(0).reconstruct(tree)
         self.value = tree.pop(0).reconstruct(tree)
         return self
 
@@ -200,7 +202,7 @@ class Assign:
     def similarity(self, node, node_pairs):
         if not isinstance(node, self.__class__):
             return 0
-        if self.operation != node.operation:
+        if not self.operation.equals(node.operation):
             return 0
         else:
             node_sim = node_pairs.get((self.value, node.value), 0) + node_pairs.get((self.variable, node.variable), 0)
@@ -210,6 +212,7 @@ class Assign:
     def get_children(self, node):
         children = list()
         children.append(node.variable)
+        children.append(node.operation)
         children.append(node.value)
         return children
 
@@ -220,12 +223,14 @@ class Assign:
             return False
 
     def num_children(self):
-        return 2 + self.variable.num_children() + self.value.num_children()
+        return 3 + self.variable.num_children() + self.value.num_children() + self.operation.num_children()
 
     def get_all_children(self):
         children = list()
         children.append(self.variable)
         children.extend(self.variable.get_all_children())
+        children.append(self.operation)
+        children.extend(self.operation.get_all_children())
         children.append(self.value)
         children.extend(self.value.get_all_children())
         return children
@@ -234,7 +239,7 @@ class Assign:
         if isinstance(other, Wildcard):
             return True
         if isinstance(other, self.__class__):
-            return other.operation == self.operation \
+            return other.operation.equals(self.operation) \
                    and other.value.equals(self.value) \
                    and other.variable.equals(self.variable)
         return False

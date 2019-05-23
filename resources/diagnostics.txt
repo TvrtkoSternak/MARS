@@ -1,4 +1,4 @@
-Diagnostics  2019-05-23 15:23
+Diagnostics  2019-05-23 18:16
 ----------------------------------------
 Pattern # 1
 Original #1 {
@@ -164,19 +164,19 @@ Pattern # 6
 Original #1 {
 while i < 100:
 	do_something()
-	i += 1
+	i  +=  1
 }
 
 Original #2 {
 while j < 500:
 	print(j)
-	j += 1
+	j  +=  1
 }
 
 Original Created {
 while Wildcard(1) < Wildcard(2):
 	Wildcard(3)
-	Wildcard(1) += 1
+	Wildcard(1)  +=  1
 }
 
 Modified #1 {
@@ -233,24 +233,24 @@ if Use(1):
 ----------------------------------------
 Pattern # 8
 Original #1 {
-negative_step = 744
+negative_step  =  744
 while negative_step > 0:
 	do_some_something_negative()
-	negative_step -= 1
+	negative_step  -=  1
 }
 
 Original #2 {
-step_back = 850
+step_back  =  850
 while step_back > 100:
 	do_some_something()
-	step_back -= 10
+	step_back  -=  10
 }
 
 Original Created {
-Wildcard(1) = Wildcard(2)
+Wildcard(1)  =  Wildcard(2)
 while Wildcard(1) > Wildcard(3):
 	Wildcard(4)
-	Wildcard(1) -= Wildcard(5)
+	Wildcard(1)  -=  Wildcard(5)
 }
 
 Modified #1 {
@@ -271,24 +271,24 @@ for Use(1) in range(Use(2), Use(3), -Use(5)):
 ----------------------------------------
 Pattern # 9
 Original #1 {
-bottom_start = 250
+bottom_start  =  250
 while bottom_start < 1050:
 	get_values_by_50()
-	bottom_start += 50
+	bottom_start  +=  50
 }
 
 Original #2 {
-from_value = 1005
+from_value  =  1005
 while from_value < 2000:
 	from_value.get_by_step()
-	from_value += 3
+	from_value  +=  3
 }
 
 Original Created {
-Wildcard(1) = Wildcard(2)
+Wildcard(1)  =  Wildcard(2)
 while Wildcard(1) < Wildcard(3):
 	Wildcard(4)
-	Wildcard(1) += Wildcard(5)
+	Wildcard(1)  +=  Wildcard(5)
 }
 
 Modified #1 {
@@ -380,7 +380,7 @@ Use(2)}
 Pattern # 12
 Original #1 {
 if len(numbers):
-	max_number = max(numbers)
+	max_number  =  max(numbers)
 }
 
 Original #2 {
@@ -394,7 +394,7 @@ Wildcard(2)}
 
 Modified #1 {
 if numbers:
-	max_number = max(numbers)
+	max_number  =  max(numbers)
 }
 
 Modified #2 {
@@ -417,7 +417,7 @@ if x == None:
 
 Original #2 {
 if function() == None:
-	return_value = remedy_none()
+	return_value  =  remedy_none()
 }
 
 Original Created {
@@ -433,7 +433,7 @@ if x is None:
 
 Modified #2 {
 if function() is None:
-	return_value = remedy_none()
+	return_value  =  remedy_none()
 }
 
 Modified Created {

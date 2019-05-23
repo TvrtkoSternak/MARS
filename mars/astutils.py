@@ -175,7 +175,10 @@ class AstWrapper(ast.NodeTransformer):
         args = list()
         for arg in node.args:
             args.append(self.visit(arg))
-        function = Function(args, FunctionName(node.func.id))
+        if hasattr(node.func, "id"):
+            function = Function(args, FunctionName(node.func.id))
+        else:
+            function = Function(args, FunctionName(node.func.value.id + "." + node.func.attr))
         return function
 
     def visit_Name(self, node):

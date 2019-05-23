@@ -1,3 +1,1 @@
-while j < 100:
-    print(j)
-    j += 1
+a = 2

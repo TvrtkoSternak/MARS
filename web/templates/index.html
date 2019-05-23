@@ -40,7 +40,7 @@
 </style>
 </head>
 <body>
-    <form action=analyse_code method="post" enctype="multipart/form-data">
+    <form action=upload_code method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="file"
                    title="Upload code for analysation"
@@ -48,12 +48,15 @@
                    required="required">
             <p>
             <input type="submit"
-                   value="Analyse">
+                   value="Upload">
                 </form>
-
+    <form method="POST" action="analyse_code" id="analyseForm" name="analyseForm">
+        {% csrf_token %}
+        <input type="submit" value="Analyse">
+    </form>
     <div class="inline-div">
         <p align="center">Original</p>
-        <textarea rows="50" class="inline-textarea" readonly>{% for row in source_code %}{{row}}{% endfor %}</textarea>
+        <textarea name="source_code" id="source_code" rows="50" class="inline-textarea" form="analyseForm">{% for row in source_code %}{{row}}{% endfor %}</textarea>
     </div>
     <div class="inline-div">
         <p align="center">Recommendations</p>

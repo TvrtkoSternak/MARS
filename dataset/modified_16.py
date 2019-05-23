@@ -1,2 +1,1 @@
-for j in range(100):
-    print(j)
+print(d.get('hello', 'default_value'))

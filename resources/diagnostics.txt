@@ -1,4 +1,4 @@
-Diagnostics  2019-05-22 16:09
+Diagnostics  2019-05-23 03:19
 ----------------------------------------
 Pattern # 1
 Original #1 {
@@ -144,26 +144,64 @@ while j < 500:
 Original Created {
 while Wildcard(1) < Wildcard(2):
 	Wildcard(3)
-	Wildcard(0) += 1
+	Wildcard(1) += 1
 }
 
 Modified #1 {
-for iin range(100):
+for i in range(100):
 	do_something()
 }
 
 Modified #2 {
-for jin range(500):
+for j in range(500):
 	print(j)
 }
 
 Modified Created {
-for Use(1)in range(Use(2)):
+for Use(1) in range(Use(2)):
 	Use(3)
 }
 
 ----------------------------------------
 Pattern # 6
+Original #1 {
+negative_step = 744
+while negative_step > 0:
+	do_some_something_negative()
+	negative_step -= 1
+}
+
+Original #2 {
+step_back = 850
+while step_back > 100:
+	do_some_something()
+	step_back -= 10
+}
+
+Original Created {
+Wildcard(1) = Wildcard(2)
+while Wildcard(1) > Wildcard(3):
+	Wildcard(4)
+	Wildcard(1) -= Wildcard(5)
+}
+
+Modified #1 {
+for negative_step in range(744, 0, -1):
+	do_some_something_negative()
+}
+
+Modified #2 {
+for step_back in range(850, 100, -10):
+	do_some_something()
+}
+
+Modified Created {
+for Use(1) in range(Use(2), Use(3), -Use(5)):
+	Use(4)
+}
+
+----------------------------------------
+Pattern # 7
 Original #1 {
 if type(no_of_nodes) is type(int):
 	say("ah ah ah")
@@ -172,9 +210,9 @@ if type(no_of_nodes) is type(int):
 }
 
 Original #2 {
-if type(some_float_prob) is type(float):
-	calculate_with_float(some_float_prob)
-	squared(some_float_prob)
+if type(float_no_of) is type(float):
+	calculate_with_float(float_no_of)
+	squared(float_no_of)
 }
 
 Original Created {
@@ -190,9 +228,9 @@ if isinstance(no_of_nodes, int):
 }
 
 Modified #2 {
-if isinstance(some_float_prob, float):
-	calculate_with_float(some_float_prob)
-	squared(some_float_prob)
+if isinstance(float_no_of, float):
+	calculate_with_float(float_no_of)
+	squared(float_no_of)
 }
 
 Modified Created {
@@ -201,7 +239,7 @@ if isinstance(Use(1), Use(2)):
 }
 
 ----------------------------------------
-Pattern # 7
+Pattern # 8
 Original #1 {
 if  not definetly_true == False:
 	op()
@@ -231,44 +269,6 @@ if some_calculations:
 Modified Created {
 if Use(1):
 Use(2)}
-
-----------------------------------------
-Pattern # 8
-Original #1 {
-negative_step = 744
-while negative_step > 0:
-	do_some_something_negative()
-	negative_step -= 1
-}
-
-Original #2 {
-step_back = 850
-while step_back > 100:
-	recalculations(step_back)
-	step_back -= 10
-}
-
-Original Created {
-Wildcard(1) = 744
-while Wildcard(0) > 0:
-	do_some_something_negative()
-	Wildcard(0) -= Wildcard(2)
-}
-
-Modified #1 {
-for negative_stepin range(744, 0, -1):
-	do_some_something_negative()
-}
-
-Modified #2 {
-for step_backin range(850, 100, -10):
-	recalculations(step_back)
-}
-
-Modified Created {
-for Use(1)in range(744, 0, -Use(2)):
-	do_some_something_negative()
-}
 
 ----------------------------------------
 Pattern # 9

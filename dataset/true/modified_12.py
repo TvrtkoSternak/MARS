@@ -1,3 +1,3 @@
-if isinstance(some_float_prob, float):
-    calculate_with_float(some_float_prob)
-    squared(some_float_prob)
+if isinstance(float_no_of, float):
+    calculate_with_float(float_no_of)
+    squared(float_no_of)

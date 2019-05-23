@@ -143,7 +143,7 @@ class Constant(Leaf):
             return 0
         else:
             s = SequenceMatcher(None, str(self.value), str(node.value))
-            return s.ratio()
+            return (s.ratio()*4 + 1) / 5
 
     def equals(self, other):
         if isinstance(other, Wildcard):
@@ -1173,6 +1173,9 @@ class While(Node):
         children.extend(self.body.get_all_children())
         return children
 
+    def num_children(self):
+        return 2 + self.test.num_children() + self.body.num_children()
+
     def get_children(self, node):
         children = list()
         children.append(node.test)
@@ -1264,6 +1267,9 @@ class For(Node):
         children.append(self.body)
         children.extend(self.body.get_all_children())
         return children
+
+    def num_children(self):
+        return 3 + self.target.num_children() + self.body.num_children() + self.iter.num_children()
 
     def get_children(self, node):
         children = list()

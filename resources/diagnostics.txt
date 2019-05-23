@@ -1,4 +1,4 @@
-Diagnostics  2019-05-23 14:36
+Diagnostics  2019-05-23 15:07
 ----------------------------------------
 Pattern # 1
 Original #1 {
@@ -66,6 +66,38 @@ if  not Use(1):
 ----------------------------------------
 Pattern # 3
 Original #1 {
+if len(empty_list) == 0:
+	print("the list is empty")
+}
+
+Original #2 {
+if len(collection) == 0:
+	print_list(collection)
+}
+
+Original Created {
+if len(Wildcard(1)) == 0:
+	Wildcard(2)
+}
+
+Modified #1 {
+if  not empty_list:
+	print("the list is empty")
+}
+
+Modified #2 {
+if  not collection:
+	print_list(collection)
+}
+
+Modified Created {
+if  not Use(1):
+	Use(2)
+}
+
+----------------------------------------
+Pattern # 4
+Original #1 {
 if  not len(my_list):
 	sum(my_list)
 }
@@ -96,7 +128,7 @@ if  not Use(1):
 }
 
 ----------------------------------------
-Pattern # 4
+Pattern # 5
 Original #1 {
 if  not complex_calculation() is None:
 	we_made_it_man()
@@ -128,7 +160,7 @@ if Use(1) is not None:
 }
 
 ----------------------------------------
-Pattern # 5
+Pattern # 6
 Original #1 {
 while i < 100:
 	do_something()
@@ -163,7 +195,39 @@ for Use(1) in range(Use(2)):
 }
 
 ----------------------------------------
-Pattern # 6
+Pattern # 7
+Original #1 {
+if d.has_key("hello"):
+	print("hello")
+print("default_value")
+}
+
+Original #2 {
+if dictionary.has_key("value1"):
+	print(dictionary.get("value1"))
+print("dict dont have that key")
+}
+
+Original Created {
+if Wildcard(1):
+	print("hello")
+print(Wildcard(3))
+}
+
+Modified #1 {
+print(d.get("hello", "default_value"))
+}
+
+Modified #2 {
+print(dictionary.get("value1", "dict dont have that key"))
+}
+
+Modified Created {
+print(Use(1))
+}
+
+----------------------------------------
+Pattern # 8
 Original #1 {
 negative_step = 744
 while negative_step > 0:
@@ -201,7 +265,7 @@ for Use(1) in range(Use(2), Use(3), -Use(5)):
 }
 
 ----------------------------------------
-Pattern # 7
+Pattern # 9
 Original #1 {
 if type(no_of_nodes) is type(int):
 	say("ah ah ah")
@@ -239,7 +303,7 @@ if isinstance(Use(1), Use(2)):
 }
 
 ----------------------------------------
-Pattern # 8
+Pattern # 10
 Original #1 {
 if  not definetly_true == False:
 	op()
@@ -271,7 +335,37 @@ if Use(1):
 Use(2)}
 
 ----------------------------------------
-Pattern # 9
+Pattern # 11
+Original #1 {
+if len(numbers):
+	max_number = max(numbers)
+}
+
+Original #2 {
+if len(positive_numbers):
+	print_min(positive_numbers)
+}
+
+Original Created {
+if len(Wildcard(1)):
+Wildcard(2)}
+
+Modified #1 {
+if numbers:
+	max_number = max(numbers)
+}
+
+Modified #2 {
+if positive_numbers:
+	print_min(positive_numbers)
+}
+
+Modified Created {
+if Use(1):
+Use(2)}
+
+----------------------------------------
+Pattern # 12
 Original #1 {
 if x == None:
 	abort()

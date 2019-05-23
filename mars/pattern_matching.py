@@ -150,7 +150,6 @@ class Recommender(Reader):
         File
             File with found recommendations
         """
-        wrapper = AstWrapper()
         for node in source:
             self.present_node = node
             self.notify()

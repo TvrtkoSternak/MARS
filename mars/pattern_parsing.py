@@ -51,6 +51,8 @@ class ReadablePatternParser(PatternParser):
         Parses the IPatternMatcher into a human-readable form and writes
         it to standard output.
     """
+    def __init__(self):
+        self.recommendation = ''
 
     def parse(self, pattern_matcher):
         """
@@ -75,15 +77,10 @@ class ReadablePatternParser(PatternParser):
 
         edit_script = EditScript(edit_operations)
         edit_script.execute(list_pattern_matcher_copy)
-        list_pattern_matcher_copy.pop(0).reconstruct(list_pattern_matcher_copy).unparse(0)
 
-
-class StoreRecommendationsPatternParser(PatternParser):
-    def __init__(self):
-        self.recommendation = ''
-
-    def parse(self, pattern_matcher):
-        self.recommendation = astunparse.unparse(pattern_matcher.pattern.modified)
+        pattern = list_pattern_matcher_copy.pop(0).reconstruct(list_pattern_matcher_copy)
+        self.recommendation += pattern.to_source_code(0)
+        print(pattern.to_source_code(0))
 
 
 class CounterPatternParser(PatternParser):

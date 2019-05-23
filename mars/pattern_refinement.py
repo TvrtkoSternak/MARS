@@ -262,16 +262,19 @@ class PatternRefiner:
         wildcards = [x for x in wildcard_updates if x.change.index != 0]
         unmatched_wildcards = [x for x in wildcard_updates if x.change.index == 0 and isinstance(x.change.wrapped_node, Variable)]
 
-        # for unmatched_wildcard in unmatched_wildcards:
-        #     for wildcard in wildcards:
-        #         if wildcard.change.wrapped_node.__eq__(unmatched_wildcard.change.wrapped_node):
-        #             unmatched_wildcard.change.index = wildcard.change.index
+        self.multiple_match(wildcards, unmatched_wildcards)
 
         wildcards.extend(unmatched_wildcards)
 
         uses = [x for x in use_updates if x.change.index != 0]
 
         return wildcards, uses
+
+    def multiple_match(self, wildcards, unmatched_wildcards):
+        for unmatched_wildcard in unmatched_wildcards:
+            for wildcard in wildcards:
+                if wildcard.change.wrapped_node.equals(unmatched_wildcard.change.wrapped_node):
+                    unmatched_wildcard.change.index = wildcard.change.index
 
 
 class IOptimiser(ABC):

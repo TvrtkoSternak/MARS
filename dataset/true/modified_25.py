@@ -1,2 +1,2 @@
 for bottom_start in range(250, 1050, 50):
-    get_values_by_50(bottom_start)
+    get_values_by_50()

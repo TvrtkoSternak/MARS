@@ -24,4 +24,4 @@ class Mars:
         self.parser.recommendation = ''
         self.recommender.get_recommendations(nodes)
 
-        return self.parser.recommendation
+        return self.parser.get_recommended_code()

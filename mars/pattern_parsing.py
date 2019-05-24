@@ -53,6 +53,7 @@ class ReadablePatternParser(PatternParser):
     """
     def __init__(self):
         self.recommendation = ''
+        self.recommendations = list()
 
     def parse(self, pattern_matcher):
         """
@@ -80,7 +81,30 @@ class ReadablePatternParser(PatternParser):
 
         pattern = list_pattern_matcher_copy.pop(0).reconstruct(list_pattern_matcher_copy)
         self.recommendation += pattern.to_source_code(0)
-        print(pattern.to_source_code(0))
+        self.recommendations.append((pattern_matcher.no_line, pattern.to_source_code(0)))
+
+    def get_recommended_code(self):
+        current_line = 1
+        self.recommendations.sort(key=lambda tup: tup[0])
+        code = list()
+        for recommendation in self.recommendations:
+            while current_line < recommendation[0]:
+                code.insert(current_line, "")
+                current_line += 1
+            position = recommendation[0]
+            for line in recommendation[1].split("\n"):
+                if len(code) > position:
+                    tab = code[position-1].replace("    ", "\t").count('\t')
+                    code[position-1] = ("    "*tab)+line.replace("\t", "")
+                else:
+                    code.insert(position, line)
+                position += 1
+            current_line = position
+        return '\n'.join(code)
+
+    def clear(self):
+        self.recommendation = ''
+        self.recommendations.clear()
 
 
 class CounterPatternParser(PatternParser):

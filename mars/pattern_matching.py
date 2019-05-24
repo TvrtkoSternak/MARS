@@ -140,6 +140,7 @@ class Recommender(Reader):
         super().__init__()
         self.parser = parser
         self.present_node = None
+        self.no_line = 0
 
     def get_recommendations(self, source):
         """
@@ -150,8 +151,11 @@ class Recommender(Reader):
         File
             File with found recommendations
         """
+        self.parser.clear()
         for node in source:
             self.present_node = node
+            if hasattr(node, "lineno"):
+                self.no_line = node.lineno
             self.notify()
 
     def parse(self, pattern_matcher):
@@ -278,6 +282,7 @@ class IPatternMatcher(ABC):
         self.pattern = pattern
         self.original_detailed = self.pattern.original.walk()
         self.counter = 2
+        self.no_line = 0
 
     @abstractmethod
     def check_match(self, node):
@@ -454,13 +459,15 @@ class PatternListener(IListener, IPatternMatcher):
         2) The matched node is not the last node in the pattern:
             Pattern listener increments its internal node count and continues to listen for updates from the reader.
         """
+        if not self.no_line:
+            self.no_line = self.reader.no_line
         self.counter += 1
         node = self.reader.get_present_node()
         if not self.check_match(node):
             self.unsubscribe()
         else:
             if hasattr(node, 'lineno'):
-                self.last_lineno = node.node.lineno
+                self.last_lineno = node.lineno
             if self.counter == self.original_detailed.__len__()-2:
                 self.reader.parse(self)
                 self.unsubscribe()

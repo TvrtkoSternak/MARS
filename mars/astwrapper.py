@@ -95,7 +95,8 @@ class Leaf(Node):
 
 
 class Variable(Leaf):
-    def __init__(self, value):
+    def __init__(self, lineno, value):
+        self.lineno = lineno
         self.value = value
 
     def print_me(self):
@@ -155,7 +156,8 @@ class Constant(Leaf):
 
 
 class Assign:
-    def __init__(self, variable, operation, value):
+    def __init__(self, lineno, variable, operation, value):
+        self.lineno = lineno
         self.variable = variable
         self.operation = operation
         self.value = value
@@ -246,7 +248,8 @@ class Assign:
 
 
 class FunctionName(Leaf):
-    def __init__(self, value):
+    def __init__(self, lineno, value):
+        self.lineno = lineno
         self.value = value
 
     def print_me(self):
@@ -274,9 +277,10 @@ class FunctionName(Leaf):
 
 
 class Function:
-    def __init__(self, args, value):
-        self.start = Startnode()
-        self.end = Endnode()
+    def __init__(self, lineno, args, value):
+        self.lineno = lineno
+        self.start = Startnode(lineno)
+        self.end = Endnode(lineno)
         self.args = args
         self.value = value
 
@@ -406,7 +410,8 @@ class Function:
 
 
 class Condition:
-    def __init__(self, value):
+    def __init__(self, lineno, value):
+        self.lineno = lineno
         self.value = value
 
     def print_me(self):
@@ -476,7 +481,8 @@ class Condition:
 
 
 class ElIf:
-    def __init__(self, condition, body, next_if):
+    def __init__(self, lineno, condition, body, next_if):
+        self.lineno = lineno
         self.condition = condition
         self.body = body
         self.next_if = next_if
@@ -570,7 +576,8 @@ class ElIf:
 
 
 class Else:
-    def __init__(self, body):
+    def __init__(self, lineno, body):
+        self.lineno = lineno
         self.body = body
 
     def print_me(self):
@@ -636,7 +643,8 @@ class Else:
 
 
 class If:
-    def __init__(self, condition, body, next_if):
+    def __init__(self, lineno, condition, body, next_if):
+        self.lineno = lineno
         self.condition = condition
         self.body = body
         self.next_if = next_if
@@ -730,10 +738,11 @@ class If:
 
 
 class Body:
-    def __init__(self, children):
-        self.start = Startnode()
+    def __init__(self, lineno, children):
+        self.lineno = lineno
+        self.start = Startnode(lineno)
         self.children = children
-        self.end = Endnode()
+        self.end = Endnode(lineno)
 
     def print_me(self):
         print("Body {")
@@ -838,7 +847,8 @@ class Body:
 
 
 class BoolOperation:
-    def __init__(self, operation, first, second):
+    def __init__(self, lineno, operation, first, second):
+        self.lineno = lineno
         self.operation = operation
         self.first = first
         self.second = second
@@ -934,7 +944,8 @@ class BoolOperation:
 
 
 class UnaryOperation:
-    def __init__(self, operation, first):
+    def __init__(self, lineno, operation, first):
+        self.lineno = lineno
         self.operation = operation
         self.first = first
 
@@ -1017,7 +1028,8 @@ class UnaryOperation:
 
 
 class Compare:
-    def __init__(self, operation, first, second):
+    def __init__(self, lineno, operation, first, second):
+        self.lineno = lineno
         self.operation = operation
         self.first = first
         self.second = second
@@ -1116,7 +1128,8 @@ class Compare:
 
 class While(Node):
 
-    def __init__(self, test, body):
+    def __init__(self, lineno, test, body):
+        self.lineno = lineno
         self.test = test
         self.body = body
 
@@ -1201,7 +1214,8 @@ class While(Node):
 
 class For(Node):
 
-    def __init__(self, target, iter, body):
+    def __init__(self, lineno, target, iter, body):
+        self.lineno = lineno
         self.target = target
         self.iter = iter
         self.body = body
@@ -1297,6 +1311,9 @@ class For(Node):
 
 
 class EmptyNode(Leaf):
+    def __init__(self, lineno):
+        self.lineno = lineno
+
     def print_me(self):
         pass
 
@@ -1321,6 +1338,9 @@ class EmptyNode(Leaf):
 
 
 class Startnode(Leaf):
+    def __init__(self, lineno):
+        self.lineno = lineno
+
     def print_me(self):
         print("Start Node")
 
@@ -1348,6 +1368,9 @@ class Startnode(Leaf):
 
 
 class Endnode(Leaf):
+    def __init__(self, lineno):
+        self.lineno = lineno
+
     def print_me(self):
         print("End Node")
 

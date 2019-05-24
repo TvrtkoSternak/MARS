@@ -166,7 +166,7 @@ class AstWrapper(ast.NodeTransformer):
         children = list()
         for child in node.body:
             children.append(self.visit(child))
-        return Body(children)
+        return Body(0, children)
 
     def visit_Expr(self, node):
         return self.visit(node.value)
@@ -176,13 +176,13 @@ class AstWrapper(ast.NodeTransformer):
         for arg in node.args:
             args.append(self.visit(arg))
         if hasattr(node.func, "id"):
-            function = Function(args, FunctionName(node.func.id))
+            function = Function(node.lineno, args, FunctionName(node.lineno, node.func.id))
         else:
-            function = Function(args, FunctionName(node.func.value.id + "." + node.func.attr))
+            function = Function(node.lineno, args, FunctionName(node.lineno, node.func.value.id + "." + node.func.attr))
         return function
 
     def visit_Name(self, node):
-        return Variable(node.id)
+        return Variable(node.lineno, node.id)
 
     def visit_Num(self, node):
         return Constant(node.n, "NUMBER")
@@ -192,13 +192,13 @@ class AstWrapper(ast.NodeTransformer):
         return Constant("".join(value), "STRING")
 
     def visit_Compare(self, node):
-        return Compare(self.visit(node.ops[0]), self.visit(node.left), self.visit(node.comparators[0]))
+        return Compare(node.lineno, self.visit(node.ops[0]), self.visit(node.left), self.visit(node.comparators[0]))
 
     def visit_BoolOp(self, node):
-        return BoolOperation(self.visit(node.op), self.visit(node.values[0]), self.visit(node.values[1]))
+        return BoolOperation(node.lineno, self.visit(node.op), self.visit(node.values[0]), self.visit(node.values[1]))
 
     def visit_UnaryOp(self, node):
-        return UnaryOperation(self.visit(node.op), self.visit(node.operand))
+        return UnaryOperation(node.lineno, self.visit(node.op), self.visit(node.operand))
 
     def visit_Not(self, node):
         return Constant(" not ", "UNARYOP")
@@ -249,22 +249,22 @@ class AstWrapper(ast.NodeTransformer):
         if node.orelse:
             if len(node.orelse) == 1 and isinstance(node.orelse[0], ast.If):
                 elif_node = self.visit(node.orelse[0])
-                if_node = If(Condition(self.visit(node.test)), Body(expressions),
-                             ElIf(elif_node.condition, elif_node.body, elif_node.next_if))
+                if_node = If(node.lineno, Condition(node.lineno, self.visit(node.test)), Body(node.lineno, expressions),
+                             ElIf(node.lineno, elif_node.condition, elif_node.body, elif_node.next_if))
             else:
                 else_expressions = list()
                 for expression in node.orelse:
                     else_expressions.append(self.visit(expression))
-                if_node = If(Condition(self.visit(node.test)), Body(expressions), Else(Body(else_expressions)))
+                if_node = If(node.lineno, Condition(node.lineno, self.visit(node.test)), Body(node.lineno, expressions), Else(node.lineno, Body(node.lineno, else_expressions)))
         else:
-            if_node = If(Condition(self.visit(node.test)), Body(expressions), EmptyNode())
+            if_node = If(node.lineno, Condition(node.lineno, self.visit(node.test)), Body(node.lineno, expressions), EmptyNode(node.lineno))
         return if_node
 
     def visit_Assign(self, node):
-        return Assign(self.visit(node.targets[0]), Constant(" = ", "ASSIGN"), self.visit(node.value))
+        return Assign(node.lineno, self.visit(node.targets[0]), Constant(" = ", "ASSIGN"), self.visit(node.value))
 
     def visit_AugAssign(self, node):
-        return Assign(self.visit(node.target), Constant(self.visit(node.op).value + "= ", "ASSIGN_OP"), self.visit(node.value))
+        return Assign(node.lineno, self.visit(node.target), Constant(self.visit(node.op).value + "= ", "ASSIGN_OP"), self.visit(node.value))
 
     def visit_Add(self, node):
         return Constant(" +", "OPERATOR")
@@ -283,14 +283,14 @@ class AstWrapper(ast.NodeTransformer):
         for expression in node.body:
             expressions.append(self.visit(expression))
 
-        return While(self.visit(node.test), Body(expressions))
+        return While(node.lineno, self.visit(node.test), Body(node.lineno, expressions))
 
     def visit_For(self, node):
         expressions = list()
         for expression in node.body:
             expressions.append(self.visit(expression))
 
-        return For(self.visit(node.target), self.visit(node.iter), Body(expressions))
+        return For(node.lineno, self.visit(node.target), self.visit(node.iter), Body(node.lineno, expressions))
 
     def visit_USub(self, node):
         return Constant("-", "UNARYOP")
